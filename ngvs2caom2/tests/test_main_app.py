@@ -3,7 +3,7 @@
 # ******************  CANADIAN ASTRONOMY DATA CENTRE  *******************
 # *************  CENTRE CANADIEN DE DONNÉES ASTRONOMIQUES  **************
 #
-#  (c) 2019.                            (c) 2019.
+#  (c) 2020.                            (c) 2020.
 #  Government of Canada                 Gouvernement du Canada
 #  National Research Council            Conseil national de recherches
 #  Ottawa, Canada, K1A 0R6              Ottawa, Canada, K1A 0R6
@@ -67,128 +67,71 @@
 # ***********************************************************************
 #
 
-import importlib
-import logging
+from mock import patch
+
+from ngvs2caom2 import main_app, APPLICATION, COLLECTION, NGVSName
+from ngvs2caom2 import ARCHIVE
+from caom2.diff import get_differences
+from caom2pipe import manage_composable as mc
+
 import os
 import sys
-import traceback
 
-from caom2 import Observation
-from caom2utils import ObsBlueprint, get_gen_proc_arg_parser, gen_proc
-from caom2pipe import manage_composable as mc
-from caom2pipe import execute_composable as ec
+THIS_DIR = os.path.dirname(os.path.realpath(__file__))
+TEST_DATA_DIR = os.path.join(THIS_DIR, 'data')
+PLUGIN = os.path.join(os.path.dirname(THIS_DIR), 'main_app.py')
 
-
-__all__ = ['blank_main_app', 'update', 'BlankName', 'COLLECTION',
-           'APPLICATION', 'ARCHIVE']
+LOOKUP = {'key': ['fileid1', 'fileid2']}
 
 
-APPLICATION = 'blank2caom2'
-COLLECTION = 'blank'
-ARCHIVE = 'blank'
+def pytest_generate_tests(metafunc):
+    obs_id_list = []
+    # for ii in LOOKUP:
+    #     obs_id_list.append(ii)
+    metafunc.parametrize('test_name', obs_id_list)
 
 
-class BlankName(ec.StorageName):
-    """Naming rules:
-    - support mixed-case file name storage, and mixed-case obs id values
-    - support uncompressed files in storage
-    """
+def test_main_app(test_name):
+    basename = os.path.basename(test_name)
+    neos_name = NGVSName(file_name=basename)
+    output_file = f'{TEST_DATA_DIR}/{basename}.actual.xml'
+    obs_path = f'{TEST_DATA_DIR}/{neos_name.obs_id}.expected.xml'
+    expected = mc.read_obs_from_file(obs_path)
 
-    BLANK_NAME_PATTERN = '*'
+    with patch('caom2utils.fits2caom2.CadcDataClient') as data_client_mock:
+        def get_file_info(archive, file_id):
+            return {'type': 'application/fits'}
 
-    def __init__(self, obs_id=None, fname_on_disk=None, file_name=None):
-        self.fname_in_ad = file_name
-        super(BlankName, self).__init__(
-            obs_id, COLLECTION, BlankName.BLANK_NAME_PATTERN, fname_on_disk)
+        data_client_mock.return_value.get_file_info.side_effect = get_file_info
+        sys.argv = \
+            (f'{APPLICATION} --no_validate --local {_get_local(test_name)} ' \
+             f'--observation {COLLECTION} {test_name} -o {output_file} ' \
+             f'--plugin {PLUGIN} --module {PLUGIN} --lineage ' \
+             f'{_get_lineage(test_name)}').split()
+        print(sys.argv)
+        main_app.to_caom2()
 
-    def is_valid(self):
-        return True
-
-
-def accumulate_bp(bp, uri):
-    """Configure the telescope-specific ObsBlueprint at the CAOM model 
-    Observation level."""
-    logging.debug('Begin accumulate_bp.')
-    bp.configure_position_axes((1,2))
-    bp.configure_time_axis(3)
-    bp.configure_energy_axis(4)
-    bp.configure_polarization_axis(5)
-    bp.configure_observable_axis(6)
-    logging.debug('Done accumulate_bp.')
-
-
-def update(observation, **kwargs):
-    """Called to fill multiple CAOM model elements and/or attributes, must
-    have this signature for import_module loading and execution.
-
-    :param observation A CAOM Observation model instance.
-    :param **kwargs Everything else."""
-    logging.debug('Begin update.')
-    mc.check_param(observation, Observation)
-
-    headers = None
-    if 'headers' in kwargs:
-        headers = kwargs['headers']
-    fqn = None
-    if 'fqn' in kwargs:
-        fqn = kwargs['fqn']
-
-    logging.debug('Done update.')
-    return observation
+    actual = mc.read_obs_from_file(output_file)
+    result = get_differences(expected, actual, 'Observation')
+    if result:
+        text = '\n'.join([r for r in result])
+        msg = f'Differences found in observation {expected.observation_id} ' \
+              f'test name {test_name}\n{text}'
+        raise AssertionError(msg)
+    # assert False  # cause I want to see logging messages
 
 
-def _build_blueprints(uris):
-    """This application relies on the caom2utils fits2caom2 ObsBlueprint
-    definition for mapping FITS file values to CAOM model element
-    attributes. This method builds the DRAO-ST blueprint for a single
-    artifact.
-
-    The blueprint handles the mapping of values with cardinality of 1:1
-    between the blueprint entries and the model attributes.
-
-    :param uris The artifact URIs for the files to be processed."""
-    module = importlib.import_module(__name__)
-    blueprints = {}
-    for uri in uris:
-        blueprint = ObsBlueprint(module=module)
-        if not ec.StorageName.is_preview(uri):
-            accumulate_bp(blueprint, uri)
-        blueprints[uri] = blueprint
-    return blueprints
-
-
-def _get_uris(args):
-    result = []
-    if args.local:
-        for ii in args.local:
-            file_id = ec.StorageName.remove_extensions(os.path.basename(ii))
-            file_name = f'{file_id}.fits'
-            result.append(BlankName(file_name=file_name).file_uri)
-    elif args.lineage:
-        for ii in args.lineage:
-            result.append(ii.split('/', 1)[1])
-    else:
-        raise mc.CadcException(
-            f'Could not define uri from these args {args}')
+def _get_lineage(obs_id):
+    result = ''
+    for ii in LOOKUP[obs_id]:
+        product_id = NGVSName.extract_product_id(ii)
+        fits = mc.get_lineage(ARCHIVE, product_id, f'{ii}.fits')
+        result = f'{result} {fits}'
     return result
 
 
-def to_caom2():
-    args = get_gen_proc_arg_parser().parse_args()
-    uris = _get_uris(args)
-    blueprints = _build_blueprints(uris)
-    result = gen_proc(args, blueprints)
-    logging.debug(f'Done {APPLICATION} processing.')
+def _get_local(obs_id):
+    result = ''
+    for ii in LOOKUP[obs_id]:
+        result = f'{result} {TEST_DATA_DIR}/{ii}.fits.header'
     return result
-           
-
-def blank_main_app():
-    args = get_gen_proc_arg_parser().parse_args()
-    try:
-        result = to_caom2()
-        sys.exit(result)
-    except Exception as e:
-        logging.error(f'Failed {APPLICATION} execution for {args}.')
-        tb = traceback.format_exc()
-        logging.debug(tb)
-        sys.exit(-1)

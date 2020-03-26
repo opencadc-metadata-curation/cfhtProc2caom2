@@ -3,7 +3,7 @@
 # ******************  CANADIAN ASTRONOMY DATA CENTRE  *******************
 # *************  CENTRE CANADIEN DE DONNÉES ASTRONOMIQUES  **************
 #
-#  (c) 2019.                            (c) 2019.
+#  (c) 2020.                            (c) 2020.
 #  Government of Canada                 Gouvernement du Canada
 #  National Research Council            Conseil national de recherches
 #  Ottawa, Canada, K1A 0R6              Ottawa, Canada, K1A 0R6
@@ -67,71 +67,61 @@
 # ***********************************************************************
 #
 
-from mock import patch
-
-from blank2caom2 import main_app, APPLICATION, COLLECTION, BlankName
-from blank2caom2 import ARCHIVE
-from caom2.diff import get_differences
-from caom2pipe import manage_composable as mc
-
-import os
+import logging
 import sys
+import traceback
 
-THIS_DIR = os.path.dirname(os.path.realpath(__file__))
-TEST_DATA_DIR = os.path.join(THIS_DIR, 'data')
-PLUGIN = os.path.join(os.path.dirname(THIS_DIR), 'main_app.py')
-
-LOOKUP = {'key': ['fileid1', 'fileid2']}
+from caom2pipe import run_composable as rc
+from ngvs2caom2 import APPLICATION
 
 
-def pytest_generate_tests(metafunc):
-    obs_id_list = []
-    for ii in LOOKUP:
-        obs_id_list.append(ii)
-    metafunc.parametrize('test_name', obs_id_list)
+meta_visitors = []
+data_visitors = []
 
 
-def test_main_app(test_name):
-    basename = os.path.basename(test_name)
-    neos_name = BlankName(file_name=basename)
-    output_file = f'{TEST_DATA_DIR}/{basename}.actual.xml'
-    obs_path = f'{TEST_DATA_DIR}/{neos_name.obs_id}.expected.xml'
-    expected = mc.read_obs_from_file(obs_path)
+def _run():
+    """
+    Uses a todo file to identify the work to be done.
 
-    with patch('caom2utils.fits2caom2.CadcDataClient') as data_client_mock:
-        def get_file_info(archive, file_id):
-            return {'type': 'application/fits'}
-
-        data_client_mock.return_value.get_file_info.side_effect = get_file_info
-        sys.argv = \
-            (f'{APPLICATION} --no_validate --local {_get_local(test_name)} ' \
-             f'--observation {COLLECTION} {test_name} -o {output_file} ' \
-             f'--plugin {PLUGIN} --module {PLUGIN} --lineage ' \
-             f'{_get_lineage(test_name)}').split()
-        print(sys.argv)
-        main_app.to_caom2()
-
-    actual = mc.read_obs_from_file(output_file)
-    result = get_differences(expected, actual, 'Observation')
-    if result:
-        text = '\n'.join([r for r in result])
-        msg = f'Differences found in observation {expected.observation_id} ' \
-              f'test name {test_name}\n{text}'
-        raise AssertionError(msg)
-    # assert False  # cause I want to see logging messages
+    :return 0 if successful, -1 if there's any sort of failure. Return status
+        is used by airflow for task instance management and reporting.
+    """
+    return rc.run_by_todo(config=None, name_builder=None, 
+                          command_name=APPLICATION,
+                          meta_visitors=meta_visitors, 
+                          data_visitors=data_visitors, chooser=None)
 
 
-def _get_lineage(obs_id):
-    result = ''
-    for ii in LOOKUP[obs_id]:
-        product_id = BlankName.extract_product_id(ii)
-        fits = mc.get_lineage(ARCHIVE, product_id, f'{ii}.fits')
-        result = f'{result} {fits}'
-    return result
+def run():
+    """Wraps _run in exception handling, with sys.exit calls."""
+    try:
+        result = _run()
+        sys.exit(result)
+    except Exception as e:
+        logging.error(e)
+        tb = traceback.format_exc()
+        logging.debug(tb)
+        sys.exit(-1)
 
 
-def _get_local(obs_id):
-    result = ''
-    for ii in LOOKUP[obs_id]:
-        result = f'{result} {TEST_DATA_DIR}/{ii}.fits.header'
-    return result
+def _run_state():
+    """Uses a state file with a timestamp to control which entries will be
+    processed.
+    """
+    return rc.run_by_state(config=None, name_builder=None,
+                           command_name=APPLICATION, 
+                           bookmark_name=None, meta_visitors=meta_visitors,
+                           data_visitors=data_visitors, end_time=None,
+                           source=None, chooser=None)
+
+
+def run_state():
+    """Wraps _run_state in exception handling."""
+    try:
+        _run_state()
+        sys.exit(0)
+    except Exception as e:
+        logging.error(e)
+        tb = traceback.format_exc()
+        logging.debug(tb)
+        sys.exit(-1)

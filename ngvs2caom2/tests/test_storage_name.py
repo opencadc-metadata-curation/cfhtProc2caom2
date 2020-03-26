@@ -3,7 +3,7 @@
 # ******************  CANADIAN ASTRONOMY DATA CENTRE  *******************
 # *************  CENTRE CANADIEN DE DONNÉES ASTRONOMIQUES  **************
 #
-#  (c) 2019.                            (c) 2019.
+#  (c) 2020.                            (c) 2020.
 #  Government of Canada                 Gouvernement du Canada
 #  National Research Council            Conseil national de recherches
 #  Ottawa, Canada, K1A 0R6              Ottawa, Canada, K1A 0R6
@@ -66,8 +66,8 @@
 #
 # ***********************************************************************
 #
-from blank2caom2 import BlankName
+from ngvs2caom2 import NGVSName
 
 
 def test_is_valid():
-    assert BlankName('anything').is_valid()
+    assert NGVSName('anything').is_valid()

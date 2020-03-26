@@ -1,4 +1,4 @@
-working_directory: /usr/src/app/blankt2caom2
+working_directory: /usr/src/app/ngvs2caom2
 # the netrc_filename value must be a fully-qualified name
 # netrc_filename: /usr/src/app/netrc
 # this is the name of the proxy certificate file supplied 
@@ -47,8 +47,8 @@ progress_file_name: progress.txt
 # ad stream value - sorry
 # set stream to 'default', if using TaskType STORE or PULL
 stream: default
-archive: BLANK
-collection: BLANK
+archive: NGVS
+collection: NGVS
 #
 # CADC service execution metrics
 #
@@ -82,5 +82,7 @@ task_types:
   - ingest
 features:
   supports_composite: False
+  supports_latest_caom: False
+  supports_multiple_files: False
   use_file_names: True
   use_urls: False
