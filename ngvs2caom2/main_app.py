@@ -73,7 +73,7 @@ import os
 import sys
 import traceback
 
-from caom2 import Observation
+from caom2 import Observation, CalibrationLevel, DataProductType, ProductType
 from caom2utils import ObsBlueprint, get_gen_proc_arg_parser, gen_proc
 from caom2pipe import manage_composable as mc
 
@@ -97,22 +97,71 @@ class NGVSName(mc.StorageName):
 
     def __init__(self, obs_id=None, fname_on_disk=None, file_name=None):
         self.fname_in_ad = file_name
+        obs_id = mc.StorageName.remove_extensions(file_name)
         super(NGVSName, self).__init__(
             obs_id, COLLECTION, NGVSName.NGVS_NAME_PATTERN, fname_on_disk)
 
+    @property
+    def product_id(self):
+        # from fits header COMBINET keyword
+        result = 'art_skep'
+        if NGVSName.is_catalog(self.fname_in_ad):
+            result = 'catalog'
+        return result
+
     def is_valid(self):
         return True
+
+    @staticmethod
+    def remove_extensions(name):
+        """How to get the file_id from a file_name."""
+        return name.replace('.fits', '').replace('.fz', '').replace(
+            '.header', '').replace('.sig', '').replace('.weight', '').replace(
+            '.cat', '').replace('.mask.rd.reg', '')
+
+    @staticmethod
+    def is_catalog(name):
+        return '.cat' in name
+
+
+def get_artifact_product_type(uri):
+    result = ProductType.SCIENCE
+    if 'weight' in uri:
+        result = ProductType.WEIGHT
+    elif 'mask.rd.reg' in uri or '.flag' in uri:
+        result = ProductType.AUXILIARY
+    return result
+
+
+def get_calibration_level(uri):
+    result = CalibrationLevel.PRODUCT
+    if NGVSName.is_catalog(uri):
+        result = CalibrationLevel.ANALYSIS_PRODUCT
+    return result
+
+
+def get_data_product_type(uri):
+    result = DataProductType.CUBE
+    if NGVSName.is_catalog(uri):
+        result = DataProductType.CATALOG
+    return result
 
 
 def accumulate_bp(bp, uri):
     """Configure the telescope-specific ObsBlueprint at the CAOM model 
     Observation level."""
-    logging.debug('Begin accumulate_bp.')
+    logging.debug(f'Begin accumulate_bp for {uri}.')
     bp.configure_position_axes((1,2))
     bp.configure_time_axis(3)
     bp.configure_energy_axis(4)
     bp.configure_polarization_axis(5)
     bp.configure_observable_axis(6)
+
+    bp.set('Plane.calibrationLevel', 'get_calibration_level(uri)')
+    bp.set('Plane.dataProductType', 'get_data_product_type(uri)')
+    bp.set('Plane.dataRelease', '2032-01-01T00:00:00')
+
+    bp.set('Artifact.productType', 'get_artifact_product_type(uri)')
     logging.debug('Done accumulate_bp.')
 
 
@@ -158,14 +207,13 @@ def _build_blueprints(uris):
 
 def _get_uris(args):
     result = []
-    if args.local:
-        for ii in args.local:
-            file_id = mc.StorageName.remove_extensions(os.path.basename(ii))
-            file_name = f'{file_id}.fits'
-            result.append(NGVSName(file_name=file_name).file_uri)
-    elif args.lineage:
+    if args.lineage:
         for ii in args.lineage:
             result.append(ii.split('/', 1)[1])
+    elif args.local:
+        for ii in args.local:
+            file_uri = mc.build_uri(ARCHIVE, os.path.basename(ii))
+            result.append(file_uri)
     else:
         raise mc.CadcException(
             f'Could not define uri from these args {args}')

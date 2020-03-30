@@ -1,0 +1,54 @@
+# HDU 0 in NGVS+0+0.l.i.Mg002.fits:
+SIMPLE  =                    T / file does conform to FITS standard             
+BITPIX  =                  -32 / number of bits per data pixel                  
+NAXIS   =                    2 / number of data axes                            
+NAXIS1  =                20302 / length of data axis 1                          
+NAXIS2  =                21374 / length of data axis 2                          
+COMMENT   FITS (Flexible Image Transport System) format is defined in 'Astronomy
+COMMENT   and Astrophysics', volume 376, page 359; bibcode: 2001A&A...376..359H 
+EQUINOX =      2.000000000E+03 / Mean equinox                                   
+RADECSYS= 'ICRS    '           / Astrometric system                             
+CTYPE1  = 'RA---TAN'           / WCS projection type for this axis              
+CUNIT1  = 'deg     '           / Axis unit                                      
+CRVAL1  =      1.880488332E+02 / World coordinate on this axis                  
+CRPIX1  =      1.015150000E+04 / Reference pixel on this axis                   
+CD1_1   =     -5.160416185E-05 / Linear projection matrix                       
+CD1_2   =      0.000000000E+00 / Linear projection matrix                       
+CTYPE2  = 'DEC--TAN'           / WCS projection type for this axis              
+CUNIT2  = 'deg     '           / Axis unit                                      
+CRVAL2  =      1.201046947E+01 / World coordinate on this axis                  
+CRPIX2  =      1.068750000E+04 / Reference pixel on this axis                   
+CD2_1   =      0.000000000E+00 / Linear projection matrix                       
+CD2_2   =      5.160416185E-05 / Linear projection matrix                       
+HISTORY = input image 973887p.fits; phot ref: SDSS; IQ=0.55; Sky= 1741.0        
+HISTORY = input image 973888p.fits; phot ref: SDSS; IQ=0.56; Sky= 1740.0        
+HISTORY = input image 973889p.fits; phot ref: SDSS; IQ=0.54; Sky= 1728.0        
+HISTORY = input image 973890p.fits; phot ref: SDSS; IQ=0.50; Sky= 1700.0        
+HISTORY = input image 973891p.fits; phot ref: SDSS; IQ=0.53; Sky= 1675.0        
+RESAMPT1= 'LANCZOS3'           / RESAMPLING_TYPE config parameter               
+CENTERT1= 'ALL     '           / CENTER_TYPE config parameter                   
+PSCALET1= 'MEDIAN  '           / PIXELSCALE_TYPE config parameter               
+RESAMPT2= 'LANCZOS3'           / RESAMPLING_TYPE config parameter               
+CENTERT2= 'ALL     '           / CENTER_TYPE config parameter                   
+PSCALET2= 'MEDIAN  '           / PIXELSCALE_TYPE config parameter               
+HISTORY images combined using gcomb                                             
+COMBINET= 'ART_SKEP'           / combining algorthim                            
+HISTORY background removed globally with deback.pl                              
+HISTORY background map: back..fits                                              
+HISTORY background equalized between amplifiers                                 
+OBJECT  = 'NGVS+0+0'           / Field                                          
+REL_DATE= '2009-08-31'         / UTC Release Date                               
+EXPTIME =                 2055 / Total exposure time                            
+FILTER  = ''                   / Filter                                         
+DATE1   = '2008-03-03'         / DATE-OBS of first input image                  
+DATE2   = '2008-03-03'         / DATE-OBS of last input image                   
+MJDMEAN =          54528.44479 / Mean MJD                                       
+IQMIN   =                 0.50 / Best input image quality (arcsec)              
+IQMAX   =                 0.56 / Worst input image quality (arcsec)             
+SKYMIN  =               1675.0 / Minimum input image sky level                  
+SKYMAX  =               1741.0 / Maximum input image sky level                  
+PHOTZP  =               30.000 / photometric zeropoint                          
+COMMENT AB magnitude = -2.5 * log10(flux) + PHOTZP                              
+COMMENT i.MP9702_=u_SDSS-0.241*(u_SDSS-g_SDSS)                                  
+FINALIQ =                 0.54 / Image Quality of stack                         
+MAGLIM  =               26.100 / Limiting magnitude                             

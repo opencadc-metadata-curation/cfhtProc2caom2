@@ -1,0 +1,22 @@
+# HDU 0 in NGVS+0+0.l.i.Mg002.sig.fits:
+SIMPLE  =                    T / file does conform to FITS standard             
+BITPIX  =                  -32 / number of bits per data pixel                  
+NAXIS   =                    2 / number of data axes                            
+NAXIS1  =                20302 / length of data axis 1                          
+NAXIS2  =                21374 / length of data axis 2                          
+COMMENT   FITS (Flexible Image Transport System) format is defined in 'Astronomy
+COMMENT   and Astrophysics', volume 376, page 359; bibcode: 2001A&A...376..359H 
+EQUINOX =      2.000000000E+03 / Mean equinox                                   
+RADECSYS= 'ICRS    '           / Astrometric system                             
+CTYPE1  = 'RA---TAN'           / WCS projection type for this axis              
+CUNIT1  = 'deg     '           / Axis unit                                      
+CRVAL1  =      1.880488332E+02 / World coordinate on this axis                  
+CRPIX1  =      1.015150000E+04 / Reference pixel on this axis                   
+CD1_1   =     -5.160416185E-05 / Linear projection matrix                       
+CD1_2   =      0.000000000E+00 / Linear projection matrix                       
+CTYPE2  = 'DEC--TAN'           / WCS projection type for this axis              
+CUNIT2  = 'deg     '           / Axis unit                                      
+CRVAL2  =      1.201046947E+01 / World coordinate on this axis                  
+CRPIX2  =      1.068750000E+04 / Reference pixel on this axis                   
+CD2_1   =      0.000000000E+00 / Linear projection matrix                       
+CD2_2   =      5.160416185E-05 / Linear projection matrix                       

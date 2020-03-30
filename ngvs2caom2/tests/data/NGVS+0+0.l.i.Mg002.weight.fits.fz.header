@@ -1,0 +1,32 @@
+# HDU 0 in NGVS+0+0.l.i.Mg002.weight.fits.fz:
+SIMPLE  =                    T / file does conform to FITS standard             
+BITPIX  =                   16 / number of bits per data pixel                  
+NAXIS   =                    0 / number of data axes                            
+EXTEND  =                    T / FITS dataset may contain extensions            
+COMMENT   FITS (Flexible Image Transport System) format is defined in 'Astronomy
+COMMENT   and Astrophysics', volume 376, page 359; bibcode: 2001A&A...376..359H 
+
+# HDU 1 in NGVS+0+0.l.i.Mg002.weight.fits.fz:
+XTENSION= 'IMAGE   '           / binary table extension                         
+BITPIX  =                  -32 / data type of original image                    
+NAXIS   =                    2 / dimension of original image                    
+NAXIS1  =                20302 / length of original image axis                  
+NAXIS2  =                21374 / length of original image axis                  
+PCOUNT  =                    0 / size of special data area                      
+GCOUNT  =                    1 / one data group (required keyword)              
+COMMENT   FITS (Flexible Image Transport System) format is defined in 'Astronomy
+COMMENT   and Astrophysics', volume 376, page 359; bibcode: 2001A&A...376..359H 
+EQUINOX =      2.000000000E+03 / Mean equinox                                   
+RADECSYS= 'ICRS    '           / Astrometric system                             
+CTYPE1  = 'RA---TAN'           / WCS projection type for this axis              
+CUNIT1  = 'deg     '           / Axis unit                                      
+CRVAL1  =      1.880488332E+02 / World coordinate on this axis                  
+CRPIX1  =      1.015150000E+04 / Reference pixel on this axis                   
+CD1_1   =     -5.160416185E-05 / Linear projection matrix                       
+CD1_2   =      0.000000000E+00 / Linear projection matrix                       
+CTYPE2  = 'DEC--TAN'           / WCS projection type for this axis              
+CUNIT2  = 'deg     '           / Axis unit                                      
+CRVAL2  =      1.201046947E+01 / World coordinate on this axis                  
+CRPIX2  =      1.068750000E+04 / Reference pixel on this axis                   
+CD2_1   =      0.000000000E+00 / Linear projection matrix                       
+CD2_2   =      5.160416185E-05 / Linear projection matrix                       
