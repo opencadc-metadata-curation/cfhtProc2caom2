@@ -67,11 +67,13 @@
 # ***********************************************************************
 #
 
+import logging
 import os
 import sys
 
 from mock import patch
 
+from astropy.io.votable import parse_single_table
 from ngvs2caom2 import main_app, APPLICATION, COLLECTION, NGVSName
 from ngvs2caom2 import ARCHIVE
 from caom2pipe import manage_composable as mc
@@ -95,15 +97,17 @@ def pytest_generate_tests(metafunc):
     metafunc.parametrize('test_name', obs_id_list)
 
 
+@patch('caom2pipe.astro_composable.get_vo_table')
 @patch('caom2pipe.manage_composable.repo_get')
 @patch('caom2utils.fits2caom2.CadcDataClient')
-def test_main_app(data_client_mock, repo_get_mock, test_name):
+def test_main_app(data_client_mock, repo_get_mock, vo_mock, test_name):
     basename = os.path.basename(test_name)
     storage_name = NGVSName(file_name=basename)
     output_file = f'{TEST_DATA_DIR}/{basename}.actual.xml'
     obs_path = f'{TEST_DATA_DIR}/{storage_name.obs_id}.expected.xml'
     data_client_mock.return_value.get_file_info.side_effect = get_file_info
     repo_get_mock.side_effect = _repo_read_mock
+    vo_mock.side_effect = _vo_mock
 
     sys.argv = \
         (f'{APPLICATION} --no_validate --local {_get_local(test_name)} '
@@ -145,3 +149,14 @@ def _get_local(obs_id):
 
 def _repo_read_mock():
     return None
+
+
+def _vo_mock(url):
+    try:
+        x = url.split('/')
+        filter_name = x[-1].replace('&VERB=0', '')
+        votable = parse_single_table(
+            f'{TEST_DATA_DIR}/{filter_name}.xml')
+        return votable, None
+    except Exception as e:
+        logging.error(f'get_vo_table failure for url {url}')

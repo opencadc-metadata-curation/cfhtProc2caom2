@@ -82,7 +82,7 @@ from caom2pipe import caom_composable as cc
 from caom2pipe import manage_composable as mc
 
 
-__all__ = ['ngvs_main_app', 'update', 'NGVSName', 'COLLECTION',
+__all__ = ['ngvs_main_app', 'to_caom2', 'update', 'NGVSName', 'COLLECTION',
            'APPLICATION', 'ARCHIVE']
 
 
@@ -91,11 +91,11 @@ COLLECTION = 'NGVS'
 ARCHIVE = 'NGVS'
 INSTRUMENT = 'MegaPrime'
 
-filter_repair_lookup = {  'i.MP9703': 'i_sdss',
-                          'g.MP9402': 'g_sdss',
-                          'r.MP9602': 'r_sdss',
-                          'u.MP9302': 'u_sdss',
-                          'z.MP9901': 'z_sdss'}
+filter_repair_lookup = {'i': 'i_sdss',  # i.MP9703
+                        'g': 'g_sdss',  # g.MP9402
+                        'r': 'r_sdss',  # r.MP9602
+                        'u': 'u_sdss',  # u.MP9302
+                        'z': 'z_sdss'}  # z.MP9901
 filter_cache = ac.FilterMetadataCache(
     filter_repair_lookup, {}, 'CFHT', {}, 'NONE')
 
@@ -171,12 +171,6 @@ def get_data_product_type(uri):
     return result
 
 
-def get_energy_function_delta(uri):
-    filter_name = NGVSName.get_filter(uri)
-    temp = filter_cache.get_svo_filter(INSTRUMENT, filter_name)
-    return ac.FilterMetadataCache.get_fwhm(temp)
-
-
 def get_proposal_id(header):
     # JJK - 23-03-20
     # Replace with value of ProposalID from the first input ‘member’  from list
@@ -217,8 +211,14 @@ def accumulate_bp(bp, uri):
         bp.add_fits_attribute('Observation.environment.seeing', 'FINALIQ')
         bp.set('Observation.proposal.id', 'get_proposal_id(header)')
 
+        bp.clear('Plane.metrics.magLimit')
+        bp.add_fits_attribute('Plane.metrics.magLimit', 'MAGLIM')
+
         bp.clear('Plane.provenance.keywords')
         bp.add_fits_attribute('Plane.provenance.keywords', 'COMBINET')
+
+        bp.clear('Chunk.position.resolution')
+        bp.add_fits_attribute('Chunk.position.resolution', 'FINALIQ')
 
     bp.set('Observation.instrument.name', 'MegaPrime')
 
@@ -262,13 +262,6 @@ def update(observation, **kwargs):
     :param **kwargs Everything else."""
     logging.debug('Begin update.')
     mc.check_param(observation, Observation)
-
-    # headers = None
-    # if 'headers' in kwargs:
-    #     headers = kwargs['headers']
-    # fqn = None
-    # if 'fqn' in kwargs:
-    #     fqn = kwargs['fqn']
     fqn = kwargs.get('fqn')
     headers = kwargs.get('headers')
     uri = kwargs.get('uri')
@@ -279,7 +272,7 @@ def update(observation, **kwargs):
     elif fqn is not None:
         ngvs_name = NGVSName(file_name=os.path.basename(fqn))
     else:
-        raise mc.CadcException(f'Cannot define a CFHTName instance for '
+        raise mc.CadcException(f'Cannot define a NGVSName instance for '
                                f'{observation.observation_id}')
 
     for plane in observation.planes.values():
@@ -290,24 +283,24 @@ def update(observation, **kwargs):
                                               'CFHT',
                                               _repair_history_provenance_value,
                                               observation.observation_id)
-        # for artifact in plane.artifacts.values():
-        #     for part in artifact.parts.values():
-        #         for chunk in part.chunks:
-        #             _update_energy(chunk, observation.observation_id)
-        #             _update_time(chunk, headers[0], plane.provenance,
-        #                          observation.observation_id)
-
-        logging.error(f'product id {plane.product_id} '
-                      f'len {len(plane.provenance.inputs)} uri {uri}')
+            for artifact in plane.artifacts.values():
+                for part in artifact.parts.values():
+                    for chunk in part.chunks:
+                        _update_energy(chunk, artifact.uri,
+                                       observation.observation_id)
+                        # _update_time(chunk, headers[0], plane.provenance,
+                        #              observation.observation_id)
 
     cc.update_observation_members(observation)
     logging.debug('Done update.')
     return observation
 
 
-def _update_energy(chunk, obs_id):
+def _update_energy(chunk, uri, obs_id):
     logging.debug(f'Begin _update_energy for {obs_id}')
-    # TODO
+    filter_name = NGVSName.get_filter_name(uri)
+    filter_md = filter_cache.get_svo_filter(INSTRUMENT, filter_name)
+    cc.build_chunk_energy_range(chunk, filter_name, filter_md)
     logging.debug(f'End _update_energy.')
 
 
