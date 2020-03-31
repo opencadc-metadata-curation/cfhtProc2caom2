@@ -74,7 +74,11 @@ import sys
 import traceback
 
 from caom2 import Observation, CalibrationLevel, DataProductType, ProductType
+from caom2 import TemporalWCS, CoordAxis1D, Axis, CoordBounds1D, CoordRange1D
+from caom2repo import CAOM2RepoClient
 from caom2utils import ObsBlueprint, get_gen_proc_arg_parser, gen_proc
+from caom2pipe import astro_composable as ac
+from caom2pipe import caom_composable as cc
 from caom2pipe import manage_composable as mc
 
 
@@ -85,6 +89,15 @@ __all__ = ['ngvs_main_app', 'update', 'NGVSName', 'COLLECTION',
 APPLICATION = 'ngvs2caom2'
 COLLECTION = 'NGVS'
 ARCHIVE = 'NGVS'
+INSTRUMENT = 'MegaPrime'
+
+filter_repair_lookup = {  'i.MP9703': 'i_sdss',
+                          'g.MP9402': 'g_sdss',
+                          'r.MP9602': 'r_sdss',
+                          'u.MP9302': 'u_sdss',
+                          'z.MP9901': 'z_sdss'}
+filter_cache = ac.FilterMetadataCache(
+    filter_repair_lookup, {}, 'CFHT', {}, 'NONE')
 
 
 class NGVSName(mc.StorageName):
@@ -100,17 +113,28 @@ class NGVSName(mc.StorageName):
         obs_id = mc.StorageName.remove_extensions(file_name)
         super(NGVSName, self).__init__(
             obs_id, COLLECTION, NGVSName.NGVS_NAME_PATTERN, fname_on_disk)
+        self._product_id = NGVSName.get_product_id(file_name)
 
     @property
     def product_id(self):
-        # from fits header COMBINET keyword
-        result = 'art_skep'
-        if NGVSName.is_catalog(self.fname_in_ad):
-            result = 'catalog'
-        return result
+        return self._product_id
 
     def is_valid(self):
         return True
+
+    @staticmethod
+    def get_filter_name(f_name):
+        bits = f_name.split('.')
+        return bits[2]
+
+    @staticmethod
+    def get_product_id(f_name):
+        if NGVSName.is_catalog(f_name):
+            result = 'catalog'
+        else:
+            bits = f_name.split('.')
+            result = f'{bits[1]}.{bits[2]}.{bits[3]}'
+        return result
 
     @staticmethod
     def remove_extensions(name):
@@ -126,7 +150,7 @@ class NGVSName(mc.StorageName):
 
 def get_artifact_product_type(uri):
     result = ProductType.SCIENCE
-    if 'weight' in uri:
+    if 'weight' in uri or '.sig' in uri:
         result = ProductType.WEIGHT
     elif 'mask.rd.reg' in uri or '.flag' in uri:
         result = ProductType.AUXILIARY
@@ -141,9 +165,40 @@ def get_calibration_level(uri):
 
 
 def get_data_product_type(uri):
-    result = DataProductType.CUBE
+    result = DataProductType.IMAGE
     if NGVSName.is_catalog(uri):
         result = DataProductType.CATALOG
+    return result
+
+
+def get_energy_function_delta(uri):
+    filter_name = NGVSName.get_filter(uri)
+    temp = filter_cache.get_svo_filter(INSTRUMENT, filter_name)
+    return ac.FilterMetadataCache.get_fwhm(temp)
+
+
+def get_proposal_id(header):
+    # JJK - 23-03-20
+    # Replace with value of ProposalID from the first input ‘member’  from list
+    # TODO
+    return None
+
+
+def get_provenance_version(uri):
+    bits = mc.CaomName(uri).file_name.split('.')
+    return bits[3]
+
+
+def get_target_name(uri):
+    return mc.CaomName(uri).file_name.split('.')[0]
+
+
+def _informative_uri(uri):
+    result = False
+    if ('.weight' not in uri and '.sig' not in uri and '.cat' not in uri and
+            '.mask' not in uri):
+        # all the excluded names have fewer useful keywords
+        result = True
     return result
 
 
@@ -151,17 +206,51 @@ def accumulate_bp(bp, uri):
     """Configure the telescope-specific ObsBlueprint at the CAOM model 
     Observation level."""
     logging.debug(f'Begin accumulate_bp for {uri}.')
-    bp.configure_position_axes((1,2))
-    bp.configure_time_axis(3)
-    bp.configure_energy_axis(4)
-    bp.configure_polarization_axis(5)
-    bp.configure_observable_axis(6)
+    bp.configure_position_axes((1, 2))
+
+    # they're all CompositeObservations
+    bp.set('CompositeObservation.members', {})
+
+    # JJK - comments by email - 28-03-20
+    if _informative_uri(uri):
+        bp.clear('Observation.environment.seeing')
+        bp.add_fits_attribute('Observation.environment.seeing', 'FINALIQ')
+        bp.set('Observation.proposal.id', 'get_proposal_id(header)')
+
+        bp.clear('Plane.provenance.keywords')
+        bp.add_fits_attribute('Plane.provenance.keywords', 'COMBINET')
+
+    bp.set('Observation.instrument.name', 'MegaPrime')
+
+    bp.set('Observation.proposal.pi', 'Laura Ferrarese')
+    bp.set('Observation.proposal.project', 'NGVS')
+    bp.set('Observation.proposal.title',
+           'Next Generation Virgo Cluster Survey')
+    bp.set('Observation.proposal.keywords', 'Galaxy Cluster Dwarfs')
+
+    bp.set('Observation.target.name', 'get_target_name(uri)')
+    bp.set('Observation.target.type', 'field')
+
+    bp.set('Observation.telescope.name', 'CFHT 3.6m')
+    x, y, z = ac.get_geocentric_location('cfht')
+    bp.set('Observation.telescope.geoLocationX', x)
+    bp.set('Observation.telescope.geoLocationY', y)
+    bp.set('Observation.telescope.geoLocationZ', z)
 
     bp.set('Plane.calibrationLevel', 'get_calibration_level(uri)')
     bp.set('Plane.dataProductType', 'get_data_product_type(uri)')
-    bp.set('Plane.dataRelease', '2032-01-01T00:00:00')
+    bp.set('Plane.dataRelease', '2022-01-01T00:00:00')
+
+    bp.set('Plane.provenance.name', 'MEGAPIPE')
+    bp.set('Plane.provenance.producer', 'CADC')
+    bp.set('Plane.provenance.project', 'NGVS')
+    bp.set('Plane.provenance.reference',
+           'http://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/en/community/ngvs/docs/'
+           'ngvsdoc.html')
+    bp.set('Plane.provenance.version', 'get_provenance_version(uri)')
 
     bp.set('Artifact.productType', 'get_artifact_product_type(uri)')
+
     logging.debug('Done accumulate_bp.')
 
 
@@ -174,15 +263,117 @@ def update(observation, **kwargs):
     logging.debug('Begin update.')
     mc.check_param(observation, Observation)
 
-    headers = None
-    if 'headers' in kwargs:
-        headers = kwargs['headers']
-    fqn = None
-    if 'fqn' in kwargs:
-        fqn = kwargs['fqn']
+    # headers = None
+    # if 'headers' in kwargs:
+    #     headers = kwargs['headers']
+    # fqn = None
+    # if 'fqn' in kwargs:
+    #     fqn = kwargs['fqn']
+    fqn = kwargs.get('fqn')
+    headers = kwargs.get('headers')
+    uri = kwargs.get('uri')
 
+    if uri is not None:
+        f_name = mc.CaomName(uri).file_name
+        ngvs_name = NGVSName(file_name=f_name)
+    elif fqn is not None:
+        ngvs_name = NGVSName(file_name=os.path.basename(fqn))
+    else:
+        raise mc.CadcException(f'Cannot define a CFHTName instance for '
+                               f'{observation.observation_id}')
+
+    for plane in observation.planes.values():
+        if plane.product_id != ngvs_name.product_id:
+            continue
+        if _informative_uri(fqn):
+            cc.update_plane_provenance_single(plane, headers, 'HISTORY',
+                                              'CFHT',
+                                              _repair_history_provenance_value,
+                                              observation.observation_id)
+        # for artifact in plane.artifacts.values():
+        #     for part in artifact.parts.values():
+        #         for chunk in part.chunks:
+        #             _update_energy(chunk, observation.observation_id)
+        #             _update_time(chunk, headers[0], plane.provenance,
+        #                          observation.observation_id)
+
+        logging.error(f'product id {plane.product_id} '
+                      f'len {len(plane.provenance.inputs)} uri {uri}')
+
+    cc.update_observation_members(observation)
     logging.debug('Done update.')
     return observation
+
+
+def _update_energy(chunk, obs_id):
+    logging.debug(f'Begin _update_energy for {obs_id}')
+    # TODO
+    logging.debug(f'End _update_energy.')
+
+
+def _update_time(chunk, header, provenance, obs_id):
+    logging.debug(f'Begin _update_time for {obs_id}')
+
+    if chunk is not None and provenance is not None:
+        # bounds = ctor
+        config = mc.Config()
+        config.get_executors()
+        subject = mc.define_subject(config)
+        client = CAOM2RepoClient(
+            subject, config.logging_level, config.resource_id)
+        metrics = mc.Metrics(config)
+        bounds = CoordBounds1D()
+        min_date = 0
+        max_date = sys.float_info.max
+        exposure = 0
+        for entry in provenance.inputs:
+            ip_obs_id, ip_product_id = mc.CaomName.decompose_provenance_input(
+                entry)
+            ip_obs = mc.repo_get(client, COLLECTION, ip_obs_id, metrics)
+            ip_plane = ip_obs.planes.get(ip_product_id)
+            if (ip_plane is not None and ip_plane.time is not None and
+                    ip_plane.time.bounds is not None):
+                bounds.samples.append(CoordRange1D(ip_plane.time.bounds.lower,
+                                                   ip_plane.time.bounds.upper))
+                min_date = min(ip_plane.time.bounds.lower, min_date)
+                max_date = max(ip_plane.time.bounds.upper, max_date)
+                exposure += ip_plane.time.exposure
+        axis = Axis(ctype='TIME', cunit='mjd')
+        time_axis = CoordAxis1D(axis=axis,
+                                error=None,
+                                range=None,
+                                bounds=bounds,
+                                function=None)
+        temporal_wcs = TemporalWCS(axis=time_axis, timesys=None, trefpos=None,
+                                   mjdref=None, exposure=exposure,
+                                   resolution=None)
+        chunk.time_axis = 3
+        chunk.time = temporal_wcs
+    logging.debug(f'End _update_time.')
+
+
+def _repair_history_provenance_value(value, obs_id):
+    logging.debug(f'Begin _repair_history_provenance_value for {obs_id}')
+    results = []
+    # HISTORY headers with provenance:
+    # HISTORY = input image 973887p.fits; phot ref: SDSS; IQ=0.55; Sky= 1741.0
+    # HISTORY = input image 973888p.fits; phot ref: SDSS; IQ=0.56; Sky= 1740.0
+    # HISTORY = input image 973889p.fits; phot ref: SDSS; IQ=0.54; Sky= 1728.0
+    # HISTORY = input image 973890p.fits; phot ref: SDSS; IQ=0.50; Sky= 1700.0
+    # HISTORY = input image 973891p.fits; phot ref: SDSS; IQ=0.53; Sky= 1675.0
+    if 'input image' in str(value):
+        for entry in value:
+            if 'input image' in entry:
+                temp = str(entry).split('input image ')
+                # TODO TODO TODO - this is the old archive product id and
+                #  plane id - whoops, when it comes to un-intended consequences
+                prov_prod_id = temp[1].split(';')[0].replace('.fits', '')
+                prov_obs_id = prov_prod_id[:-1]
+                # 0 - observation
+                # 1 - plane
+                results.append([prov_obs_id, prov_prod_id])
+    logging.debug(f'End _repair_history_provenance_value')
+    return results
 
 
 def _build_blueprints(uris):

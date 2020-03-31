@@ -70,4 +70,7 @@ from ngvs2caom2 import NGVSName
 
 
 def test_is_valid():
-    assert NGVSName('anything').is_valid()
+    test_subject = NGVSName(file_name='NGVS+0+0.l.i.Mg002.fits.header')
+    assert test_subject.is_valid()
+    assert test_subject.obs_id == 'NGVS+0+0.l.i.Mg002', 'wrong obs id'
+    assert test_subject.product_id == 'l.i.Mg002', 'wrong product id'

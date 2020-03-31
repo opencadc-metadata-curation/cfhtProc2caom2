@@ -81,9 +81,9 @@ TEST_DATA_DIR = os.path.join(THIS_DIR, 'data')
 PLUGIN = os.path.join(os.path.dirname(THIS_DIR), 'main_app.py')
 
 LOOKUP = {'NGVS+0+0.l.i.Mg002': ['NGVS+0+0.l.i.Mg002.fits.header',
-                                 'NGVS+0+0.l.i.Mg002.cat.header',
-                                 'NGVS+0+0.l.i.Mg002.fits.mask.rd.reg.header',
-                                 'NGVS+0+0.l.i.Mg002.flag.fits.fz.header',
+                                 # 'NGVS+0+0.l.i.Mg002.cat',
+                                 # 'NGVS+0+0.l.i.Mg002.fits.mask.rd.reg',
+                                 # 'NGVS+0+0.l.i.Mg002.flag.fits.fz',
                                  'NGVS+0+0.l.i.Mg002.sig.fits.header',
                                  'NGVS+0+0.l.i.Mg002.weight.fits.fz.header']}
 
@@ -95,13 +95,15 @@ def pytest_generate_tests(metafunc):
     metafunc.parametrize('test_name', obs_id_list)
 
 
+@patch('caom2pipe.manage_composable.repo_get')
 @patch('caom2utils.fits2caom2.CadcDataClient')
-def test_main_app(data_client_mock, test_name):
+def test_main_app(data_client_mock, repo_get_mock, test_name):
     basename = os.path.basename(test_name)
     storage_name = NGVSName(file_name=basename)
     output_file = f'{TEST_DATA_DIR}/{basename}.actual.xml'
     obs_path = f'{TEST_DATA_DIR}/{storage_name.obs_id}.expected.xml'
     data_client_mock.return_value.get_file_info.side_effect = get_file_info
+    repo_get_mock.side_effect = _repo_read_mock
 
     sys.argv = \
         (f'{APPLICATION} --no_validate --local {_get_local(test_name)} '
@@ -139,3 +141,7 @@ def _get_local(obs_id):
     for ii in LOOKUP[obs_id]:
         result = f'{result} {TEST_DATA_DIR}/{ii}'
     return result
+
+
+def _repo_read_mock():
+    return None
