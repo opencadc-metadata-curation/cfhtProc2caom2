@@ -44,6 +44,9 @@
           <caom2:planeURI>caom:CFHT/973887/973887p</caom2:planeURI>
         </caom2:inputs>
       </caom2:provenance>
+      <caom2:metrics>
+        <caom2:magLimit>26.1</caom2:magLimit>
+      </caom2:metrics>
       <caom2:artifacts>
         <caom2:artifact caom2:id="b66e2bd2-eb2d-4052-a30f-89016bfcfd37">
           <caom2:uri>ad:NGVS/NGVS+0+0.l.i.Mg002.fits</caom2:uri>
@@ -58,6 +61,7 @@
                   <caom2:naxis>2</caom2:naxis>
                   <caom2:positionAxis1>1</caom2:positionAxis1>
                   <caom2:positionAxis2>2</caom2:positionAxis2>
+                  <caom2:energyAxis>4</caom2:energyAxis>
                   <caom2:position>
                     <caom2:axis>
                       <caom2:axis1>
@@ -91,7 +95,29 @@
                     </caom2:axis>
                     <caom2:coordsys>FK5</caom2:coordsys>
                     <caom2:equinox>2000.0</caom2:equinox>
+                    <caom2:resolution>0.54</caom2:resolution>
                   </caom2:position>
+                  <caom2:energy>
+                    <caom2:axis>
+                      <caom2:axis>
+                        <caom2:ctype>WAVE</caom2:ctype>
+                        <caom2:cunit>A</caom2:cunit>
+                      </caom2:axis>
+                      <caom2:range>
+                        <caom2:start>
+                          <caom2:pix>0.5</caom2:pix>
+                          <caom2:val>6985.4311197339</caom2:val>
+                        </caom2:start>
+                        <caom2:end>
+                          <caom2:pix>1.5</caom2:pix>
+                          <caom2:val>8532.8205671531</caom2:val>
+                        </caom2:end>
+                      </caom2:range>
+                    </caom2:axis>
+                    <caom2:specsys>TOPOCENT</caom2:specsys>
+                    <caom2:bandpassName>i</caom2:bandpassName>
+                    <caom2:resolvingPower>5.0143329181832605</caom2:resolvingPower>
+                  </caom2:energy>
                 </caom2:chunk>
               </caom2:chunks>
             </caom2:part>
