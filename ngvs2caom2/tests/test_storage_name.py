@@ -66,7 +66,12 @@
 #
 # ***********************************************************************
 #
-from ngvs2caom2 import NGVSName
+
+import sys
+
+from mock import patch
+
+from ngvs2caom2 import NGVSName, to_caom2, APPLICATION, COLLECTION
 
 
 def test_is_valid():
@@ -74,3 +79,33 @@ def test_is_valid():
     assert test_subject.is_valid()
     assert test_subject.obs_id == 'NGVS+0+0.l.i.Mg002', 'wrong obs id'
     assert test_subject.product_id == 'l.i.Mg002', 'wrong product id'
+
+
+@patch('ngvs2caom2.main_app.gen_proc')
+def test_build_uris(gen_proc_mock):
+    f1 = 'l.i.Mg002/ad:NGVS/NGVS+0+0.l.i.Mg002.sig.fits'
+    f2 = 'l.i.Mg002/ad:NGVS/NGVS+0+0.l.i.Mg002.fits'
+    f3 = 'l.i.Mg002/ad:NGVS/NGVS+0+0.l.i.Mg002.weight.fits.fz'
+    f4 = 'l.i.Mg002/ad:NGVS/NGVS+0+0.l.i.Mg002.fits.mask.rd.reg'
+    f5 = 'catalog/ad:NGVS/NGVS+0+0.l.i.Mg002.cat'
+    f6 = 'l.i.Mg002/ad:NGVS/NGVS+0+0.l.i.Mg002.flag.fits.fz'
+    f_names = [f1, f2, f3, f4, f5, f6]
+    test_local = ' '.join(ii.split('/')[2] for ii in f_names)
+    test_lineage = ' '.join(ii for ii in f_names)
+    test_name = 'consistent_local_lineage'
+    sys.argv = (f'{APPLICATION} --no_validate --local {test_local} '
+                f'--observation {COLLECTION} {test_name} --lineage '
+                f'{test_lineage}').split()
+    to_caom2()
+    assert gen_proc_mock.called, 'should be called'
+    args, kwargs = gen_proc_mock.call_args
+    import logging
+    logging.error(args)
+    generic_parser = vars(args[0]).get('use_generic_parser')
+    assert generic_parser is not None, 'expect a generic_parser'
+    assert f4.split('/', 1)[1] in generic_parser, 'no mask'
+    assert f6.split('/', 1)[1] in generic_parser, 'no flag'
+    assert f2.split('/', 1)[1] not in generic_parser, 'expect product'
+    assert f3.split('/', 1)[1] not in generic_parser, 'expect weight'
+    assert f1.split('/', 1)[1] not in generic_parser, 'expect sig'
+    assert f5.split('/', 1)[1] not in generic_parser, 'expect cat'

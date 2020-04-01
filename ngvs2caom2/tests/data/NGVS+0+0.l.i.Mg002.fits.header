@@ -52,3 +52,4 @@ COMMENT AB magnitude = -2.5 * log10(flux) + PHOTZP
 COMMENT i.MP9702_=u_SDSS-0.241*(u_SDSS-g_SDSS)                                  
 FINALIQ =                 0.54 / Image Quality of stack                         
 MAGLIM  =               26.100 / Limiting magnitude                             
+END                                                                             

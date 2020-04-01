@@ -80,6 +80,7 @@ from caom2utils import ObsBlueprint, get_gen_proc_arg_parser, gen_proc
 from caom2pipe import astro_composable as ac
 from caom2pipe import caom_composable as cc
 from caom2pipe import manage_composable as mc
+from caom2pipe import parsing_composable as pc
 
 
 __all__ = ['ngvs_main_app', 'to_caom2', 'update', 'NGVSName', 'COLLECTION',
@@ -104,6 +105,14 @@ class NGVSName(mc.StorageName):
     """Naming rules:
     - support mixed-case file name storage, and mixed-case obs id values
     - support uncompressed files in storage
+
+    File names look like:
+    NGVS+0+0.l.i.Mg002.sig.fits
+    NGVS+0+0.l.i.Mg002.fits
+    NGVS+0+0.l.i.Mg002.weight.fits.fz
+    NGVS+0+0.l.i.Mg002.fits.mask.rd.reg
+    NGVS+0+0.l.i.Mg002.cat
+    NGVS+0+0.l.i.Mg002.flag.fits.fz
     """
 
     NGVS_NAME_PATTERN = '*'
@@ -146,6 +155,14 @@ class NGVSName(mc.StorageName):
     @staticmethod
     def is_catalog(name):
         return '.cat' in name
+
+    @staticmethod
+    def use_later_extensions(name):
+        return '.weight' in name
+
+    @staticmethod
+    def use_metadata(name):
+        return not ('mask.rd.reg' in name or '.flag' in name)
 
 
 def get_artifact_product_type(uri):
@@ -190,7 +207,7 @@ def get_target_name(uri):
 def _informative_uri(uri):
     result = False
     if ('.weight' not in uri and '.sig' not in uri and '.cat' not in uri and
-            '.mask' not in uri):
+            '.mask' not in uri and '.flag' not in uri):
         # all the excluded names have fewer useful keywords
         result = True
     return result
@@ -207,9 +224,17 @@ def accumulate_bp(bp, uri):
 
     # JJK - comments by email - 28-03-20
     if _informative_uri(uri):
+        # make sure information set from header keywords is only set for
+        # the fits files where it's accessible
+        bp.clear('Observation.metaRelease')
+        bp.add_fits_attribute('Observation.metaRelease', 'REL_DATE')
+
         bp.clear('Observation.environment.seeing')
         bp.add_fits_attribute('Observation.environment.seeing', 'FINALIQ')
         bp.set('Observation.proposal.id', 'get_proposal_id(header)')
+
+        bp.clear('Plane.metaRelease')
+        bp.add_fits_attribute('Plane.metaRelease', 'REL_DATE')
 
         bp.clear('Plane.metrics.magLimit')
         bp.add_fits_attribute('Plane.metrics.magLimit', 'MAGLIM')
@@ -278,7 +303,8 @@ def update(observation, **kwargs):
     for plane in observation.planes.values():
         if plane.product_id != ngvs_name.product_id:
             continue
-        if _informative_uri(fqn):
+        if _informative_uri(ngvs_name.file_name):
+            logging.error(f'informative {ngvs_name.file_name}')
             cc.update_plane_provenance_single(plane, headers, 'HISTORY',
                                               'CFHT',
                                               _repair_history_provenance_value,
@@ -291,9 +317,22 @@ def update(observation, **kwargs):
                         # _update_time(chunk, headers[0], plane.provenance,
                         #              observation.observation_id)
 
+        elif NGVSName.is_catalog(ngvs_name.file_name):
+            _finish_catalog_plane(observation, plane)
+
     cc.update_observation_members(observation)
+
+    if NGVSName.use_later_extensions(uri):
+        _update_observation_metadata(observation, headers, ngvs_name, uri)
     logging.debug('Done update.')
     return observation
+
+
+def _finish_catalog_plane(observation, plane):
+    logging.debug(f'Begin _finish_catalog_plane for '
+                  f'{observation.observation_id}.')
+    plane.meta_release = observation.meta_release
+    logging.debug('Done _finish_catalog_plane.')
 
 
 def _update_energy(chunk, uri, obs_id):
@@ -302,6 +341,36 @@ def _update_energy(chunk, uri, obs_id):
     filter_md = filter_cache.get_svo_filter(INSTRUMENT, filter_name)
     cc.build_chunk_energy_range(chunk, filter_name, filter_md)
     logging.debug(f'End _update_energy.')
+
+
+def _update_observation_metadata(obs, headers, ngvs_name, uri):
+    """
+    Why this method exists:
+
+    The NGVS weight files have almost no metadata in the primary HDU, but
+    all the needed metadata in subsequent HDUs.
+
+    It's not possible to apply extension
+    numbers for non-chunk blueprint entries, so that means that to use the
+    information captured in the blueprint, the header that's provided
+    must be manipulated instead. There is only access to the header
+    information in this extension of the fitscaom2 module (i.e. this file)
+    during the execution of the 'update' step of fits2caom2 execution.
+    Hence the self-referential implementation. Maybe it will result in an
+    infinite loop and I'll be sad.
+    """
+    n_axis = headers[0].get('NAXIS')
+    if n_axis == 0:
+        logging.warning(f'Resetting the header/blueprint relationship for '
+                        f'{ngvs_name.file_name} in {obs.observation_id}')
+        module = importlib.import_module(__name__)
+        blueprint = ObsBlueprint(module=module)
+        accumulate_bp(blueprint, uri)
+        # there are no end keywords, so astropy is a bit confused about
+        # the structure of the headers, hence the 0th header, starting at a
+        # non-zero index
+        pc.add_headers_to_obs_by_blueprint(
+            obs, [headers[0][4:]], blueprint, uri, ngvs_name.product_id)
 
 
 def _update_time(chunk, header, provenance, obs_id):
@@ -383,31 +452,41 @@ def _build_blueprints(uris):
     blueprints = {}
     for uri in uris:
         blueprint = ObsBlueprint(module=module)
-        if not mc.StorageName.is_preview(uri):
-            accumulate_bp(blueprint, uri)
+        accumulate_bp(blueprint, uri)
         blueprints[uri] = blueprint
     return blueprints
 
 
-def _get_uris(args):
+def _filter_args(args):
+    uris_for_later = []
     result = []
     if args.lineage:
         for ii in args.lineage:
-            result.append(ii.split('/', 1)[1])
-    elif args.local:
-        for ii in args.local:
-            file_uri = mc.build_uri(ARCHIVE, os.path.basename(ii))
-            result.append(file_uri)
+            uri = ii.split('/', 1)[1]
+            result.append(uri)
+            if not NGVSName.use_metadata(uri):
+                uris_for_later.append(uri)
     else:
         raise mc.CadcException(
             f'Could not define uri from these args {args}')
-    return result
+    return result, uris_for_later
 
 
 def to_caom2():
-    args = get_gen_proc_arg_parser().parse_args()
-    uris = _get_uris(args)
+    parser = get_gen_proc_arg_parser()
+    args = parser.parse_args()
+    # set the arguments for those files that, despite being fits files,
+    # are processed with a generic parser - do this because fits2caom2
+    # manages parser creation based on file names, mostly
+    #
+    # the
+    uris, generic_uris = _filter_args(args)
     blueprints = _build_blueprints(uris)
+    if len(generic_uris) > 0:
+        sys.argv.append('--use_generic_parser')
+        for ii in generic_uris:
+            sys.argv.append(ii)
+        args = parser.parse_args()
     result = gen_proc(args, blueprints)
     logging.debug(f'Done {APPLICATION} processing.')
     return result

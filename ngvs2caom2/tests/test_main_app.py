@@ -83,9 +83,9 @@ TEST_DATA_DIR = os.path.join(THIS_DIR, 'data')
 PLUGIN = os.path.join(os.path.dirname(THIS_DIR), 'main_app.py')
 
 LOOKUP = {'NGVS+0+0.l.i.Mg002': ['NGVS+0+0.l.i.Mg002.fits.header',
-                                 # 'NGVS+0+0.l.i.Mg002.cat',
-                                 # 'NGVS+0+0.l.i.Mg002.fits.mask.rd.reg',
-                                 # 'NGVS+0+0.l.i.Mg002.flag.fits.fz',
+                                 'NGVS+0+0.l.i.Mg002.cat',
+                                 'NGVS+0+0.l.i.Mg002.fits.mask.rd.reg',
+                                 'NGVS+0+0.l.i.Mg002.flag.fits.fz',
                                  'NGVS+0+0.l.i.Mg002.sig.fits.header',
                                  'NGVS+0+0.l.i.Mg002.weight.fits.fz.header']}
 

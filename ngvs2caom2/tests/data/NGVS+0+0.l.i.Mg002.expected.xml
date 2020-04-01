@@ -4,7 +4,7 @@
   <caom2:observationID>NGVS+0+0.l.i.Mg002</caom2:observationID>
   <caom2:metaRelease>2009-08-31T00:00:00.000</caom2:metaRelease>
   <caom2:algorithm>
-    <caom2:name>derived</caom2:name>
+    <caom2:name>composite</caom2:name>
   </caom2:algorithm>
   <caom2:intent>science</caom2:intent>
   <caom2:target>
@@ -246,7 +246,7 @@
     <caom2:plane caom2:id="696b18db-f60c-49f3-a370-a077cddde3fc">
       <caom2:productID>catalog</caom2:productID>
       <caom2:metaRelease>2009-08-31T00:00:00.000</caom2:metaRelease>
-      <caom2:dataRelease>2032-01-01T00:00:00.000</caom2:dataRelease>
+      <caom2:dataRelease>2022-01-01T00:00:00.000</caom2:dataRelease>
       <caom2:dataProductType>http://www.opencadc.org/caom2/DataProductType#catalog</caom2:dataProductType>
       <caom2:calibrationLevel>4</caom2:calibrationLevel>
       <caom2:artifacts>
@@ -255,6 +255,7 @@
           <caom2:productType>science</caom2:productType>
           <caom2:releaseType>data</caom2:releaseType>
           <caom2:contentType>text/plain</caom2:contentType>
+          <caom2:contentLength>3</caom2:contentLength>
           <caom2:parts/>
         </caom2:artifact>
       </caom2:artifacts>
