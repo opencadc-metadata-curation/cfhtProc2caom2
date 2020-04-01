@@ -2,7 +2,12 @@ FROM opencadc/astropy:3.8-slim
 
 RUN apt-get update -y && apt-get dist-upgrade -y
 
-RUN apt-get install -y git
+RUN apt-get install -y \
+    git \
+    python3-astropy \
+    python3-pip \
+    python3-tz \
+    python3-yaml
 
 RUN pip3 install cadcdata && \
     pip3 install cadctap && \
@@ -33,7 +38,7 @@ RUN git clone https://github.com/${OMC_REPO}/ngvs2caom2.git && \
   cp ./ngvs2caom2/scripts/docker-entrypoint.sh / && \
   pip3 install ./ngvs2caom2
 
-RUN apt-get purge git
+RUN apt-get purge -y git
 
 ENTRYPOINT ["/docker-entrypoint.sh"]
 
