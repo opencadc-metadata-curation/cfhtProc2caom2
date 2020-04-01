@@ -119,10 +119,16 @@ class NGVSName(mc.StorageName):
 
     def __init__(self, obs_id=None, fname_on_disk=None, file_name=None):
         self.fname_in_ad = file_name
-        obs_id = mc.StorageName.remove_extensions(file_name)
+        obs_id = NGVSName.remove_extensions(file_name)
         super(NGVSName, self).__init__(
-            obs_id, COLLECTION, NGVSName.NGVS_NAME_PATTERN, fname_on_disk)
+            obs_id, COLLECTION, NGVSName.NGVS_NAME_PATTERN, fname_on_disk,
+            compression='')
         self._product_id = NGVSName.get_product_id(file_name)
+        self._file_name = file_name
+
+    @property
+    def file_name(self):
+        return self._file_name
 
     @property
     def product_id(self):

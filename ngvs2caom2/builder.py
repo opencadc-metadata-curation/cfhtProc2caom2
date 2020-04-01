@@ -67,63 +67,16 @@
 # ***********************************************************************
 #
 
-import logging
-import sys
-import traceback
+from caom2pipe import name_builder_composable as nbc
+from ngvs2caom2 import NGVSName
 
-from caom2pipe import run_composable as rc
-from ngvs2caom2 import APPLICATION, builder
+__all__ = ['NGVSNameBuilder']
 
 
-meta_visitors = []
-data_visitors = []
+class NGVSNameBuilder(nbc.StorageNameBuilder):
 
+    def __init__(self):
+        super(NGVSNameBuilder, self).__init__()
 
-def _run():
-    """
-    Uses a todo file to identify the work to be done.
-
-    :return 0 if successful, -1 if there's any sort of failure. Return status
-        is used by airflow for task instance management and reporting.
-    """
-    name_builder = builder.NGVSNameBuilder()
-    return rc.run_by_todo(config=None, name_builder=name_builder,
-                          command_name=APPLICATION,
-                          meta_visitors=meta_visitors, 
-                          data_visitors=data_visitors, chooser=None)
-
-
-def run():
-    """Wraps _run in exception handling, with sys.exit calls."""
-    try:
-        result = _run()
-        sys.exit(result)
-    except Exception as e:
-        logging.error(e)
-        tb = traceback.format_exc()
-        logging.error(tb)
-        sys.exit(-1)
-
-
-def _run_state():
-    """Uses a state file with a timestamp to control which entries will be
-    processed.
-    """
-    name_builder = builder.NGVSNameBuilder()
-    return rc.run_by_state(config=None, name_builder=name_builder,
-                           command_name=APPLICATION, 
-                           bookmark_name=None, meta_visitors=meta_visitors,
-                           data_visitors=data_visitors, end_time=None,
-                           source=None, chooser=None)
-
-
-def run_state():
-    """Wraps _run_state in exception handling."""
-    try:
-        _run_state()
-        sys.exit(0)
-    except Exception as e:
-        logging.error(e)
-        tb = traceback.format_exc()
-        logging.debug(tb)
-        sys.exit(-1)
+    def build(self, entry):
+        return NGVSName(file_name=entry)
