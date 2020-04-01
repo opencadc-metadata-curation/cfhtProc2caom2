@@ -195,10 +195,14 @@
           <caom2:releaseType>data</caom2:releaseType>
           <caom2:contentType>application/fits</caom2:contentType>
           <caom2:parts>
-            <caom2:part caom2:id="724e858f-7120-42f3-aa32-47ff5ad1d75f">
+            <caom2:part caom2:id="515d24fc-17ec-4418-9f2e-01800fc5ecef">
               <caom2:name>0</caom2:name>
+              <caom2:chunks/>
+            </caom2:part>
+            <caom2:part caom2:id="a114c0ed-ca23-4e4a-82bf-385434ffc42c">
+              <caom2:name>1</caom2:name>
               <caom2:chunks>
-                <caom2:chunk caom2:id="b0546a5d-871a-4238-aa35-09b580cc3b14">
+                <caom2:chunk caom2:id="c738a6b7-542b-47f5-b7ad-2014f52a8c1b">
                   <caom2:naxis>2</caom2:naxis>
                   <caom2:positionAxis1>1</caom2:positionAxis1>
                   <caom2:positionAxis2>2</caom2:positionAxis2>

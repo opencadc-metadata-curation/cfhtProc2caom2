@@ -156,7 +156,7 @@ class NGVSName(mc.StorageName):
         """How to get the file_id from a file_name."""
         return name.replace('.fits', '').replace('.fz', '').replace(
             '.header', '').replace('.sig', '').replace('.weight', '').replace(
-            '.cat', '').replace('.mask.rd.reg', '')
+            '.cat', '').replace('.mask.rd.reg', '').replace('.flag', '')
 
     @staticmethod
     def is_catalog(name):
@@ -372,11 +372,8 @@ def _update_observation_metadata(obs, headers, ngvs_name, uri):
         module = importlib.import_module(__name__)
         blueprint = ObsBlueprint(module=module)
         accumulate_bp(blueprint, uri)
-        # there are no end keywords, so astropy is a bit confused about
-        # the structure of the headers, hence the 0th header, starting at a
-        # non-zero index
         pc.add_headers_to_obs_by_blueprint(
-            obs, [headers[0][4:]], blueprint, uri, ngvs_name.product_id)
+            obs, [headers[1]], blueprint, uri, ngvs_name.product_id)
 
 
 def _update_time(chunk, header, provenance, obs_id):
