@@ -75,19 +75,38 @@ from mock import patch
 
 from astropy.io.votable import parse_single_table
 from ngvs2caom2 import main_app, APPLICATION, COLLECTION, NGVSName
-from ngvs2caom2 import ARCHIVE
+from ngvs2caom2 import ARCHIVE, MEGAPRIMEName, M_COLLECTION
 from caom2pipe import manage_composable as mc
 
 THIS_DIR = os.path.dirname(os.path.realpath(__file__))
 TEST_DATA_DIR = os.path.join(THIS_DIR, 'data')
 PLUGIN = os.path.join(os.path.dirname(THIS_DIR), 'main_app.py')
 
-LOOKUP = {'NGVS+0+0.l.i.Mg002': ['NGVS+0+0.l.i.Mg002.fits.header',
-                                 'NGVS+0+0.l.i.Mg002.cat',
-                                 'NGVS+0+0.l.i.Mg002.fits.mask.rd.reg',
-                                 'NGVS+0+0.l.i.Mg002.flag.fits.fz',
-                                 'NGVS+0+0.l.i.Mg002.sig.fits.header',
-                                 'NGVS+0+0.l.i.Mg002.weight.fits.fz.header']}
+# LOOKUP = {'NGVS+0+0.l.i.Mg002': ['NGVS+0+0.l.i.Mg002.fits.header',
+#                                  'NGVS+0+0.l.i.Mg002.cat',
+#                                  'NGVS+0+0.l.i.Mg002.fits.mask.rd.reg',
+#                                  'NGVS+0+0.l.i.Mg002.flag.fits.fz',
+#                                  'NGVS+0+0.l.i.Mg002.sig.fits.header',
+#                                  'NGVS+0+0.l.i.Mg002.weight.fits.fz.header']}
+
+LOOKUP = {'W3+2-3': ['W3+2-3.G.cat',
+                     'W3+2-3.G.fits.header',
+                     'W3+2-3.G.weight.fits.header',
+                     'W3+2-3.I.cat',
+                     'W3+2-3.I.fits.header',
+                     'W3+2-3.I.weight.fits.header',
+                     'W3+2-3.I2.cat',
+                     'W3+2-3.I2.fits.header',
+                     'W3+2-3.I2.weight.fits.header',
+                     'W3+2-3.R.cat',
+                     'W3+2-3.R.fits.header',
+                     'W3+2-3.R.weight.fits.header',
+                     'W3+2-3.U.cat',
+                     'W3+2-3.U.fits.header',
+                     'W3+2-3.U.weight.fits.header',
+                     'W3+2-3.Z.cat',
+                     'W3+2-3.Z.fits.header',
+                     'W3+2-3.Z.weight.fits.header']}
 
 
 def pytest_generate_tests(metafunc):
@@ -102,16 +121,15 @@ def pytest_generate_tests(metafunc):
 @patch('caom2utils.fits2caom2.CadcDataClient')
 def test_main_app(data_client_mock, repo_get_mock, vo_mock, test_name):
     basename = os.path.basename(test_name)
-    storage_name = NGVSName(file_name=basename)
     output_file = f'{TEST_DATA_DIR}/{basename}.actual.xml'
-    obs_path = f'{TEST_DATA_DIR}/{storage_name.obs_id}.expected.xml'
+    obs_path = f'{TEST_DATA_DIR}/{basename}.expected.xml'
     data_client_mock.return_value.get_file_info.side_effect = get_file_info
     repo_get_mock.side_effect = _repo_read_mock
     vo_mock.side_effect = _vo_mock
 
     sys.argv = \
         (f'{APPLICATION} --no_validate --local {_get_local(test_name)} '
-         f'--observation {COLLECTION} {test_name} -o {output_file} '
+         f'--observation {M_COLLECTION} {test_name} -o {output_file} '
          f'--plugin {PLUGIN} --module {PLUGIN} --lineage '
          f'{_get_lineage(test_name)}').split()
     print(sys.argv)
@@ -133,8 +151,8 @@ def get_file_info(archive, file_id):
 def _get_lineage(obs_id):
     result = ''
     for ii in LOOKUP[obs_id]:
-        storage_name = NGVSName(file_name=ii)
-        fits = mc.get_lineage(ARCHIVE, storage_name.product_id,
+        storage_name = MEGAPRIMEName(file_name=ii)
+        fits = mc.get_lineage(storage_name.archive, storage_name.product_id,
                               f'{ii.replace(".header", "")}')
         result = f'{result} {fits}'
     return result

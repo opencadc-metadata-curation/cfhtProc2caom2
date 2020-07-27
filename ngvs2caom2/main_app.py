@@ -80,23 +80,32 @@ from caom2utils import ObsBlueprint, get_gen_proc_arg_parser, gen_proc
 from caom2pipe import astro_composable as ac
 from caom2pipe import caom_composable as cc
 from caom2pipe import manage_composable as mc
-from caom2pipe import parsing_composable as pc
+from caom2pipe import translate_composable as tc
 
 
 __all__ = ['ngvs_main_app', 'to_caom2', 'update', 'NGVSName', 'COLLECTION',
-           'APPLICATION', 'ARCHIVE']
+           'APPLICATION', 'ARCHIVE', 'MEGAPRIMEName', 'M_COLLECTION',
+           'M_ARCHIVE']
 
 
 APPLICATION = 'ngvs2caom2'
 COLLECTION = 'NGVS'
 ARCHIVE = 'NGVS'
 INSTRUMENT = 'MegaPrime'
+M_COLLECTION = 'CFHTMEGAPIPE'
+M_ARCHIVE = 'CFHTSG'
 
 filter_repair_lookup = {'i': 'i_sdss',  # i.MP9703
+                        'I2': 'i',      # i.MP9702
+                        'I': 'i1',      # i.MP9701
                         'g': 'g_sdss',  # g.MP9402
+                        'G': 'g',       # g.MP9401
                         'r': 'r_sdss',  # r.MP9602
+                        'R': 'r',       # r.MP9601
                         'u': 'u_sdss',  # u.MP9302
-                        'z': 'z_sdss'}  # z.MP9901
+                        'U': 'u',       # u.MP9301
+                        'z': 'z_sdss',  # z.MP9901
+                        'Z': 'z'}       # z.MP9801
 filter_cache = ac.FilterMetadataCache(
     filter_repair_lookup, {}, 'CFHT', {}, 'NONE')
 
@@ -171,6 +180,210 @@ class NGVSName(mc.StorageName):
         return not ('mask.rd.reg' in name or '.flag' in name)
 
 
+class MEGAPRIMEName(mc.StorageName):
+    """
+    Compression is varied, so handle it on a case-by-case basis.
+    """
+
+    def __init__(self, file_name):
+        obs_id = MEGAPRIMEName.get_obs_id(file_name)
+        super(MEGAPRIMEName, self).__init__(obs_id=obs_id,
+                                            fname_on_disk=file_name,
+                                            archive=M_ARCHIVE,
+                                            collection=M_COLLECTION,
+                                            compression='')
+        self._product_id = MEGAPRIMEName.get_product_id(file_name)
+        self._file_name = file_name
+
+    @property
+    def is_catalog(self):
+        return 'cat' in self._file_name
+
+    @property
+    def is_weight(self):
+        return 'weight' in self._file_name
+
+    @property
+    def product_id(self):
+        return self._product_id
+
+    @property
+    def filter_name(self):
+        bits = self._file_name.split('.')
+        return bits[1]
+
+    @staticmethod
+    def get_obs_id(f_name):
+        bits = f_name.split('.')
+        return bits[0]
+
+    @staticmethod
+    def get_product_id(f_name):
+        bits = f_name.split('.')
+        return f'{bits[0]}.{bits[1]}'
+
+    @staticmethod
+    def remove_extensions(f_name):
+        return f_name.replace('.fits', '').replace('.fz', '').replace(
+            '.header', '')
+
+
+def accumulate_bp(bp, uri):
+    """Configure the telescope-specific ObsBlueprint at the CAOM model
+    Observation level."""
+    logging.debug(f'Begin accumulate_bp for {uri}.')
+    bp.configure_position_axes((1, 2))
+
+    # they're all DerivedObservations
+    bp.set('DerivedObservation.members', {})
+    bp.set('Observation.type', 'OBJECT')
+
+    # NGVS
+    # JJK - comments by email - 28-03-20
+    # if _informative_uri(uri):
+    # make sure information set from header keywords is only set for
+    # the fits files where it's accessible
+    #
+    # bp.clear('Observation.metaRelease')
+    # bp.add_fits_attribute('Observation.metaRelease', 'REL_DATE')
+
+    bp.set('Observation.algorithm.name', 'MEGAPIPE')
+
+    bp.set('Observation.environment.photometric', True)
+    bp.clear('Observation.environment.seeing')
+    bp.add_fits_attribute('Observation.environment.seeing', 'FINALIQ')
+
+    bp.set('Observation.proposal.id', 'get_proposal_id(header)')
+
+    bp.clear('Plane.metaRelease')
+    bp.add_fits_attribute('Plane.metaRelease', 'REL_DATE')
+
+    bp.clear('Plane.metrics.magLimit')
+    bp.add_fits_attribute('Plane.metrics.magLimit', 'MAGLIM')
+
+    bp.clear('Plane.provenance.keywords')
+    bp.add_fits_attribute('Plane.provenance.keywords', 'COMBINET')
+
+    bp.clear('Chunk.position.resolution')
+    bp.add_fits_attribute('Chunk.position.resolution', 'FINALIQ')
+
+    bp.set('Observation.instrument.name', 'MegaPrime')
+
+    # NGVS
+    # bp.set('Observation.proposal.pi', 'Laura Ferrarese')
+    # bp.set('Observation.proposal.project', 'NGVS')
+    # bp.set('Observation.proposal.title',
+    #        'Next Generation Virgo Cluster Survey')
+    # bp.set('Observation.proposal.keywords', 'Galaxy Cluster Dwarfs')
+    bp.set('Observation.proposal.id', 'CFHTLS')
+    bp.set('Observation.proposal.project', 'CFHTLS')
+    bp.set('Observation.proposal.title',
+           'Canada-France-Hawaii Telescope Legacy Survey')
+
+    bp.set('Observation.target.name', 'get_target_name(uri)')
+    bp.set('Observation.target.type', 'field')
+
+    bp.set('Observation.telescope.name', 'CFHT 3.6m')
+    x, y, z = ac.get_geocentric_location('cfht')
+    bp.set('Observation.telescope.geoLocationX', x)
+    bp.set('Observation.telescope.geoLocationY', y)
+    bp.set('Observation.telescope.geoLocationZ', z)
+
+    bp.set('Plane.calibrationLevel', 'get_calibration_level(uri)')
+    bp.set('Plane.dataProductType', 'get_data_product_type(uri)')
+    # NGVS
+    # bp.set('Plane.dataRelease', '2022-01-01T00:00:00')
+    bp.clear('Plane.dataRelease')
+    bp.add_fits_attribute('Plane.dataRelease', 'REL_DATE')
+
+    bp.set('Plane.provenance.name', 'MEGAPIPE')
+    bp.set('Plane.provenance.producer', 'CADC')
+    bp.set('Plane.provenance.reference',
+           'http://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/megapipe')
+    # NGVS
+    # bp.set('Plane.provenance.project', 'NGVS')
+    # bp.set('Plane.provenance.reference',
+    #        'http://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/en/community/ngvs/'
+    #        'docs/ngvsdoc.html')
+    # bp.set('Plane.provenance.version', 'get_provenance_version(uri)')
+
+    bp.set('Artifact.productType', 'get_artifact_product_type(uri)')
+
+    logging.debug('Done accumulate_bp.')
+
+
+def update(observation, **kwargs):
+    """Called to fill multiple CAOM model elements and/or attributes, must
+    have this signature for import_module loading and execution.
+
+    :param observation A CAOM Observation model instance.
+    :param **kwargs Everything else."""
+    logging.debug('Begin update.')
+    mc.check_param(observation, Observation)
+    fqn = kwargs.get('fqn')
+    headers = kwargs.get('headers')
+    uri = kwargs.get('uri')
+
+    if uri is not None:
+        f_name = mc.CaomName(uri).file_name
+        logging.error(f'uri is {uri} {f_name}')
+        ngvs_name = MEGAPRIMEName(file_name=f_name)
+    elif fqn is not None:
+        ngvs_name = MEGAPRIMEName(file_name=os.path.basename(fqn))
+        logging.error(f'fqn is {fqn}')
+    else:
+        raise mc.CadcException(f'Cannot define a MEGAPRIMEName instance for '
+                               f'{observation.observation_id}')
+    logging.debug(f'Update for {observation.observation_id} with '
+                  f'{ngvs_name.file_name}.')
+
+    max_meta_release = observation.meta_release
+    min_seeing = None
+    if (observation.environment is not None and
+            observation.environment.seeing is not None):
+        min_seeing = observation.environment.seeing
+    if not ngvs_name.is_catalog:
+        for plane in observation.planes.values():
+            max_meta_release = max(max_meta_release, plane.meta_release)
+            if plane.product_id != ngvs_name.product_id:
+                continue
+            min_seeing = min(min_seeing, _get_keyword(headers, 'FINALIQ'))
+            if _informative_uri(ngvs_name.file_name):
+                cc.update_plane_provenance_single(
+                    plane, headers, 'HISTORY', 'CFHT',
+                    _repair_history_provenance_value,
+                    observation.observation_id)
+                logging.error(f'{len(plane.provenance.inputs)} {ngvs_name.file_name}')
+                for artifact in plane.artifacts.values():
+                    for part in artifact.parts.values():
+                        for chunk in part.chunks:
+                            _update_energy(chunk, ngvs_name,
+                                           observation.observation_id)
+                            # _update_time(chunk, headers[0], plane.provenance,
+                            #              observation.observation_id)
+
+            # elif MEGAPRIMEName.is_catalog(ngvs_name.file_name):
+            #     _finish_catalog_plane(observation, plane)
+
+
+        if ngvs_name.is_weight:
+            _update_observation_metadata(observation, headers, ngvs_name, uri)
+
+    observation.meta_release = max_meta_release
+    if observation.environment is not None:
+        observation.environment.seeing = min_seeing
+    cc.update_observation_members(observation)
+    logging.debug('Done update.')
+    return observation
+
+
+def _get_keyword(headers, keyword):
+    result = headers[0].get(keyword)
+    if result is None:
+        result = headers[1].get(keyword)
+    return result
+
+
 def get_artifact_product_type(uri):
     result = ProductType.SCIENCE
     if 'weight' in uri or '.sig' in uri:
@@ -201,9 +414,9 @@ def get_proposal_id(header):
     return None
 
 
-def get_provenance_version(uri):
-    bits = mc.CaomName(uri).file_name.split('.')
-    return bits[3]
+# def get_provenance_version(uri):
+#     bits = mc.CaomName(uri).file_name.split('.')
+#     return bits[3]
 
 
 def get_target_name(uri):
@@ -219,121 +432,6 @@ def _informative_uri(uri):
     return result
 
 
-def accumulate_bp(bp, uri):
-    """Configure the telescope-specific ObsBlueprint at the CAOM model 
-    Observation level."""
-    logging.debug(f'Begin accumulate_bp for {uri}.')
-    bp.configure_position_axes((1, 2))
-
-    # they're all CompositeObservations
-    bp.set('CompositeObservation.members', {})
-
-    # JJK - comments by email - 28-03-20
-    if _informative_uri(uri):
-        # make sure information set from header keywords is only set for
-        # the fits files where it's accessible
-        bp.clear('Observation.metaRelease')
-        bp.add_fits_attribute('Observation.metaRelease', 'REL_DATE')
-
-        bp.clear('Observation.environment.seeing')
-        bp.add_fits_attribute('Observation.environment.seeing', 'FINALIQ')
-        bp.set('Observation.proposal.id', 'get_proposal_id(header)')
-
-        bp.clear('Plane.metaRelease')
-        bp.add_fits_attribute('Plane.metaRelease', 'REL_DATE')
-
-        bp.clear('Plane.metrics.magLimit')
-        bp.add_fits_attribute('Plane.metrics.magLimit', 'MAGLIM')
-
-        bp.clear('Plane.provenance.keywords')
-        bp.add_fits_attribute('Plane.provenance.keywords', 'COMBINET')
-
-        bp.clear('Chunk.position.resolution')
-        bp.add_fits_attribute('Chunk.position.resolution', 'FINALIQ')
-
-    bp.set('Observation.instrument.name', 'MegaPrime')
-
-    bp.set('Observation.proposal.pi', 'Laura Ferrarese')
-    bp.set('Observation.proposal.project', 'NGVS')
-    bp.set('Observation.proposal.title',
-           'Next Generation Virgo Cluster Survey')
-    bp.set('Observation.proposal.keywords', 'Galaxy Cluster Dwarfs')
-
-    bp.set('Observation.target.name', 'get_target_name(uri)')
-    bp.set('Observation.target.type', 'field')
-
-    bp.set('Observation.telescope.name', 'CFHT 3.6m')
-    x, y, z = ac.get_geocentric_location('cfht')
-    bp.set('Observation.telescope.geoLocationX', x)
-    bp.set('Observation.telescope.geoLocationY', y)
-    bp.set('Observation.telescope.geoLocationZ', z)
-
-    bp.set('Plane.calibrationLevel', 'get_calibration_level(uri)')
-    bp.set('Plane.dataProductType', 'get_data_product_type(uri)')
-    bp.set('Plane.dataRelease', '2022-01-01T00:00:00')
-
-    bp.set('Plane.provenance.name', 'MEGAPIPE')
-    bp.set('Plane.provenance.producer', 'CADC')
-    bp.set('Plane.provenance.project', 'NGVS')
-    bp.set('Plane.provenance.reference',
-           'http://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/en/community/ngvs/docs/'
-           'ngvsdoc.html')
-    bp.set('Plane.provenance.version', 'get_provenance_version(uri)')
-
-    bp.set('Artifact.productType', 'get_artifact_product_type(uri)')
-
-    logging.debug('Done accumulate_bp.')
-
-
-def update(observation, **kwargs):
-    """Called to fill multiple CAOM model elements and/or attributes, must
-    have this signature for import_module loading and execution.
-
-    :param observation A CAOM Observation model instance.
-    :param **kwargs Everything else."""
-    logging.debug('Begin update.')
-    mc.check_param(observation, Observation)
-    fqn = kwargs.get('fqn')
-    headers = kwargs.get('headers')
-    uri = kwargs.get('uri')
-
-    if uri is not None:
-        f_name = mc.CaomName(uri).file_name
-        ngvs_name = NGVSName(file_name=f_name)
-    elif fqn is not None:
-        ngvs_name = NGVSName(file_name=os.path.basename(fqn))
-    else:
-        raise mc.CadcException(f'Cannot define a NGVSName instance for '
-                               f'{observation.observation_id}')
-
-    for plane in observation.planes.values():
-        if plane.product_id != ngvs_name.product_id:
-            continue
-        if _informative_uri(ngvs_name.file_name):
-            logging.error(f'informative {ngvs_name.file_name}')
-            cc.update_plane_provenance_single(plane, headers, 'HISTORY',
-                                              'CFHT',
-                                              _repair_history_provenance_value,
-                                              observation.observation_id)
-            for artifact in plane.artifacts.values():
-                for part in artifact.parts.values():
-                    for chunk in part.chunks:
-                        _update_energy(chunk, artifact.uri,
-                                       observation.observation_id)
-                        # _update_time(chunk, headers[0], plane.provenance,
-                        #              observation.observation_id)
-
-        elif NGVSName.is_catalog(ngvs_name.file_name):
-            _finish_catalog_plane(observation, plane)
-
-    cc.update_observation_members(observation)
-
-    if NGVSName.use_later_extensions(uri):
-        _update_observation_metadata(observation, headers, ngvs_name, uri)
-    logging.debug('Done update.')
-    return observation
-
-
 def _finish_catalog_plane(observation, plane):
     logging.debug(f'Begin _finish_catalog_plane for '
                   f'{observation.observation_id}.')
@@ -341,9 +439,9 @@ def _finish_catalog_plane(observation, plane):
     logging.debug('Done _finish_catalog_plane.')
 
 
-def _update_energy(chunk, uri, obs_id):
+def _update_energy(chunk, ngvs_name, obs_id):
     logging.debug(f'Begin _update_energy for {obs_id}')
-    filter_name = NGVSName.get_filter_name(uri)
+    filter_name = ngvs_name.filter_name
     filter_md = filter_cache.get_svo_filter(INSTRUMENT, filter_name)
     cc.build_chunk_energy_range(chunk, filter_name, filter_md)
     logging.debug(f'End _update_energy.')
@@ -372,7 +470,7 @@ def _update_observation_metadata(obs, headers, ngvs_name, uri):
         module = importlib.import_module(__name__)
         blueprint = ObsBlueprint(module=module)
         accumulate_bp(blueprint, uri)
-        pc.add_headers_to_obs_by_blueprint(
+        tc.add_headers_to_obs_by_blueprint(
             obs, [headers[1]], blueprint, uri, ngvs_name.product_id)
 
 
@@ -467,7 +565,7 @@ def _filter_args(args):
         for ii in args.lineage:
             uri = ii.split('/', 1)[1]
             result.append(uri)
-            if not NGVSName.use_metadata(uri):
+            if NGVSName.is_catalog(uri):
                 uris_for_later.append(uri)
     else:
         raise mc.CadcException(
