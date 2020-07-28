@@ -382,13 +382,13 @@ def update(observation, **kwargs):
                             _update_time(chunk, headers,
                                          observation.observation_id,
                                          artifact.uri)
-
+                        logging.error(artifact.uri)
+                        logging.error(chunk.time)
             # elif MEGAPRIMEName.is_catalog(ngvs_name.file_name):
             #     _finish_catalog_plane(observation, plane)
 
-
-        if ngvs_name.is_weight:
-            _update_observation_metadata(observation, headers, ngvs_name, uri)
+        # if ngvs_name.is_weight:
+        #     _update_observation_metadata(observation, headers, ngvs_name, uri)
 
     observation.meta_release = max_meta_release
     if observation.environment is not None:
