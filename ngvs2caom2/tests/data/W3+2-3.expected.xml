@@ -1,4 +1,5 @@
-<caom2:Observation xmlns:caom2="http://www.opencadc.org/caom2/xml/v2.4" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="caom2:DerivedObservation" caom2:id="00000000-0000-0000-bca8-015bfa476101" caom2:lastModified="2017-11-16T21:06:12.613" caom2:maxLastModified="2019-11-06T15:58:55.081" caom2:metaChecksum="md5:e3d13fc828868dd5693432143aa56184" caom2:accMetaChecksum="md5:261e5430a2707f14b0bb9829a33e0ac7">
+<?xml version='1.0' encoding='UTF-8'?>
+<caom2:Observation xmlns:caom2="http://www.opencadc.org/caom2/xml/v2.3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="caom2:CompositeObservation" caom2:id="00000000-0000-0000-bca8-015bfa476101" caom2:lastModified="2017-11-16T21:06:12.613" caom2:maxLastModified="2019-11-06T15:58:55.081" caom2:metaChecksum="md5:e3d13fc828868dd5693432143aa56184" caom2:accMetaChecksum="md5:261e5430a2707f14b0bb9829a33e0ac7">
   <caom2:collection>CFHTMEGAPIPE</caom2:collection>
   <caom2:observationID>W3+2-3</caom2:observationID>
   <caom2:metaRelease>2009-08-15T19:32:42.000</caom2:metaRelease>
@@ -43,20 +44,15 @@
         <caom2:reference>http://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/megapipe/</caom2:reference>
         <caom2:lastExecuted>2009-08-18T05:02:48.000</caom2:lastExecuted>
         <caom2:inputs>
-          <caom2:planeURI>caom:CFHT/750107/750107p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/975222/975222p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/745596/745596p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/745251/745251p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/750186/750186p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/975221/975221p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/750188/750188p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/750105/750105p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/975224/975224p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/750187/750187p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/750106/750106p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/975223/975223p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/975225/975225p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/745597/745597p</caom2:planeURI>
+          <caom2:planeURI>caom:CFHT/750188p/750188p</caom2:planeURI>
+          <caom2:planeURI>caom:CFHT/750187p/750187p</caom2:planeURI>
+          <caom2:planeURI>caom:CFHT/750107p/750107p</caom2:planeURI>
+          <caom2:planeURI>caom:CFHT/745596p/745596p</caom2:planeURI>
+          <caom2:planeURI>caom:CFHT/745251p/745251p</caom2:planeURI>
+          <caom2:planeURI>caom:CFHT/750186p/750186p</caom2:planeURI>
+          <caom2:planeURI>caom:CFHT/750105p/750105p</caom2:planeURI>
+          <caom2:planeURI>caom:CFHT/750106p/750106p</caom2:planeURI>
+          <caom2:planeURI>caom:CFHT/745597p/745597p</caom2:planeURI>
         </caom2:inputs>
       </caom2:provenance>
       <caom2:metrics>
@@ -126,18 +122,20 @@
                         <caom2:ctype>WAVE</caom2:ctype>
                         <caom2:cunit>Angstrom</caom2:cunit>
                       </caom2:axis>
-                      <caom2:function>
-                        <caom2:naxis>1</caom2:naxis>
-                        <caom2:delta>1624.0</caom2:delta>
-                        <caom2:refCoord>
-                          <caom2:pix>1.0</caom2:pix>
-                          <caom2:val>4890.0</caom2:val>
-                        </caom2:refCoord>
-                      </caom2:function>
+                      <caom2:range>
+                        <caom2:start>
+                          <caom2:pix>0.5</caom2:pix>
+                          <caom2:val>4145.00065002595</caom2:val>
+                        </caom2:start>
+                        <caom2:end>
+                          <caom2:pix>1.5</caom2:pix>
+                          <caom2:val>5600.4581254922505</caom2:val>
+                        </caom2:end>
+                      </caom2:range>
                     </caom2:axis>
                     <caom2:specsys>TOPOCENT</caom2:specsys>
                     <caom2:bandpassName>g.MP9401</caom2:bandpassName>
-                    <caom2:resolvingPower>3.0</caom2:resolvingPower>
+                    <caom2:resolvingPower>3.347902271207184</caom2:resolvingPower>
                   </caom2:energy>
                   <caom2:time>
                     <caom2:axis>
@@ -163,8 +161,8 @@
           </caom2:parts>
         </caom2:artifact>
         <caom2:artifact caom2:id="00000000-0000-0000-4eb8-015bfa4a8aff" caom2:lastModified="2017-11-16T21:06:12.613" caom2:maxLastModified="2017-11-16T21:06:12.613" caom2:metaChecksum="md5:1e0418e6f0aafa9ca3502809621badf3" caom2:accMetaChecksum="md5:a60385fe2a35c26ead918c7c3e0491af">
-          <caom2:uri>ad:CFHTSG/W3+2-3.G.weight.fits.fz</caom2:uri>
-          <caom2:productType>science</caom2:productType>
+          <caom2:uri>ad:CFHTSG/W3+2-3.G.weight.fits</caom2:uri>
+          <caom2:productType>weight</caom2:productType>
           <caom2:releaseType>data</caom2:releaseType>
           <caom2:contentType>application/fits</caom2:contentType>
           <caom2:contentChecksum>md5:191a979f7d514eac43b5e4e43e272b84</caom2:contentChecksum>
@@ -215,25 +213,6 @@
                     <caom2:equinox>2000.0</caom2:equinox>
                     <caom2:resolution>0.99</caom2:resolution>
                   </caom2:position>
-                  <caom2:energy>
-                    <caom2:axis>
-                      <caom2:axis>
-                        <caom2:ctype>WAVE</caom2:ctype>
-                        <caom2:cunit>Angstrom</caom2:cunit>
-                      </caom2:axis>
-                      <caom2:function>
-                        <caom2:naxis>1</caom2:naxis>
-                        <caom2:delta>1624.0</caom2:delta>
-                        <caom2:refCoord>
-                          <caom2:pix>1.0</caom2:pix>
-                          <caom2:val>4890.0</caom2:val>
-                        </caom2:refCoord>
-                      </caom2:function>
-                    </caom2:axis>
-                    <caom2:specsys>TOPOCENT</caom2:specsys>
-                    <caom2:bandpassName>g.MP9401</caom2:bandpassName>
-                    <caom2:resolvingPower>3.0</caom2:resolvingPower>
-                  </caom2:energy>
                   <caom2:time>
                     <caom2:axis>
                       <caom2:axis>
@@ -271,38 +250,17 @@
         <caom2:reference>http://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/megapipe/</caom2:reference>
         <caom2:lastExecuted>2009-08-15T19:28:41.000</caom2:lastExecuted>
         <caom2:inputs>
-          <caom2:planeURI>caom:CFHT/975224/975224p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/745593/745593p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/745594/745594p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/975013/975013p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/743144/743144p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/987355/987355p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/743141/743141p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/796835/796835p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/745596/745596p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/745251/745251p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/975221/975221p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/750105/750105p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/975223/975223p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/750106/750106p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/743140/743140p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/975014/975014p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/745591/745591p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/750107/750107p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/975222/975222p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/750186/750186p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/745592/745592p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/750188/750188p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/750187/750187p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/743142/743142p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/994775/994775p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/745587/745587p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/745595/745595p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/745589/745589p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/745588/745588p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/975225/975225p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/745590/745590p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/745597/745597p</caom2:planeURI>
+          <caom2:planeURI>caom:CFHT/743142p/743142p</caom2:planeURI>
+          <caom2:planeURI>caom:CFHT/745591p/745591p</caom2:planeURI>
+          <caom2:planeURI>caom:CFHT/745592p/745592p</caom2:planeURI>
+          <caom2:planeURI>caom:CFHT/745593p/745593p</caom2:planeURI>
+          <caom2:planeURI>caom:CFHT/745588p/745588p</caom2:planeURI>
+          <caom2:planeURI>caom:CFHT/745590p/745590p</caom2:planeURI>
+          <caom2:planeURI>caom:CFHT/745587p/745587p</caom2:planeURI>
+          <caom2:planeURI>caom:CFHT/743141p/743141p</caom2:planeURI>
+          <caom2:planeURI>caom:CFHT/743140p/743140p</caom2:planeURI>
+          <caom2:planeURI>caom:CFHT/743144p/743144p</caom2:planeURI>
+          <caom2:planeURI>caom:CFHT/745589p/745589p</caom2:planeURI>
         </caom2:inputs>
       </caom2:provenance>
       <caom2:metrics>
@@ -372,18 +330,20 @@
                         <caom2:ctype>WAVE</caom2:ctype>
                         <caom2:cunit>Angstrom</caom2:cunit>
                       </caom2:axis>
-                      <caom2:function>
-                        <caom2:naxis>1</caom2:naxis>
-                        <caom2:delta>1726.0</caom2:delta>
-                        <caom2:refCoord>
-                          <caom2:pix>1.0</caom2:pix>
-                          <caom2:val>7763.0</caom2:val>
-                        </caom2:refCoord>
-                      </caom2:function>
+                      <caom2:range>
+                        <caom2:start>
+                          <caom2:pix>0.5</caom2:pix>
+                          <caom2:val>7021.9669592153</caom2:val>
+                        </caom2:start>
+                        <caom2:end>
+                          <caom2:pix>1.5</caom2:pix>
+                          <caom2:val>8530.3320037541</caom2:val>
+                        </caom2:end>
+                      </caom2:range>
                     </caom2:axis>
                     <caom2:specsys>TOPOCENT</caom2:specsys>
                     <caom2:bandpassName>i.MP9701</caom2:bandpassName>
-                    <caom2:resolvingPower>4.5</caom2:resolvingPower>
+                    <caom2:resolvingPower>5.155349833675274</caom2:resolvingPower>
                   </caom2:energy>
                   <caom2:time>
                     <caom2:axis>
@@ -409,8 +369,8 @@
           </caom2:parts>
         </caom2:artifact>
         <caom2:artifact caom2:id="00000000-0000-0000-a4ff-015bfa4c06be" caom2:lastModified="2017-11-16T21:06:12.613" caom2:maxLastModified="2017-11-16T21:06:12.613" caom2:metaChecksum="md5:cbdd4b13bad3d8d03454028698130297" caom2:accMetaChecksum="md5:451ccd40d108f4efb09f3bdbbccf4920">
-          <caom2:uri>ad:CFHTSG/W3+2-3.I.weight.fits.fz</caom2:uri>
-          <caom2:productType>science</caom2:productType>
+          <caom2:uri>ad:CFHTSG/W3+2-3.I.weight.fits</caom2:uri>
+          <caom2:productType>weight</caom2:productType>
           <caom2:releaseType>data</caom2:releaseType>
           <caom2:contentType>application/fits</caom2:contentType>
           <caom2:contentChecksum>md5:c7f7555a5afccf972553ff649bfa3218</caom2:contentChecksum>
@@ -461,25 +421,6 @@
                     <caom2:equinox>2000.0</caom2:equinox>
                     <caom2:resolution>0.99</caom2:resolution>
                   </caom2:position>
-                  <caom2:energy>
-                    <caom2:axis>
-                      <caom2:axis>
-                        <caom2:ctype>WAVE</caom2:ctype>
-                        <caom2:cunit>Angstrom</caom2:cunit>
-                      </caom2:axis>
-                      <caom2:function>
-                        <caom2:naxis>1</caom2:naxis>
-                        <caom2:delta>1726.0</caom2:delta>
-                        <caom2:refCoord>
-                          <caom2:pix>1.0</caom2:pix>
-                          <caom2:val>7763.0</caom2:val>
-                        </caom2:refCoord>
-                      </caom2:function>
-                    </caom2:axis>
-                    <caom2:specsys>TOPOCENT</caom2:specsys>
-                    <caom2:bandpassName>i.MP9701</caom2:bandpassName>
-                    <caom2:resolvingPower>4.5</caom2:resolvingPower>
-                  </caom2:energy>
                   <caom2:time>
                     <caom2:axis>
                       <caom2:axis>
@@ -517,52 +458,13 @@
         <caom2:reference>http://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/megapipe/</caom2:reference>
         <caom2:lastExecuted>2009-08-15T19:35:00.000</caom2:lastExecuted>
         <caom2:inputs>
-          <caom2:planeURI>caom:CFHT/987103/987103p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/918137/918137p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/918135/918135p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/975224/975224p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/987101/987101p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/745593/745593p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/745594/745594p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/975013/975013p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/987102/987102p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/743144/743144p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/987355/987355p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/987105/987105p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/743141/743141p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/796835/796835p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/745596/745596p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/745251/745251p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/975221/975221p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/987106/987106p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/750105/750105p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/975223/975223p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/750106/750106p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/743140/743140p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/987100/987100p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/918131/918131p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/918134/918134p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/745591/745591p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/975014/975014p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/750107/750107p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/987107/987107p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/975222/975222p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/750186/750186p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/745592/745592p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/918136/918136p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/750188/750188p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/750187/750187p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/743142/743142p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/994775/994775p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/745587/745587p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/745595/745595p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/745589/745589p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/745588/745588p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/975225/975225p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/745590/745590p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/918133/918133p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/745597/745597p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/918132/918132p</caom2:planeURI>
+          <caom2:planeURI>caom:CFHT/987100p/987100p</caom2:planeURI>
+          <caom2:planeURI>caom:CFHT/987103p/987103p</caom2:planeURI>
+          <caom2:planeURI>caom:CFHT/987106p/987106p</caom2:planeURI>
+          <caom2:planeURI>caom:CFHT/987105p/987105p</caom2:planeURI>
+          <caom2:planeURI>caom:CFHT/987107p/987107p</caom2:planeURI>
+          <caom2:planeURI>caom:CFHT/987102p/987102p</caom2:planeURI>
+          <caom2:planeURI>caom:CFHT/987101p/987101p</caom2:planeURI>
         </caom2:inputs>
       </caom2:provenance>
       <caom2:metrics>
@@ -632,18 +534,20 @@
                         <caom2:ctype>WAVE</caom2:ctype>
                         <caom2:cunit>Angstrom</caom2:cunit>
                       </caom2:axis>
-                      <caom2:function>
-                        <caom2:naxis>1</caom2:naxis>
-                        <caom2:delta>1728.0</caom2:delta>
-                        <caom2:refCoord>
-                          <caom2:pix>1.0</caom2:pix>
-                          <caom2:val>7623.0</caom2:val>
-                        </caom2:refCoord>
-                      </caom2:function>
+                      <caom2:range>
+                        <caom2:start>
+                          <caom2:pix>0.5</caom2:pix>
+                          <caom2:val>7021.9669592153</caom2:val>
+                        </caom2:start>
+                        <caom2:end>
+                          <caom2:pix>1.5</caom2:pix>
+                          <caom2:val>8530.3320037541</caom2:val>
+                        </caom2:end>
+                      </caom2:range>
                     </caom2:axis>
                     <caom2:specsys>TOPOCENT</caom2:specsys>
                     <caom2:bandpassName>i.MP9702</caom2:bandpassName>
-                    <caom2:resolvingPower>4.4</caom2:resolvingPower>
+                    <caom2:resolvingPower>5.155349833675274</caom2:resolvingPower>
                   </caom2:energy>
                   <caom2:time>
                     <caom2:axis>
@@ -669,8 +573,8 @@
           </caom2:parts>
         </caom2:artifact>
         <caom2:artifact caom2:id="00000000-0000-0000-bda9-015bfa4cf5b9" caom2:lastModified="2017-11-16T21:06:12.613" caom2:maxLastModified="2017-11-16T21:06:12.613" caom2:metaChecksum="md5:8e42f46c2931ca8db4af83f847f7c145" caom2:accMetaChecksum="md5:c49d1b3261de08970f77de2ce871bb90">
-          <caom2:uri>ad:CFHTSG/W3+2-3.I2.weight.fits.fz</caom2:uri>
-          <caom2:productType>science</caom2:productType>
+          <caom2:uri>ad:CFHTSG/W3+2-3.I2.weight.fits</caom2:uri>
+          <caom2:productType>weight</caom2:productType>
           <caom2:releaseType>data</caom2:releaseType>
           <caom2:contentType>application/fits</caom2:contentType>
           <caom2:contentChecksum>md5:e49340257541bb90883c6b597e63b906</caom2:contentChecksum>
@@ -721,25 +625,6 @@
                     <caom2:equinox>2000.0</caom2:equinox>
                     <caom2:resolution>0.99</caom2:resolution>
                   </caom2:position>
-                  <caom2:energy>
-                    <caom2:axis>
-                      <caom2:axis>
-                        <caom2:ctype>WAVE</caom2:ctype>
-                        <caom2:cunit>Angstrom</caom2:cunit>
-                      </caom2:axis>
-                      <caom2:function>
-                        <caom2:naxis>1</caom2:naxis>
-                        <caom2:delta>1728.0</caom2:delta>
-                        <caom2:refCoord>
-                          <caom2:pix>1.0</caom2:pix>
-                          <caom2:val>7623.0</caom2:val>
-                        </caom2:refCoord>
-                      </caom2:function>
-                    </caom2:axis>
-                    <caom2:specsys>TOPOCENT</caom2:specsys>
-                    <caom2:bandpassName>i.MP9702</caom2:bandpassName>
-                    <caom2:resolvingPower>4.4</caom2:resolvingPower>
-                  </caom2:energy>
                   <caom2:time>
                     <caom2:axis>
                       <caom2:axis>
@@ -777,27 +662,13 @@
         <caom2:reference>http://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/megapipe/</caom2:reference>
         <caom2:lastExecuted>2009-08-15T19:25:48.000</caom2:lastExecuted>
         <caom2:inputs>
-          <caom2:planeURI>caom:CFHT/975224/975224p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/745594/745594p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/975013/975013p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/987355/987355p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/796835/796835p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/745596/745596p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/745251/745251p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/975221/975221p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/750105/750105p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/975223/975223p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/750106/750106p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/975014/975014p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/750107/750107p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/975222/975222p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/750186/750186p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/750188/750188p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/750187/750187p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/994775/994775p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/745595/745595p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/975225/975225p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/745597/745597p</caom2:planeURI>
+          <caom2:planeURI>caom:CFHT/994775p/994775p</caom2:planeURI>
+          <caom2:planeURI>caom:CFHT/745594p/745594p</caom2:planeURI>
+          <caom2:planeURI>caom:CFHT/975013p/975013p</caom2:planeURI>
+          <caom2:planeURI>caom:CFHT/796835p/796835p</caom2:planeURI>
+          <caom2:planeURI>caom:CFHT/745595p/745595p</caom2:planeURI>
+          <caom2:planeURI>caom:CFHT/975014p/975014p</caom2:planeURI>
+          <caom2:planeURI>caom:CFHT/987355p/987355p</caom2:planeURI>
         </caom2:inputs>
       </caom2:provenance>
       <caom2:metrics>
@@ -867,18 +738,20 @@
                         <caom2:ctype>WAVE</caom2:ctype>
                         <caom2:cunit>Angstrom</caom2:cunit>
                       </caom2:axis>
-                      <caom2:function>
-                        <caom2:naxis>1</caom2:naxis>
-                        <caom2:delta>1413.0</caom2:delta>
-                        <caom2:refCoord>
-                          <caom2:pix>1.0</caom2:pix>
-                          <caom2:val>6248.5</caom2:val>
-                        </caom2:refCoord>
-                      </caom2:function>
+                      <caom2:range>
+                        <caom2:start>
+                          <caom2:pix>0.5</caom2:pix>
+                          <caom2:val>5672.19817501165</caom2:val>
+                        </caom2:start>
+                        <caom2:end>
+                          <caom2:pix>1.5</caom2:pix>
+                          <caom2:val>6891.577888750149</caom2:val>
+                        </caom2:end>
+                      </caom2:range>
                     </caom2:axis>
                     <caom2:specsys>TOPOCENT</caom2:specsys>
                     <caom2:bandpassName>r.MP9601</caom2:bandpassName>
-                    <caom2:resolvingPower>4.4</caom2:resolvingPower>
+                    <caom2:resolvingPower>5.151707840555457</caom2:resolvingPower>
                   </caom2:energy>
                   <caom2:time>
                     <caom2:axis>
@@ -904,8 +777,8 @@
           </caom2:parts>
         </caom2:artifact>
         <caom2:artifact caom2:id="00000000-0000-0000-219f-015bfa4b6da3" caom2:lastModified="2017-11-16T21:06:12.613" caom2:maxLastModified="2017-11-16T21:06:12.613" caom2:metaChecksum="md5:62462cbdcc0d9b74f11c9e4fc8d975b2" caom2:accMetaChecksum="md5:164ad7bad66fa69c8e82b92ab5187a72">
-          <caom2:uri>ad:CFHTSG/W3+2-3.R.weight.fits.fz</caom2:uri>
-          <caom2:productType>science</caom2:productType>
+          <caom2:uri>ad:CFHTSG/W3+2-3.R.weight.fits</caom2:uri>
+          <caom2:productType>weight</caom2:productType>
           <caom2:releaseType>data</caom2:releaseType>
           <caom2:contentType>application/fits</caom2:contentType>
           <caom2:contentChecksum>md5:f0bd6c16ae3362bf50b2b338193f03f1</caom2:contentChecksum>
@@ -956,25 +829,6 @@
                     <caom2:equinox>2000.0</caom2:equinox>
                     <caom2:resolution>0.99</caom2:resolution>
                   </caom2:position>
-                  <caom2:energy>
-                    <caom2:axis>
-                      <caom2:axis>
-                        <caom2:ctype>WAVE</caom2:ctype>
-                        <caom2:cunit>Angstrom</caom2:cunit>
-                      </caom2:axis>
-                      <caom2:function>
-                        <caom2:naxis>1</caom2:naxis>
-                        <caom2:delta>1413.0</caom2:delta>
-                        <caom2:refCoord>
-                          <caom2:pix>1.0</caom2:pix>
-                          <caom2:val>6248.5</caom2:val>
-                        </caom2:refCoord>
-                      </caom2:function>
-                    </caom2:axis>
-                    <caom2:specsys>TOPOCENT</caom2:specsys>
-                    <caom2:bandpassName>r.MP9601</caom2:bandpassName>
-                    <caom2:resolvingPower>4.4</caom2:resolvingPower>
-                  </caom2:energy>
                   <caom2:time>
                     <caom2:axis>
                       <caom2:axis>
@@ -1012,11 +866,11 @@
         <caom2:reference>http://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/megapipe/</caom2:reference>
         <caom2:lastExecuted>2009-08-15T19:18:48.000</caom2:lastExecuted>
         <caom2:inputs>
-          <caom2:planeURI>caom:CFHT/975222/975222p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/975224/975224p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/975221/975221p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/975223/975223p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/975225/975225p</caom2:planeURI>
+          <caom2:planeURI>caom:CFHT/975225p/975225p</caom2:planeURI>
+          <caom2:planeURI>caom:CFHT/975224p/975224p</caom2:planeURI>
+          <caom2:planeURI>caom:CFHT/975222p/975222p</caom2:planeURI>
+          <caom2:planeURI>caom:CFHT/975221p/975221p</caom2:planeURI>
+          <caom2:planeURI>caom:CFHT/975223p/975223p</caom2:planeURI>
         </caom2:inputs>
       </caom2:provenance>
       <caom2:metrics>
@@ -1086,18 +940,20 @@
                         <caom2:ctype>WAVE</caom2:ctype>
                         <caom2:cunit>Angstrom</caom2:cunit>
                       </caom2:axis>
-                      <caom2:function>
-                        <caom2:naxis>1</caom2:naxis>
-                        <caom2:delta>867.0</caom2:delta>
-                        <caom2:refCoord>
-                          <caom2:pix>1.0</caom2:pix>
-                          <caom2:val>3754.5</caom2:val>
-                        </caom2:refCoord>
-                      </caom2:function>
+                      <caom2:range>
+                        <caom2:start>
+                          <caom2:pix>0.5</caom2:pix>
+                          <caom2:val>3363.83492521177</caom2:val>
+                        </caom2:start>
+                        <caom2:end>
+                          <caom2:pix>1.5</caom2:pix>
+                          <caom2:val>4122.27933163823</caom2:val>
+                        </caom2:end>
+                      </caom2:range>
                     </caom2:axis>
                     <caom2:specsys>TOPOCENT</caom2:specsys>
                     <caom2:bandpassName>u.MP9301</caom2:bandpassName>
-                    <caom2:resolvingPower>4.3</caom2:resolvingPower>
+                    <caom2:resolvingPower>4.935176654622652</caom2:resolvingPower>
                   </caom2:energy>
                   <caom2:time>
                     <caom2:axis>
@@ -1123,8 +979,8 @@
           </caom2:parts>
         </caom2:artifact>
         <caom2:artifact caom2:id="00000000-0000-0000-bca8-015bfa4764b6" caom2:lastModified="2017-11-16T21:06:12.613" caom2:maxLastModified="2017-11-16T21:06:12.613" caom2:metaChecksum="md5:1cf9425440c7cc762c14647d8c4831d9" caom2:accMetaChecksum="md5:23355c0d023452d90323477479952bc7">
-          <caom2:uri>ad:CFHTSG/W3+2-3.U.weight.fits.fz</caom2:uri>
-          <caom2:productType>science</caom2:productType>
+          <caom2:uri>ad:CFHTSG/W3+2-3.U.weight.fits</caom2:uri>
+          <caom2:productType>weight</caom2:productType>
           <caom2:releaseType>data</caom2:releaseType>
           <caom2:contentType>application/fits</caom2:contentType>
           <caom2:contentChecksum>md5:dbbcca326a2e55028a8d5452ca97ddf7</caom2:contentChecksum>
@@ -1175,25 +1031,6 @@
                     <caom2:equinox>2000.0</caom2:equinox>
                     <caom2:resolution>0.99</caom2:resolution>
                   </caom2:position>
-                  <caom2:energy>
-                    <caom2:axis>
-                      <caom2:axis>
-                        <caom2:ctype>WAVE</caom2:ctype>
-                        <caom2:cunit>Angstrom</caom2:cunit>
-                      </caom2:axis>
-                      <caom2:function>
-                        <caom2:naxis>1</caom2:naxis>
-                        <caom2:delta>867.0</caom2:delta>
-                        <caom2:refCoord>
-                          <caom2:pix>1.0</caom2:pix>
-                          <caom2:val>3754.5</caom2:val>
-                        </caom2:refCoord>
-                      </caom2:function>
-                    </caom2:axis>
-                    <caom2:specsys>TOPOCENT</caom2:specsys>
-                    <caom2:bandpassName>u.MP9301</caom2:bandpassName>
-                    <caom2:resolvingPower>4.3</caom2:resolvingPower>
-                  </caom2:energy>
                   <caom2:time>
                     <caom2:axis>
                       <caom2:axis>
@@ -1231,45 +1068,13 @@
         <caom2:reference>http://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/megapipe/</caom2:reference>
         <caom2:lastExecuted>2009-08-15T19:32:42.000</caom2:lastExecuted>
         <caom2:inputs>
-          <caom2:planeURI>caom:CFHT/918137/918137p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/918135/918135p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/975224/975224p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/745593/745593p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/745594/745594p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/975013/975013p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/743144/743144p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/987355/987355p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/743141/743141p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/796835/796835p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/745596/745596p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/745251/745251p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/975221/975221p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/750105/750105p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/975223/975223p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/750106/750106p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/743140/743140p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/918131/918131p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/918134/918134p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/745591/745591p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/975014/975014p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/750107/750107p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/975222/975222p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/750186/750186p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/745592/745592p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/918136/918136p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/750188/750188p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/750187/750187p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/743142/743142p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/994775/994775p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/745587/745587p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/745595/745595p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/745589/745589p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/745588/745588p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/975225/975225p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/745590/745590p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/918133/918133p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/745597/745597p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/918132/918132p</caom2:planeURI>
+          <caom2:planeURI>caom:CFHT/918136p/918136p</caom2:planeURI>
+          <caom2:planeURI>caom:CFHT/918134p/918134p</caom2:planeURI>
+          <caom2:planeURI>caom:CFHT/918135p/918135p</caom2:planeURI>
+          <caom2:planeURI>caom:CFHT/918132p/918132p</caom2:planeURI>
+          <caom2:planeURI>caom:CFHT/918133p/918133p</caom2:planeURI>
+          <caom2:planeURI>caom:CFHT/918137p/918137p</caom2:planeURI>
+          <caom2:planeURI>caom:CFHT/918131p/918131p</caom2:planeURI>
         </caom2:inputs>
       </caom2:provenance>
       <caom2:metrics>
@@ -1339,18 +1144,20 @@
                         <caom2:ctype>WAVE</caom2:ctype>
                         <caom2:cunit>Angstrom</caom2:cunit>
                       </caom2:axis>
-                      <caom2:function>
-                        <caom2:naxis>1</caom2:naxis>
-                        <caom2:delta>1848.0</caom2:delta>
-                        <caom2:refCoord>
-                          <caom2:pix>1.0</caom2:pix>
-                          <caom2:val>9083.0</caom2:val>
-                        </caom2:refCoord>
-                      </caom2:function>
+                      <caom2:range>
+                        <caom2:start>
+                          <caom2:pix>0.5</caom2:pix>
+                          <caom2:val>8268.1020175722</caom2:val>
+                        </caom2:start>
+                        <caom2:end>
+                          <caom2:pix>1.5</caom2:pix>
+                          <caom2:val>11999.9999999998</caom2:val>
+                        </caom2:end>
+                      </caom2:range>
                     </caom2:axis>
                     <caom2:specsys>TOPOCENT</caom2:specsys>
                     <caom2:bandpassName>z.MP9801</caom2:bandpassName>
-                    <caom2:resolvingPower>4.9</caom2:resolvingPower>
+                    <caom2:resolvingPower>2.7155219827830877</caom2:resolvingPower>
                   </caom2:energy>
                   <caom2:time>
                     <caom2:axis>
@@ -1376,8 +1183,8 @@
           </caom2:parts>
         </caom2:artifact>
         <caom2:artifact caom2:id="00000000-0000-0000-2244-015bfa4c83ad" caom2:lastModified="2017-11-16T21:06:12.613" caom2:maxLastModified="2017-11-16T21:06:12.613" caom2:metaChecksum="md5:b111e6e1f64a2ae7baa5f24fd7de99fe" caom2:accMetaChecksum="md5:c02a23160182d82608f6f5210f16902a">
-          <caom2:uri>ad:CFHTSG/W3+2-3.Z.weight.fits.fz</caom2:uri>
-          <caom2:productType>science</caom2:productType>
+          <caom2:uri>ad:CFHTSG/W3+2-3.Z.weight.fits</caom2:uri>
+          <caom2:productType>weight</caom2:productType>
           <caom2:releaseType>data</caom2:releaseType>
           <caom2:contentType>application/fits</caom2:contentType>
           <caom2:contentChecksum>md5:9deeb2e8ea40f5a814bb27a7e1a5c475</caom2:contentChecksum>
@@ -1428,25 +1235,6 @@
                     <caom2:equinox>2000.0</caom2:equinox>
                     <caom2:resolution>0.99</caom2:resolution>
                   </caom2:position>
-                  <caom2:energy>
-                    <caom2:axis>
-                      <caom2:axis>
-                        <caom2:ctype>WAVE</caom2:ctype>
-                        <caom2:cunit>Angstrom</caom2:cunit>
-                      </caom2:axis>
-                      <caom2:function>
-                        <caom2:naxis>1</caom2:naxis>
-                        <caom2:delta>1848.0</caom2:delta>
-                        <caom2:refCoord>
-                          <caom2:pix>1.0</caom2:pix>
-                          <caom2:val>9083.0</caom2:val>
-                        </caom2:refCoord>
-                      </caom2:function>
-                    </caom2:axis>
-                    <caom2:specsys>TOPOCENT</caom2:specsys>
-                    <caom2:bandpassName>z.MP9801</caom2:bandpassName>
-                    <caom2:resolvingPower>4.9</caom2:resolvingPower>
-                  </caom2:energy>
                   <caom2:time>
                     <caom2:axis>
                       <caom2:axis>
@@ -1474,51 +1262,51 @@
     </caom2:plane>
   </caom2:planes>
   <caom2:members>
-    <caom2:observationURI>caom:CFHT/743141</caom2:observationURI>
-    <caom2:observationURI>caom:CFHT/745592</caom2:observationURI>
-    <caom2:observationURI>caom:CFHT/918131</caom2:observationURI>
-    <caom2:observationURI>caom:CFHT/745587</caom2:observationURI>
-    <caom2:observationURI>caom:CFHT/987100</caom2:observationURI>
-    <caom2:observationURI>caom:CFHT/743140</caom2:observationURI>
-    <caom2:observationURI>caom:CFHT/745588</caom2:observationURI>
-    <caom2:observationURI>caom:CFHT/750188</caom2:observationURI>
-    <caom2:observationURI>caom:CFHT/750106</caom2:observationURI>
-    <caom2:observationURI>caom:CFHT/918133</caom2:observationURI>
-    <caom2:observationURI>caom:CFHT/745593</caom2:observationURI>
-    <caom2:observationURI>caom:CFHT/750186</caom2:observationURI>
-    <caom2:observationURI>caom:CFHT/975013</caom2:observationURI>
-    <caom2:observationURI>caom:CFHT/987107</caom2:observationURI>
-    <caom2:observationURI>caom:CFHT/750187</caom2:observationURI>
-    <caom2:observationURI>caom:CFHT/918134</caom2:observationURI>
-    <caom2:observationURI>caom:CFHT/745591</caom2:observationURI>
-    <caom2:observationURI>caom:CFHT/987106</caom2:observationURI>
-    <caom2:observationURI>caom:CFHT/987355</caom2:observationURI>
-    <caom2:observationURI>caom:CFHT/987102</caom2:observationURI>
-    <caom2:observationURI>caom:CFHT/994775</caom2:observationURI>
-    <caom2:observationURI>caom:CFHT/918136</caom2:observationURI>
-    <caom2:observationURI>caom:CFHT/745595</caom2:observationURI>
-    <caom2:observationURI>caom:CFHT/975224</caom2:observationURI>
-    <caom2:observationURI>caom:CFHT/918135</caom2:observationURI>
-    <caom2:observationURI>caom:CFHT/750107</caom2:observationURI>
-    <caom2:observationURI>caom:CFHT/975014</caom2:observationURI>
-    <caom2:observationURI>caom:CFHT/745251</caom2:observationURI>
-    <caom2:observationURI>caom:CFHT/750105</caom2:observationURI>
-    <caom2:observationURI>caom:CFHT/975221</caom2:observationURI>
-    <caom2:observationURI>caom:CFHT/975225</caom2:observationURI>
-    <caom2:observationURI>caom:CFHT/987103</caom2:observationURI>
-    <caom2:observationURI>caom:CFHT/745596</caom2:observationURI>
-    <caom2:observationURI>caom:CFHT/743144</caom2:observationURI>
-    <caom2:observationURI>caom:CFHT/743142</caom2:observationURI>
-    <caom2:observationURI>caom:CFHT/796835</caom2:observationURI>
-    <caom2:observationURI>caom:CFHT/745590</caom2:observationURI>
-    <caom2:observationURI>caom:CFHT/918132</caom2:observationURI>
-    <caom2:observationURI>caom:CFHT/745594</caom2:observationURI>
-    <caom2:observationURI>caom:CFHT/987101</caom2:observationURI>
-    <caom2:observationURI>caom:CFHT/987105</caom2:observationURI>
-    <caom2:observationURI>caom:CFHT/975222</caom2:observationURI>
-    <caom2:observationURI>caom:CFHT/745589</caom2:observationURI>
-    <caom2:observationURI>caom:CFHT/918137</caom2:observationURI>
-    <caom2:observationURI>caom:CFHT/745597</caom2:observationURI>
-    <caom2:observationURI>caom:CFHT/975223</caom2:observationURI>
+    <caom2:observationURI>caom:CFHT/745595p</caom2:observationURI>
+    <caom2:observationURI>caom:CFHT/918133p</caom2:observationURI>
+    <caom2:observationURI>caom:CFHT/918132p</caom2:observationURI>
+    <caom2:observationURI>caom:CFHT/987100p</caom2:observationURI>
+    <caom2:observationURI>caom:CFHT/745593p</caom2:observationURI>
+    <caom2:observationURI>caom:CFHT/987101p</caom2:observationURI>
+    <caom2:observationURI>caom:CFHT/745591p</caom2:observationURI>
+    <caom2:observationURI>caom:CFHT/743140p</caom2:observationURI>
+    <caom2:observationURI>caom:CFHT/745597p</caom2:observationURI>
+    <caom2:observationURI>caom:CFHT/918134p</caom2:observationURI>
+    <caom2:observationURI>caom:CFHT/987103p</caom2:observationURI>
+    <caom2:observationURI>caom:CFHT/987105p</caom2:observationURI>
+    <caom2:observationURI>caom:CFHT/918135p</caom2:observationURI>
+    <caom2:observationURI>caom:CFHT/975222p</caom2:observationURI>
+    <caom2:observationURI>caom:CFHT/745592p</caom2:observationURI>
+    <caom2:observationURI>caom:CFHT/745596p</caom2:observationURI>
+    <caom2:observationURI>caom:CFHT/994775p</caom2:observationURI>
+    <caom2:observationURI>caom:CFHT/987106p</caom2:observationURI>
+    <caom2:observationURI>caom:CFHT/975223p</caom2:observationURI>
+    <caom2:observationURI>caom:CFHT/745587p</caom2:observationURI>
+    <caom2:observationURI>caom:CFHT/987102p</caom2:observationURI>
+    <caom2:observationURI>caom:CFHT/975225p</caom2:observationURI>
+    <caom2:observationURI>caom:CFHT/750105p</caom2:observationURI>
+    <caom2:observationURI>caom:CFHT/975224p</caom2:observationURI>
+    <caom2:observationURI>caom:CFHT/745251p</caom2:observationURI>
+    <caom2:observationURI>caom:CFHT/796835p</caom2:observationURI>
+    <caom2:observationURI>caom:CFHT/918137p</caom2:observationURI>
+    <caom2:observationURI>caom:CFHT/745590p</caom2:observationURI>
+    <caom2:observationURI>caom:CFHT/745588p</caom2:observationURI>
+    <caom2:observationURI>caom:CFHT/750107p</caom2:observationURI>
+    <caom2:observationURI>caom:CFHT/987355p</caom2:observationURI>
+    <caom2:observationURI>caom:CFHT/987107p</caom2:observationURI>
+    <caom2:observationURI>caom:CFHT/750188p</caom2:observationURI>
+    <caom2:observationURI>caom:CFHT/743142p</caom2:observationURI>
+    <caom2:observationURI>caom:CFHT/918136p</caom2:observationURI>
+    <caom2:observationURI>caom:CFHT/918131p</caom2:observationURI>
+    <caom2:observationURI>caom:CFHT/743144p</caom2:observationURI>
+    <caom2:observationURI>caom:CFHT/745589p</caom2:observationURI>
+    <caom2:observationURI>caom:CFHT/743141p</caom2:observationURI>
+    <caom2:observationURI>caom:CFHT/975014p</caom2:observationURI>
+    <caom2:observationURI>caom:CFHT/975013p</caom2:observationURI>
+    <caom2:observationURI>caom:CFHT/975221p</caom2:observationURI>
+    <caom2:observationURI>caom:CFHT/750106p</caom2:observationURI>
+    <caom2:observationURI>caom:CFHT/750186p</caom2:observationURI>
+    <caom2:observationURI>caom:CFHT/745594p</caom2:observationURI>
+    <caom2:observationURI>caom:CFHT/750187p</caom2:observationURI>
   </caom2:members>
 </caom2:Observation>

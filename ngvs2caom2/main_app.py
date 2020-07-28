@@ -194,6 +194,12 @@ class MEGAPRIMEName(mc.StorageName):
                                             compression='')
         self._product_id = MEGAPRIMEName.get_product_id(file_name)
         self._file_name = file_name
+        self._logger = logging.getLogger(__name__)
+        self._logger.debug(self)
+
+    @property
+    def file_name(self):
+        return self._file_name
 
     @property
     def is_catalog(self):
@@ -258,11 +264,13 @@ def accumulate_bp(bp, uri):
     bp.clear('Plane.metaRelease')
     bp.add_fits_attribute('Plane.metaRelease', 'REL_DATE')
 
-    bp.clear('Plane.metrics.magLimit')
-    bp.add_fits_attribute('Plane.metrics.magLimit', 'MAGLIM')
+    if 'weight' not in uri:
+        bp.clear('Plane.metrics.magLimit')
+        bp.add_fits_attribute('Plane.metrics.magLimit', 'MAGLIM')
 
-    bp.clear('Plane.provenance.keywords')
-    bp.add_fits_attribute('Plane.provenance.keywords', 'COMBINET')
+    # NGVS
+    # bp.clear('Plane.provenance.keywords')
+    # bp.add_fits_attribute('Plane.provenance.keywords', 'COMBINET')
 
     bp.clear('Chunk.position.resolution')
     bp.add_fits_attribute('Chunk.position.resolution', 'FINALIQ')
@@ -280,8 +288,13 @@ def accumulate_bp(bp, uri):
     bp.set('Observation.proposal.title',
            'Canada-France-Hawaii Telescope Legacy Survey')
 
-    bp.set('Observation.target.name', 'get_target_name(uri)')
-    bp.set('Observation.target.type', 'field')
+    # NGVS
+    # bp.set('Observation.target.name', 'get_target_name(uri)')
+    bp.clear('Observation.target.name')
+    if 'weight' not in uri:
+        bp.add_fits_attribute('Observation.target.name', 'OBJECT')
+        # NGVS
+        # bp.set('Observation.target.type', 'field')
 
     bp.set('Observation.telescope.name', 'CFHT 3.6m')
     x, y, z = ac.get_geocentric_location('cfht')
@@ -299,7 +312,10 @@ def accumulate_bp(bp, uri):
     bp.set('Plane.provenance.name', 'MEGAPIPE')
     bp.set('Plane.provenance.producer', 'CADC')
     bp.set('Plane.provenance.reference',
-           'http://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/megapipe')
+           'http://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/megapipe/')
+    if 'weight' not in uri:
+        bp.clear('Plane.provenance.lastExecuted')
+        bp.add_fits_attribute('Plane.provenance.lastExecuted', 'DATE')
     # NGVS
     # bp.set('Plane.provenance.project', 'NGVS')
     # bp.set('Plane.provenance.reference',
@@ -308,6 +324,9 @@ def accumulate_bp(bp, uri):
     # bp.set('Plane.provenance.version', 'get_provenance_version(uri)')
 
     bp.set('Artifact.productType', 'get_artifact_product_type(uri)')
+
+    bp.clear('Chunk.position.coordsys')
+    bp.add_fits_attribute('Chunk.position.coordsys', 'RADECSYS')
 
     logging.debug('Done accumulate_bp.')
 
@@ -326,11 +345,9 @@ def update(observation, **kwargs):
 
     if uri is not None:
         f_name = mc.CaomName(uri).file_name
-        logging.error(f'uri is {uri} {f_name}')
         ngvs_name = MEGAPRIMEName(file_name=f_name)
     elif fqn is not None:
         ngvs_name = MEGAPRIMEName(file_name=os.path.basename(fqn))
-        logging.error(f'fqn is {fqn}')
     else:
         raise mc.CadcException(f'Cannot define a MEGAPRIMEName instance for '
                                f'{observation.observation_id}')
@@ -353,14 +370,18 @@ def update(observation, **kwargs):
                     plane, headers, 'HISTORY', 'CFHT',
                     _repair_history_provenance_value,
                     observation.observation_id)
-                logging.error(f'{len(plane.provenance.inputs)} {ngvs_name.file_name}')
-                for artifact in plane.artifacts.values():
-                    for part in artifact.parts.values():
-                        for chunk in part.chunks:
-                            _update_energy(chunk, ngvs_name,
+            for artifact in plane.artifacts.values():
+                if artifact.uri != ngvs_name.file_uri:
+                    continue
+                for part in artifact.parts.values():
+                    for chunk in part.chunks:
+                        if _informative_uri(ngvs_name.file_name):
+                            _update_energy(chunk, headers, ngvs_name,
                                            observation.observation_id)
-                            # _update_time(chunk, headers[0], plane.provenance,
-                            #              observation.observation_id)
+                        if not ngvs_name.is_catalog:
+                            _update_time(chunk, headers,
+                                         observation.observation_id,
+                                         artifact.uri)
 
             # elif MEGAPRIMEName.is_catalog(ngvs_name.file_name):
             #     _finish_catalog_plane(observation, plane)
@@ -372,6 +393,9 @@ def update(observation, **kwargs):
     observation.meta_release = max_meta_release
     if observation.environment is not None:
         observation.environment.seeing = min_seeing
+    if observation.target is not None:
+        observation.target.moving = False
+        observation.target.standard = False
     cc.update_observation_members(observation)
     logging.debug('Done update.')
     return observation
@@ -439,11 +463,12 @@ def _finish_catalog_plane(observation, plane):
     logging.debug('Done _finish_catalog_plane.')
 
 
-def _update_energy(chunk, ngvs_name, obs_id):
+def _update_energy(chunk, headers, ngvs_name, obs_id):
     logging.debug(f'Begin _update_energy for {obs_id}')
     filter_name = ngvs_name.filter_name
     filter_md = filter_cache.get_svo_filter(INSTRUMENT, filter_name)
     cc.build_chunk_energy_range(chunk, filter_name, filter_md)
+    chunk.energy.bandpass_name = _get_keyword(headers, 'FILTER')
     logging.debug(f'End _update_energy.')
 
 
@@ -474,45 +499,74 @@ def _update_observation_metadata(obs, headers, ngvs_name, uri):
             obs, [headers[1]], blueprint, uri, ngvs_name.product_id)
 
 
-def _update_time(chunk, header, provenance, obs_id):
-    logging.debug(f'Begin _update_time for {obs_id}')
+def _update_time(chunk, headers, obs_id, uri):
+    logging.debug(f'Begin _update_time for {obs_id} {uri}')
 
-    if chunk is not None and provenance is not None:
-        # bounds = ctor
-        config = mc.Config()
-        config.get_executors()
-        subject = mc.define_subject(config)
-        client = CAOM2RepoClient(
-            subject, config.logging_level, config.resource_id)
-        metrics = mc.Metrics(config)
-        bounds = CoordBounds1D()
-        min_date = 0
-        max_date = sys.float_info.max
-        exposure = 0
-        for entry in provenance.inputs:
-            ip_obs_id, ip_product_id = mc.CaomName.decompose_provenance_input(
-                entry)
-            ip_obs = mc.repo_get(client, COLLECTION, ip_obs_id, metrics)
-            ip_plane = ip_obs.planes.get(ip_product_id)
-            if (ip_plane is not None and ip_plane.time is not None and
-                    ip_plane.time.bounds is not None):
-                bounds.samples.append(CoordRange1D(ip_plane.time.bounds.lower,
-                                                   ip_plane.time.bounds.upper))
-                min_date = min(ip_plane.time.bounds.lower, min_date)
-                max_date = max(ip_plane.time.bounds.upper, max_date)
-                exposure += ip_plane.time.exposure
-        axis = Axis(ctype='TIME', cunit='mjd')
+    if chunk is not None:
+        axis = Axis(ctype='TIME', cunit='d')
+        from caom2 import CoordFunction1D, RefCoord
+        date1 = _get_keyword(headers, 'DATE1')
+        exp_time = _get_keyword(headers, 'EXPTIME')
+        logging.error(f'date1 {date1} exptime {exp_time} {uri}')
+        result = ac.get_datetime(date1)
+        ref_coord = RefCoord(pix=0.5, val=result.value)
+        time_function = CoordFunction1D(naxis=1,
+                                        delta=mc.convert_to_days(exp_time),
+                                        ref_coord=ref_coord)
         time_axis = CoordAxis1D(axis=axis,
                                 error=None,
                                 range=None,
-                                bounds=bounds,
-                                function=None)
-        temporal_wcs = TemporalWCS(axis=time_axis, timesys=None, trefpos=None,
-                                   mjdref=None, exposure=exposure,
+                                bounds=None,
+                                function=time_function)
+        temporal_wcs = TemporalWCS(axis=time_axis,
+                                   timesys='UTC',
+                                   trefpos=None,
+                                   mjdref=None,
+                                   exposure=mc.to_float(exp_time),
                                    resolution=None)
-        chunk.time_axis = 3
         chunk.time = temporal_wcs
     logging.debug(f'End _update_time.')
+
+# NGVS
+# def _update_time(chunk, header, provenance, obs_id):
+#     logging.debug(f'Begin _update_time for {obs_id}')
+#
+#     if chunk is not None and provenance is not None:
+#         # bounds = ctor
+#         config = mc.Config()
+#         config.get_executors()
+#         subject = mc.define_subject(config)
+#         client = CAOM2RepoClient(
+#             subject, config.logging_level, config.resource_id)
+#         metrics = mc.Metrics(config)
+#         bounds = CoordBounds1D()
+#         min_date = 0
+#         max_date = sys.float_info.max
+#         exposure = 0
+#         for entry in provenance.inputs:
+#             ip_obs_id, ip_product_id = mc.CaomName.decompose_provenance_input(
+#                 entry)
+#             ip_obs = mc.repo_get(client, COLLECTION, ip_obs_id, metrics)
+#             ip_plane = ip_obs.planes.get(ip_product_id)
+#             if (ip_plane is not None and ip_plane.time is not None and
+#                     ip_plane.time.bounds is not None):
+#                 bounds.samples.append(CoordRange1D(ip_plane.time.bounds.lower,
+#                                                    ip_plane.time.bounds.upper))
+#                 min_date = min(ip_plane.time.bounds.lower, min_date)
+#                 max_date = max(ip_plane.time.bounds.upper, max_date)
+#                 exposure += ip_plane.time.exposure
+#         axis = Axis(ctype='TIME', cunit='mjd')
+#         time_axis = CoordAxis1D(axis=axis,
+#                                 error=None,
+#                                 range=None,
+#                                 bounds=bounds,
+#                                 function=None)
+#         temporal_wcs = TemporalWCS(axis=time_axis, timesys=None, trefpos=None,
+#                                    mjdref=None, exposure=exposure,
+#                                    resolution=None)
+#         chunk.time_axis = 3
+#         chunk.time = temporal_wcs
+#     logging.debug(f'End _update_time.')
 
 
 def _repair_history_provenance_value(value, obs_id):
@@ -528,10 +582,8 @@ def _repair_history_provenance_value(value, obs_id):
         for entry in value:
             if 'input image' in entry:
                 temp = str(entry).split('input image ')
-                # TODO TODO TODO - this is the old archive product id and
-                #  plane id - whoops, when it comes to un-intended consequences
                 prov_prod_id = temp[1].split(';')[0].replace('.fits', '')
-                prov_obs_id = prov_prod_id[:-1]
+                prov_obs_id = prov_prod_id
                 # 0 - observation
                 # 1 - plane
                 results.append([prov_obs_id, prov_prod_id])
