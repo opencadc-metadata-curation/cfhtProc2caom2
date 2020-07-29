@@ -71,41 +71,84 @@ import sys
 
 from mock import patch
 
-from ngvs2caom2 import NGVSName, to_caom2, APPLICATION, COLLECTION
+from caom2pipe import manage_composable as mc
+from ngvs2caom2 import main_app, storage_names
+
+LOOKUP = {'W3+2-3': ['W3+2-3.G.cat',
+                     'W3+2-3.G.fits.header',
+                     'W3+2-3.G.weight.fits.header',
+                     'W3+2-3.I.cat',
+                     'W3+2-3.I.fits.header',
+                     'W3+2-3.I.weight.fits.header',
+                     'W3+2-3.I2.cat',
+                     'W3+2-3.I2.fits.header',
+                     'W3+2-3.I2.weight.fits.header',
+                     'W3+2-3.R.cat',
+                     'W3+2-3.R.fits.header',
+                     'W3+2-3.R.weight.fits.header',
+                     'W3+2-3.U.cat',
+                     'W3+2-3.U.fits.header',
+                     'W3+2-3.U.weight.fits.header',
+                     'W3+2-3.Z.cat',
+                     'W3+2-3.Z.fits.header',
+                     'W3+2-3.Z.weight.fits.header'],
+          'NGVS+0+0': ['NGVS+0+0.l.i.Mg002.fits.header',
+                       'NGVS+0+0.l.i.Mg002.cat',
+                       'NGVS+0+0.l.i.Mg002.fits.mask.rd.reg',
+                       'NGVS+0+0.l.i.Mg002.flag.fits.fz',
+                       'NGVS+0+0.l.i.Mg002.sig.fits.header',
+                       'NGVS+0+0.l.i.Mg002.weight.fits.fz.header',
+                       'NGVS+0+0_l_i_Mg002.psf',
+                       'psfex.NGVS+0+0.l.i.Mg002.psf']}
 
 
 def test_is_valid():
-    test_subject = NGVSName(file_name='NGVS+0+0.l.i.Mg002.fits.header')
-    assert test_subject.is_valid()
-    assert test_subject.obs_id == 'NGVS+0+0.l.i.Mg002', 'wrong obs id'
-    assert test_subject.product_id == 'l.i.Mg002', 'wrong product id'
+    for key, value in LOOKUP.items():
+        for entry in value:
+            sn = storage_names.get_storage_name(entry)
+            assert sn.is_valid()
+            assert sn.obs_id == key, f'wrong obs id {sn.obs_id}'
+
+            if sn.obs_id == 'W3+2-3':
+                assert sn.product_id in [
+                    'W3+2-3.G',
+                    'W3+2-3.I',
+                    'W3+2-3.I2',
+                    'W3+2-3.R',
+                    'W3+2-3.U',
+                    'W3+2-3.Z']
+            else:
+                assert sn.product_id == 'l.i.Mg002'
 
 
 @patch('ngvs2caom2.main_app.gen_proc')
 def test_build_uris(gen_proc_mock):
-    f1 = 'l.i.Mg002/ad:NGVS/NGVS+0+0.l.i.Mg002.sig.fits'
-    f2 = 'l.i.Mg002/ad:NGVS/NGVS+0+0.l.i.Mg002.fits'
-    f3 = 'l.i.Mg002/ad:NGVS/NGVS+0+0.l.i.Mg002.weight.fits.fz'
-    f4 = 'l.i.Mg002/ad:NGVS/NGVS+0+0.l.i.Mg002.fits.mask.rd.reg'
-    f5 = 'catalog/ad:NGVS/NGVS+0+0.l.i.Mg002.cat'
-    f6 = 'l.i.Mg002/ad:NGVS/NGVS+0+0.l.i.Mg002.flag.fits.fz'
-    f_names = [f1, f2, f3, f4, f5, f6]
-    test_local = ' '.join(ii.split('/')[2] for ii in f_names)
-    test_lineage = ' '.join(ii for ii in f_names)
+    test_obs_id = 'NGVS+0+0'
+    test_lineage = get_lineage(test_obs_id)
     test_name = 'consistent_local_lineage'
-    sys.argv = (f'{APPLICATION} --no_validate --local {test_local} '
-                f'--observation {COLLECTION} {test_name} --lineage '
+    sys.argv = (f'{main_app.APPLICATION} '
+                f'--observation COLLECTION {test_name} --lineage '
                 f'{test_lineage}').split()
-    to_caom2()
+    main_app.to_caom2()
     assert gen_proc_mock.called, 'should be called'
     args, kwargs = gen_proc_mock.call_args
-    import logging
-    logging.error(args)
     generic_parser = vars(args[0]).get('use_generic_parser')
     assert generic_parser is not None, 'expect a generic_parser'
-    assert f4.split('/', 1)[1] in generic_parser, 'no mask'
-    assert f6.split('/', 1)[1] in generic_parser, 'no flag'
-    assert f2.split('/', 1)[1] not in generic_parser, 'expect product'
-    assert f3.split('/', 1)[1] not in generic_parser, 'expect weight'
-    assert f1.split('/', 1)[1] not in generic_parser, 'expect sig'
-    assert f5.split('/', 1)[1] not in generic_parser, 'expect cat'
+    generic_parser_text = ' '.join(ii for ii in generic_parser)
+    logging.error(generic_parser)
+    assert LOOKUP[test_obs_id][0] not in generic_parser_text, 'expect product'
+    assert LOOKUP[test_obs_id][5] not in generic_parser_text, 'expect weight'
+    assert LOOKUP[test_obs_id][4] not in generic_parser_text, 'expect sig'
+    assert LOOKUP[test_obs_id][1] not in generic_parser_text, 'expect cat'
+    assert LOOKUP[test_obs_id][2] in generic_parser_text, 'no mask'
+    assert LOOKUP[test_obs_id][3] in generic_parser_text, 'no flag'
+
+
+def get_lineage(obs_id):
+    result = ''
+    for ii in LOOKUP[obs_id]:
+        storage_name = storage_names.get_storage_name(ii)
+        fits = mc.get_lineage(storage_name.archive, storage_name.product_id,
+                              f'{ii.replace(".header", "")}')
+        result = f'{result} {fits}'
+    return result

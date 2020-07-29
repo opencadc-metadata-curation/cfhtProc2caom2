@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <caom2:Observation xmlns:caom2="http://www.opencadc.org/caom2/xml/v2.3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="caom2:CompositeObservation" caom2:id="00000000-0000-0000-bca8-015bfa476101" caom2:lastModified="2017-11-16T21:06:12.613" caom2:maxLastModified="2019-11-06T15:58:55.081" caom2:metaChecksum="md5:e3d13fc828868dd5693432143aa56184" caom2:accMetaChecksum="md5:261e5430a2707f14b0bb9829a33e0ac7">
-  <caom2:collection>CFHTMEGAPIPE</caom2:collection>
+  <caom2:collection>COLLECTION</caom2:collection>
   <caom2:observationID>W3+2-3</caom2:observationID>
   <caom2:metaRelease>2009-08-15T19:32:42.000</caom2:metaRelease>
   <caom2:algorithm>

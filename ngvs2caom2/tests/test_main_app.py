@@ -74,45 +74,20 @@ import sys
 from mock import patch
 
 from astropy.io.votable import parse_single_table
-from ngvs2caom2 import main_app, APPLICATION, COLLECTION, NGVSName
-from ngvs2caom2 import ARCHIVE, MEGAPRIMEName, M_COLLECTION
+from ngvs2caom2 import main_app, storage_names
 from caom2pipe import manage_composable as mc
+
+import test_storage_name
 
 THIS_DIR = os.path.dirname(os.path.realpath(__file__))
 TEST_DATA_DIR = os.path.join(THIS_DIR, 'data')
 PLUGIN = os.path.join(os.path.dirname(THIS_DIR), 'main_app.py')
 
-# LOOKUP = {'NGVS+0+0.l.i.Mg002': ['NGVS+0+0.l.i.Mg002.fits.header',
-#                                  'NGVS+0+0.l.i.Mg002.cat',
-#                                  'NGVS+0+0.l.i.Mg002.fits.mask.rd.reg',
-#                                  'NGVS+0+0.l.i.Mg002.flag.fits.fz',
-#                                  'NGVS+0+0.l.i.Mg002.sig.fits.header',
-#                                  'NGVS+0+0.l.i.Mg002.weight.fits.fz.header']}
-
-LOOKUP = {'W3+2-3': ['W3+2-3.G.cat',
-                     'W3+2-3.G.fits.header',
-                     'W3+2-3.G.weight.fits.header',
-                     'W3+2-3.I.cat',
-                     'W3+2-3.I.fits.header',
-                     'W3+2-3.I.weight.fits.header',
-                     'W3+2-3.I2.cat',
-                     'W3+2-3.I2.fits.header',
-                     'W3+2-3.I2.weight.fits.header',
-                     'W3+2-3.R.cat',
-                     'W3+2-3.R.fits.header',
-                     'W3+2-3.R.weight.fits.header',
-                     'W3+2-3.U.cat',
-                     'W3+2-3.U.fits.header',
-                     'W3+2-3.U.weight.fits.header',
-                     'W3+2-3.Z.cat',
-                     'W3+2-3.Z.fits.header',
-                     'W3+2-3.Z.weight.fits.header']}
-
 
 def pytest_generate_tests(metafunc):
     obs_id_list = []
-    for ii in LOOKUP:
-        obs_id_list.append(ii)
+    for key, value in test_storage_name.LOOKUP.items():
+        obs_id_list.append(key)
     metafunc.parametrize('test_name', obs_id_list)
 
 
@@ -128,10 +103,10 @@ def test_main_app(data_client_mock, repo_get_mock, vo_mock, test_name):
     vo_mock.side_effect = _vo_mock
 
     sys.argv = \
-        (f'{APPLICATION} --no_validate --local {_get_local(test_name)} '
-         f'--observation {M_COLLECTION} {test_name} -o {output_file} '
-         f'--plugin {PLUGIN} --module {PLUGIN} --lineage '
-         f'{_get_lineage(test_name)}').split()
+        (f'{main_app.APPLICATION} --no_validate --local {_get_local(test_name)} '
+         f'--observation COLLECTION {test_name} '
+         f'-o {output_file} --plugin {PLUGIN} --module {PLUGIN} --lineage '
+         f'{test_storage_name.get_lineage(test_name)}').split()
     print(sys.argv)
     main_app.to_caom2()
 
@@ -148,25 +123,16 @@ def get_file_info(archive, file_id):
         return {'type': 'application/fits'}
 
 
-def _get_lineage(obs_id):
-    result = ''
-    for ii in LOOKUP[obs_id]:
-        storage_name = MEGAPRIMEName(file_name=ii)
-        fits = mc.get_lineage(storage_name.archive, storage_name.product_id,
-                              f'{ii.replace(".header", "")}')
-        result = f'{result} {fits}'
-    return result
-
-
 def _get_local(obs_id):
     result = ''
-    for ii in LOOKUP[obs_id]:
+    for ii in test_storage_name.LOOKUP[obs_id]:
         result = f'{result} {TEST_DATA_DIR}/{ii}'
     return result
 
 
-def _repo_read_mock():
-    return None
+def _repo_read_mock(ignore1, ignore2, obs_id, ignore4):
+    fqn = f'{TEST_DATA_DIR}/{obs_id}.xml'
+    return mc.read_obs_from_file(fqn)
 
 
 def _vo_mock(url):

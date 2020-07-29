@@ -71,12 +71,13 @@ import logging
 import sys
 import traceback
 
+from caom2pipe import name_builder_composable as nbc
 from caom2pipe import run_composable as rc
-from ngvs2caom2 import APPLICATION, builder
+from ngvs2caom2 import main_app, storage_names
 
 
-meta_visitors = []
-data_visitors = []
+META_VISITORS = []
+DATA_VISITORS = []
 
 
 def _run():
@@ -86,11 +87,11 @@ def _run():
     :return 0 if successful, -1 if there's any sort of failure. Return status
         is used by airflow for task instance management and reporting.
     """
-    name_builder = builder.NGVSNameBuilder()
+    name_builder = nbc.FileNameBuilder(storage_names.get_storage_name)
     return rc.run_by_todo(config=None, name_builder=name_builder,
-                          command_name=APPLICATION,
-                          meta_visitors=meta_visitors, 
-                          data_visitors=data_visitors, chooser=None)
+                          command_name=main_app.APPLICATION,
+                          meta_visitors=META_VISITORS,
+                          data_visitors=DATA_VISITORS)
 
 
 def run():
@@ -109,11 +110,11 @@ def _run_state():
     """Uses a state file with a timestamp to control which entries will be
     processed.
     """
-    name_builder = builder.NGVSNameBuilder()
+    name_builder = nbc.FileNameBuilder(storage_names.get_storage_name)
     return rc.run_by_state(config=None, name_builder=name_builder,
-                           command_name=APPLICATION, 
-                           bookmark_name=None, meta_visitors=meta_visitors,
-                           data_visitors=data_visitors, end_time=None,
+                           command_name=main_app.APPLICATION,
+                           bookmark_name=None, meta_visitors=META_VISITORS,
+                           data_visitors=DATA_VISITORS, end_time=None,
                            source=None, chooser=None)
 
 
