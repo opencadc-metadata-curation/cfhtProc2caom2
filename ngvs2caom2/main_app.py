@@ -493,17 +493,19 @@ def _update_ngvs_time(chunk, provenance, obs_id):
         for entry in provenance.inputs:
             ip_obs_id, ip_product_id = mc.CaomName.decompose_provenance_input(
                 entry.uri)
+            logging.info(f'Retrieving provenance metadata for {ip_obs_id}.')
             ip_obs = mc.repo_get(client, sn.NGVS_COLLECTION, ip_obs_id,
                                  metrics)
-            ip_plane = ip_obs.planes.get(ip_product_id)
-            if (ip_plane is not None and ip_plane.time is not None and
-                    ip_plane.time.bounds is not None):
-                bounds.samples.append(CoordRange1D(
-                    RefCoord(pix=0.5, val=ip_plane.time.bounds.lower),
-                    RefCoord(pix=1.5, val=ip_plane.time.bounds.upper)))
-                min_date = min(ip_plane.time.bounds.lower, min_date)
-                max_date = max(ip_plane.time.bounds.upper, max_date)
-                exposure += ip_plane.time.exposure
+            if ip_obs is not None:
+                ip_plane = ip_obs.planes.get(ip_product_id)
+                if (ip_plane is not None and ip_plane.time is not None and
+                        ip_plane.time.bounds is not None):
+                    bounds.samples.append(CoordRange1D(
+                        RefCoord(pix=0.5, val=ip_plane.time.bounds.lower),
+                        RefCoord(pix=1.5, val=ip_plane.time.bounds.upper)))
+                    min_date = min(ip_plane.time.bounds.lower, min_date)
+                    max_date = max(ip_plane.time.bounds.upper, max_date)
+                    exposure += ip_plane.time.exposure
         axis = Axis(ctype='TIME', cunit='mjd')
         time_axis = CoordAxis1D(axis=axis,
                                 error=None,
