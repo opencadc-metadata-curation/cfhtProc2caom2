@@ -583,7 +583,6 @@ def to_caom2():
     # are processed with a generic parser - do this because fits2caom2
     # manages parser creation based on file names, mostly
     #
-    # the
     uris, generic_uris = _filter_args(args)
     blueprints = _build_blueprints(uris)
     if len(generic_uris) > 0:
