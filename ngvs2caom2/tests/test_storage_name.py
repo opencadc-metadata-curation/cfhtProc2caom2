@@ -99,7 +99,8 @@ LOOKUP = {'W3+2-3': ['W3+2-3.G.cat',
                        'NGVS+0+0.l.i.Mg002.sig.fits.header',
                        'NGVS+0+0.l.i.Mg002.weight.fits.fz.header',
                        'NGVS+0+0_l_i_Mg002.psf',
-                       'psfex.NGVS+0+0.l.i.Mg002.psf']}
+                       'psfex.NGVS+0+0.l.i.Mg002.psf',
+                       'vos:ngvs/masks/NGVS+0+0.l.i.Mg002.flag.fits.fz']}
 
 
 def test_is_valid():
@@ -135,20 +136,18 @@ def test_build_uris(gen_proc_mock):
     generic_parser = vars(args[0]).get('use_generic_parser')
     assert generic_parser is not None, 'expect a generic_parser'
     generic_parser_text = ' '.join(ii for ii in generic_parser)
-    logging.error(generic_parser)
     assert LOOKUP[test_obs_id][0] not in generic_parser_text, 'expect product'
     assert LOOKUP[test_obs_id][5] not in generic_parser_text, 'expect weight'
     assert LOOKUP[test_obs_id][4] not in generic_parser_text, 'expect sig'
     assert LOOKUP[test_obs_id][1] not in generic_parser_text, 'expect cat'
     assert LOOKUP[test_obs_id][2] in generic_parser_text, 'no mask'
     assert LOOKUP[test_obs_id][3] in generic_parser_text, 'no flag'
+    assert LOOKUP[test_obs_id][8] in generic_parser_text, 'no vos flag'
 
 
 def get_lineage(obs_id):
     result = ''
     for ii in LOOKUP[obs_id]:
         storage_name = storage_names.get_storage_name(ii)
-        fits = mc.get_lineage(storage_name.archive, storage_name.product_id,
-                              f'{ii.replace(".header", "")}')
-        result = f'{result} {fits}'
+        result = f'{result} {storage_name.lineage}'
     return result

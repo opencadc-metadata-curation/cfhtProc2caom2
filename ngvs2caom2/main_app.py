@@ -140,7 +140,6 @@ def accumulate_bp(bp, uri):
 
     bp.set('Plane.calibrationLevel', 'get_calibration_level(uri)')
     bp.set('Plane.dataProductType', 'get_data_product_type(uri)')
-    bp.set('Plane.provenance.name', 'MEGAPIPE')
     bp.set('Plane.provenance.producer', 'CADC')
 
     bp.set('Artifact.productType', 'get_artifact_product_type(uri)')
@@ -170,7 +169,7 @@ def update(observation, **kwargs):
     uri = kwargs.get('uri')
 
     if uri is not None:
-        storage_name = sn.get_storage_name_from_uri(uri)
+        storage_name = sn.get_storage_name(uri)
     elif fqn is not None:
         storage_name = sn.get_storage_name(os.path.basename(fqn))
     else:
@@ -263,6 +262,7 @@ def _accumulate_mp_bp(bp, storage_name):
     bp.clear('Plane.dataRelease')
     bp.add_fits_attribute('Plane.dataRelease', 'REL_DATE')
 
+    bp.set('Plane.provenance.name', 'MegaPipe')
     bp.set('Plane.provenance.reference',
            'http://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/megapipe/')
 
@@ -290,8 +290,6 @@ def _accumulate_ngvs_bp(bp, storage_name):
     # if _informative_uri(uri):
     # make sure information set from header keywords is only set for
     # the fits files where it's accessible
-    # bp.clear('Observation.metaRelease')
-    # bp.add_fits_attribute('Observation.metaRelease', 'REL_DATE')
     bp.set('Observation.metaRelease', '2022-01-01 00:00:00')
 
     bp.set('Observation.proposal.pi', 'Laura Ferrarese')
@@ -306,6 +304,11 @@ def _accumulate_ngvs_bp(bp, storage_name):
 
     bp.set('Plane.dataRelease', '2022-01-01T00:00:00')
     bp.set('Plane.metaRelease', '2022-01-01T00:00:00')
+    # SGw 28-07-20
+    # The last 4 characters in the ID column (l128 vs g002 vs g004) refer to
+    # variation in the pipeline. If they could be captured as
+    # plane.provenance.name = MegaPipe_g004 that would be great.
+    bp.set('Plane.provenance.name', f'MegaPipe_{storage_name.version}')
     bp.clear('Plane.provenance.keywords')
     bp.add_fits_attribute('Plane.provenance.keywords', 'COMBINET')
     bp.set('Plane.provenance.project', 'NGVS')
@@ -339,7 +342,7 @@ def get_artifact_product_type(uri):
 
 def get_calibration_level(uri):
     result = CalibrationLevel.PRODUCT
-    storage_name = sn.get_storage_name_from_uri(uri)
+    storage_name = sn.get_storage_name(uri)
     if storage_name.is_catalog:
         result = CalibrationLevel.ANALYSIS_PRODUCT
     return result
@@ -347,7 +350,7 @@ def get_calibration_level(uri):
 
 def get_data_product_type(uri):
     result = DataProductType.IMAGE
-    storage_name = sn.get_storage_name_from_uri(uri)
+    storage_name = sn.get_storage_name(uri)
     if storage_name.is_catalog:
         result = DataProductType.CATALOG
     return result
@@ -360,7 +363,7 @@ def get_ngvs_bandpass_name(uri):
         'r': 'r.MP9602',
         'u': 'u.MP9302',
         'z': 'z.MP9901'}
-    storage_name = sn.get_storage_name_from_uri(uri)
+    storage_name = sn.get_storage_name(uri)
     result = None
     if storage_name.filter_name is not None:
         result = reverse_filter_lookup.get(storage_name.filter_name)
@@ -375,7 +378,7 @@ def get_proposal_id(header):
 
 
 def get_provenance_version(uri):
-    storage_name = sn.get_storage_name_from_uri(uri)
+    storage_name = sn.get_storage_name(uri)
     return storage_name.version
 
 
@@ -566,7 +569,7 @@ def _filter_args(args):
         for ii in args.lineage:
             uri = ii.split('/', 1)[1]
             result.append(uri)
-            storage_name = sn.get_storage_name_from_uri(uri)
+            storage_name = sn.get_storage_name(uri)
             if not storage_name.use_metadata:
                 uris_for_later.append(uri)
     else:

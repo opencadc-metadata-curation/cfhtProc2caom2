@@ -71,9 +71,8 @@ import logging
 from caom2pipe import manage_composable as mc
 
 
-__all__ = ['get_storage_name', 'get_storage_name_from_uri', 'is_ngvs',
-           'MEGAPRIMEName', 'MP_ARCHIVE', 'MP_COLLECTION', 'NGVSName',
-           'NGVS_ARCHIVE', 'NGVS_COLLECTION']
+__all__ = ['get_storage_name', 'is_ngvs', 'MEGAPRIMEName', 'MP_ARCHIVE',
+           'MP_COLLECTION', 'NGVSName', 'NGVS_ARCHIVE', 'NGVS_COLLECTION']
 
 NGVS_COLLECTION = 'NGVS'
 NGVS_ARCHIVE = 'NGVS'
@@ -83,18 +82,25 @@ MP_ARCHIVE = 'CFHTSG'
 
 def get_storage_name(file_name):
     """
-    :return: The StorageName extension class for the URI
+    :param file_name may be a file name or a URI. The parameter has to be
+        called 'file_name', because there's a constructor call that
+        expects that.
+    :return: The StorageName extension class for the entry
     """
-    if is_ngvs(file_name):
-        result = NGVSName(file_name=file_name)
+    uri = None
+    temp = file_name
+    scheme = 'ad'
+    if '/' in file_name:
+        # parameter is a URI, adjust accordingly
+        scheme, archive, f_name = mc.decompose_uri(file_name)
+        temp = f_name
+        uri = file_name
+    if is_ngvs(temp):
+        result = NGVSName(file_name=temp, scheme=scheme)
     else:
-        result = MEGAPRIMEName(file_name=file_name)
+        result = MEGAPRIMEName(file_name=temp)
+    result.file_uri = uri
     return result
-
-
-def get_storage_name_from_uri(uri):
-    f_name = mc.CaomName(uri).file_name
-    return get_storage_name(f_name)
 
 
 def is_ngvs(file_name):
@@ -105,15 +111,28 @@ class CFHTAdvancedProduct(mc.StorageName):
 
     NAME_PATTERN = '*'
 
-    def __init__(self, obs_id, file_name, collection, archive):
+    def __init__(self, obs_id, file_name, collection, archive, scheme):
         super(CFHTAdvancedProduct, self).__init__(
             obs_id, collection=collection, archive=archive,
             collection_pattern=CFHTAdvancedProduct.NAME_PATTERN,
-            fname_on_disk=file_name, compression='')
+            fname_on_disk=file_name, compression='', scheme=scheme)
         self._file_name = file_name
+        self._file_uri = None
+
     @property
     def file_name(self):
         return self._file_name
+
+    @property
+    def file_uri(self):
+        result = self._file_uri
+        if result is None:
+            result = super(CFHTAdvancedProduct, self).file_uri
+        return result
+
+    @file_uri.setter
+    def file_uri(self, value):
+        self._file_uri = value
 
     @property
     def product_id(self):
@@ -161,11 +180,11 @@ class NGVSName(CFHTAdvancedProduct):
     NGVS+0+0.l.i.Mg002.flag.fits.fz
     """
 
-    def __init__(self, file_name):
+    def __init__(self, file_name, scheme):
         self.fname_in_ad = file_name
         obs_id = NGVSName.get_obs_id(file_name)
         super(NGVSName, self).__init__(
-            obs_id, file_name, NGVS_COLLECTION, NGVS_ARCHIVE)
+            obs_id, file_name, NGVS_COLLECTION, NGVS_ARCHIVE, scheme)
         self._product_id = NGVSName.get_product_id(file_name)
         self._logger = logging.getLogger(__name__)
         self._logger.debug(self)
@@ -231,7 +250,7 @@ class MEGAPRIMEName(CFHTAdvancedProduct):
     def __init__(self, file_name):
         obs_id = MEGAPRIMEName.get_obs_id(file_name)
         super(MEGAPRIMEName, self).__init__(
-            obs_id, file_name, MP_COLLECTION, MP_ARCHIVE)
+            obs_id, file_name, MP_COLLECTION, MP_ARCHIVE, scheme='ad')
         self._product_id = MEGAPRIMEName.get_product_id(file_name)
         self._logger = logging.getLogger(__name__)
         self._logger.debug(self)
