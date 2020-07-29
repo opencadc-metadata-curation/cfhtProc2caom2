@@ -150,4 +150,5 @@ def get_lineage(obs_id):
     for ii in LOOKUP[obs_id]:
         storage_name = storage_names.get_storage_name(ii)
         result = f'{result} {storage_name.lineage}'
+    result = result.replace('.header', '')
     return result
