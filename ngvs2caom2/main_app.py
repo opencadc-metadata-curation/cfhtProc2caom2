@@ -494,8 +494,7 @@ def _update_ngvs_time(chunk, provenance, obs_id):
             ip_obs_id, ip_product_id = mc.CaomName.decompose_provenance_input(
                 entry.uri)
             logging.info(f'Retrieving provenance metadata for {ip_obs_id}.')
-            ip_obs = mc.repo_get(client, sn.NGVS_COLLECTION, ip_obs_id,
-                                 metrics)
+            ip_obs = mc.repo_get(client, 'CFHT', ip_obs_id, metrics)
             if ip_obs is not None:
                 ip_plane = ip_obs.planes.get(ip_product_id)
                 if (ip_plane is not None and ip_plane.time is not None and
