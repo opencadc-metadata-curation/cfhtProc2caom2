@@ -505,7 +505,7 @@ def _update_ngvs_time(chunk, provenance, obs_id):
                     min_date = min(ip_plane.time.bounds.lower, min_date)
                     max_date = max(ip_plane.time.bounds.upper, max_date)
                     exposure += ip_plane.time.exposure
-        axis = Axis(ctype='TIME', cunit='mjd')
+        axis = Axis(ctype='TIME', cunit='d')
         time_axis = CoordAxis1D(axis=axis,
                                 error=None,
                                 range=None,
