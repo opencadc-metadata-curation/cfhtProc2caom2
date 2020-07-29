@@ -484,7 +484,7 @@ def _update_ngvs_time(chunk, provenance, obs_id):
         config.get_executors()
         subject = mc.define_subject(config)
         client = CAOM2RepoClient(
-            subject, config.logging_level, config.resource_id)
+            subject, config.logging_level, 'ivo://cadc.nrc.ca/ams')
         metrics = mc.Metrics(config)
         bounds = CoordBounds1D()
         min_date = 0
