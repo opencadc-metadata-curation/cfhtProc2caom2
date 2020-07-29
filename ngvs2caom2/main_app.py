@@ -513,7 +513,7 @@ def _update_ngvs_time(chunk, provenance, obs_id):
                                 bounds=bounds,
                                 function=None)
         temporal_wcs = TemporalWCS(axis=time_axis, timesys=None, trefpos=None,
-                                   mjdref=None, exposure=exposure,
+                                   mjdref=None, exposure=mc.to_float(exposure),
                                    resolution=None)
         chunk.time = temporal_wcs
     logging.debug(f'End _update_ngvs_time.')
