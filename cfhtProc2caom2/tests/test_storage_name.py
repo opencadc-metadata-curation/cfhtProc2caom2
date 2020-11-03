@@ -72,7 +72,7 @@ import sys
 from mock import patch
 
 from caom2pipe import manage_composable as mc
-from ngvs2caom2 import main_app, storage_names
+from cfhtProc2caom2 import main_app, storage_names
 
 LOOKUP = {'W3+2-3': ['W3+2-3.G.cat',
                      'W3+2-3.G.fits.header',
@@ -122,7 +122,7 @@ def test_is_valid():
                 assert sn.product_id == 'l.i.Mg002'
 
 
-@patch('ngvs2caom2.main_app.gen_proc')
+@patch('cfhtProc2caom2.main_app.gen_proc')
 def test_build_uris(gen_proc_mock):
     test_obs_id = 'NGVS+0+0'
     test_lineage = get_lineage(test_obs_id)

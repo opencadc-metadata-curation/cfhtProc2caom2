@@ -71,7 +71,7 @@ import logging
 from caom2pipe import manage_composable as mc
 
 
-__all__ = ['get_storage_name', 'is_ngvs', 'MEGAPRIMEName', 'MP_ARCHIVE',
+__all__ = ['get_storage_name', 'is_ngvs', 'MEGAPIPEName', 'MP_ARCHIVE',
            'MP_COLLECTION', 'NGVSName', 'NGVS_ARCHIVE', 'NGVS_COLLECTION']
 
 NGVS_COLLECTION = 'NGVS'
@@ -98,7 +98,7 @@ def get_storage_name(file_name):
     if is_ngvs(temp):
         result = NGVSName(file_name=temp, scheme=scheme)
     else:
-        result = MEGAPRIMEName(file_name=temp)
+        result = MEGAPIPEName(file_name=temp)
     result.file_uri = uri
     return result
 
@@ -242,16 +242,16 @@ class NGVSName(CFHTAdvancedProduct):
         return '.weight' in name
 
 
-class MEGAPRIMEName(CFHTAdvancedProduct):
+class MEGAPIPEName(CFHTAdvancedProduct):
     """
     Compression is varied, so handle it on a case-by-case basis.
     """
 
     def __init__(self, file_name):
-        obs_id = MEGAPRIMEName.get_obs_id(file_name)
-        super(MEGAPRIMEName, self).__init__(
+        obs_id = MEGAPIPEName.get_obs_id(file_name)
+        super(MEGAPIPEName, self).__init__(
             obs_id, file_name, MP_COLLECTION, MP_ARCHIVE, scheme='ad')
-        self._product_id = MEGAPRIMEName.get_product_id(file_name)
+        self._product_id = MEGAPIPEName.get_product_id(file_name)
         self._logger = logging.getLogger(__name__)
         self._logger.debug(self)
 

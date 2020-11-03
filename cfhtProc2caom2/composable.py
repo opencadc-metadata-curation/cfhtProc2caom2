@@ -73,7 +73,7 @@ import traceback
 
 from caom2pipe import name_builder_composable as nbc
 from caom2pipe import run_composable as rc
-from ngvs2caom2 import main_app, storage_names
+from cfhtProc2caom2 import main_app, storage_names
 
 
 META_VISITORS = []
