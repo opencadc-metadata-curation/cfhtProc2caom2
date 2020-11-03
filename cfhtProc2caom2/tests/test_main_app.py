@@ -74,7 +74,7 @@ import sys
 from mock import patch
 
 from astropy.io.votable import parse_single_table
-from ngvs2caom2 import main_app, storage_names
+from cfhtProc2caom2 import main_app, storage_names
 from caom2pipe import manage_composable as mc
 
 import test_storage_name
@@ -96,15 +96,16 @@ def pytest_generate_tests(metafunc):
 @patch('caom2utils.fits2caom2.CadcDataClient')
 def test_main_app(data_client_mock, repo_get_mock, vo_mock, test_name):
     basename = os.path.basename(test_name)
-    output_file = f'{TEST_DATA_DIR}/{basename}.actual.xml'
-    obs_path = f'{TEST_DATA_DIR}/{basename}.expected.xml'
+    working_dir = get_work_dir(test_name)
+    output_file = f'{TEST_DATA_DIR}/{working_dir}/{basename}.actual.xml'
+    obs_path = f'{TEST_DATA_DIR}/{working_dir}/{basename}.expected.xml'
     data_client_mock.return_value.get_file_info.side_effect = get_file_info
     repo_get_mock.side_effect = _repo_read_mock
     vo_mock.side_effect = _vo_mock
 
     sys.argv = \
-        (f'{main_app.APPLICATION} --no_validate --local {_get_local(test_name)} '
-         f'--observation COLLECTION {test_name} '
+        (f'{main_app.APPLICATION} --no_validate --local '
+         f'{_get_local(test_name)} --observation COLLECTION {test_name} '
          f'-o {output_file} --plugin {PLUGIN} --module {PLUGIN} --lineage '
          f'{test_storage_name.get_lineage(test_name)}').split()
     print(sys.argv)
@@ -114,6 +115,13 @@ def test_main_app(data_client_mock, repo_get_mock, vo_mock, test_name):
     if compare_result is not None:
         raise AssertionError(compare_result)
     # assert False  # cause I want to see logging messages
+
+
+def get_work_dir(value):
+    working_dir = 'megaprime'
+    if 'NGVS' in value:
+        working_dir = 'ngvs'
+    return working_dir
 
 
 def get_file_info(archive, file_id):
@@ -126,12 +134,14 @@ def get_file_info(archive, file_id):
 def _get_local(obs_id):
     result = ''
     for ii in test_storage_name.LOOKUP[obs_id]:
-        result = f'{result} {TEST_DATA_DIR}/{ii}'
+        work_dir = get_work_dir(ii)
+        result = f'{result} {TEST_DATA_DIR}/{work_dir}/{ii}'
     return result
 
 
 def _repo_read_mock(ignore1, ignore2, obs_id, ignore4):
-    fqn = f'{TEST_DATA_DIR}/{obs_id}.xml'
+    work_dir = get_work_dir(obs_id)
+    fqn = f'{TEST_DATA_DIR}/{work_dir}/{obs_id}.xml'
     return mc.read_obs_from_file(fqn)
 
 
