@@ -123,7 +123,7 @@
           <caom2:parts/>
         </caom2:artifact>
         <caom2:artifact caom2:id="00000000-0000-0000-a938-3c91f55f84bb" caom2:lastModified="2018-10-16T21:21:47.633" caom2:maxLastModified="2018-10-16T21:21:47.633" caom2:metaChecksum="md5:def9a23c48cc988981f40779b9fd7936" caom2:accMetaChecksum="md5:79b9f47168ccd404b9b0e1fe1956634c">
-          <caom2:uri>ad:CFHTSG/MegaPipe.358.122.G.MP9401.weight.fits.fz</caom2:uri>
+          <caom2:uri>ad:CFHTSG/MegaPipe.358.122.G.MP9401.weight.fits</caom2:uri>
           <caom2:productType>weight</caom2:productType>
           <caom2:releaseType>data</caom2:releaseType>
           <caom2:contentType>application/fits</caom2:contentType>
@@ -159,7 +159,6 @@
           <caom2:productType>science</caom2:productType>
           <caom2:releaseType>data</caom2:releaseType>
           <caom2:contentType>application/fits</caom2:contentType>
-          <caom2:contentLength>400006080</caom2:contentLength>
           <caom2:contentChecksum>md5:6d20aee49133caa9cdafe892f28dc3b8</caom2:contentChecksum>
           <caom2:parts>
             <caom2:part caom2:id="00000000-0000-0000-8033-5ea0e21cc56f" caom2:lastModified="2018-10-16T21:21:47.633" caom2:maxLastModified="2018-10-16T21:21:47.633" caom2:metaChecksum="md5:ed796c40228db02cacaaba79bf2ffc01" caom2:accMetaChecksum="md5:9a6360719458bfb25dd5a553d1a85f77">
@@ -233,16 +232,14 @@
           <caom2:productType>preview</caom2:productType>
           <caom2:releaseType>data</caom2:releaseType>
           <caom2:contentType>image/gif</caom2:contentType>
-          <caom2:contentLength>77861</caom2:contentLength>
           <caom2:contentChecksum>md5:2e50fe609863d866b6e5d9249c5739f4</caom2:contentChecksum>
           <caom2:parts/>
         </caom2:artifact>
         <caom2:artifact caom2:id="00000000-0000-0000-90b4-5efed841c0fd" caom2:lastModified="2018-10-16T21:21:47.633" caom2:maxLastModified="2018-10-16T21:21:47.633" caom2:metaChecksum="md5:dd0c8444cf597cff3335a7b5823fe971" caom2:accMetaChecksum="md5:4f6a44a315f8e783663215a95817722d">
-          <caom2:uri>ad:CFHTSG/MegaPipe.358.122.GRI.MP9605.weight.fits.fz</caom2:uri>
+          <caom2:uri>ad:CFHTSG/MegaPipe.358.122.GRI.MP9605.weight.fits</caom2:uri>
           <caom2:productType>weight</caom2:productType>
           <caom2:releaseType>data</caom2:releaseType>
           <caom2:contentType>application/fits</caom2:contentType>
-          <caom2:contentLength>36872640</caom2:contentLength>
           <caom2:contentChecksum>md5:c2581a99a17bb093692d75bf29eab5a9</caom2:contentChecksum>
           <caom2:parts/>
         </caom2:artifact>
@@ -274,7 +271,6 @@
           <caom2:productType>science</caom2:productType>
           <caom2:releaseType>data</caom2:releaseType>
           <caom2:contentType>application/fits</caom2:contentType>
-          <caom2:contentLength>400006080</caom2:contentLength>
           <caom2:contentChecksum>md5:c6e6666f410e8a30522d6a2812d4a502</caom2:contentChecksum>
           <caom2:parts>
             <caom2:part caom2:id="00000000-0000-0000-baa9-6c3fd6e4f4cb" caom2:lastModified="2018-10-16T21:21:47.633" caom2:maxLastModified="2018-10-16T21:21:47.633" caom2:metaChecksum="md5:d6e7818eb7e30fc4c6dd01420a8e7083" caom2:accMetaChecksum="md5:7588ebd04543c76566c10c6d858d9eb1">
@@ -348,16 +344,14 @@
           <caom2:productType>preview</caom2:productType>
           <caom2:releaseType>data</caom2:releaseType>
           <caom2:contentType>image/gif</caom2:contentType>
-          <caom2:contentLength>9142</caom2:contentLength>
           <caom2:contentChecksum>md5:211e1e02126b475c7f3cf3bbea32c5d9</caom2:contentChecksum>
           <caom2:parts/>
         </caom2:artifact>
         <caom2:artifact caom2:id="00000000-0000-0000-80ec-18ce18f26f30" caom2:lastModified="2018-10-16T21:21:47.633" caom2:maxLastModified="2018-10-16T21:21:47.633" caom2:metaChecksum="md5:2b9f963df2848b489d8bf6c21cf5e851" caom2:accMetaChecksum="md5:c213df9ed4ac7c93e83430b5b56e8180">
-          <caom2:uri>ad:CFHTSG/MegaPipe.358.122.I.MP9702.weight.fits.fz</caom2:uri>
+          <caom2:uri>ad:CFHTSG/MegaPipe.358.122.I.MP9702.weight.fits</caom2:uri>
           <caom2:productType>weight</caom2:productType>
           <caom2:releaseType>data</caom2:releaseType>
           <caom2:contentType>application/fits</caom2:contentType>
-          <caom2:contentLength>10229760</caom2:contentLength>
           <caom2:contentChecksum>md5:e09628919e2ff2c5e34952e9cbc0c7f6</caom2:contentChecksum>
           <caom2:parts/>
         </caom2:artifact>
@@ -464,16 +458,14 @@
           <caom2:productType>preview</caom2:productType>
           <caom2:releaseType>data</caom2:releaseType>
           <caom2:contentType>image/gif</caom2:contentType>
-          <caom2:contentLength>10123</caom2:contentLength>
           <caom2:contentChecksum>md5:bf86126afa42be0c824c06fff3c6b8ee</caom2:contentChecksum>
           <caom2:parts/>
         </caom2:artifact>
         <caom2:artifact caom2:id="00000000-0000-0000-9a58-c416d6541ec3" caom2:lastModified="2018-10-16T21:21:47.633" caom2:maxLastModified="2018-10-16T21:21:47.633" caom2:metaChecksum="md5:3d26c2f2e90b73b0295888131d2e53ab" caom2:accMetaChecksum="md5:dbf949c0a5179abc654e90b72f8930bd">
-          <caom2:uri>ad:CFHTSG/MegaPipe.358.122.R.MP9601.weight.fits.fz</caom2:uri>
+          <caom2:uri>ad:CFHTSG/MegaPipe.358.122.R.MP9601.weight.fits</caom2:uri>
           <caom2:productType>weight</caom2:productType>
           <caom2:releaseType>data</caom2:releaseType>
           <caom2:contentType>application/fits</caom2:contentType>
-          <caom2:contentLength>10393920</caom2:contentLength>
           <caom2:contentChecksum>md5:e51737e40bf6b328f2c3d335d748176b</caom2:contentChecksum>
           <caom2:parts/>
         </caom2:artifact>
