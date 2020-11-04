@@ -96,6 +96,7 @@ def pytest_generate_tests(metafunc):
 @patch('caom2utils.fits2caom2.CadcDataClient')
 def test_main_app(data_client_mock, repo_get_mock, vo_mock, test_name):
     basename = os.path.basename(test_name)
+    storage_name = storage_names.get_storage_name(basename)
     working_dir = get_work_dir(test_name)
     output_file = f'{TEST_DATA_DIR}/{working_dir}/{basename}.actual.xml'
     obs_path = f'{TEST_DATA_DIR}/{working_dir}/{basename}.expected.xml'
@@ -105,9 +106,9 @@ def test_main_app(data_client_mock, repo_get_mock, vo_mock, test_name):
 
     sys.argv = \
         (f'{main_app.APPLICATION} --no_validate --local '
-         f'{_get_local(test_name)} --observation COLLECTION {test_name} '
-         f'-o {output_file} --plugin {PLUGIN} --module {PLUGIN} --lineage '
-         f'{test_storage_name.get_lineage(test_name)}').split()
+         f'{_get_local(test_name)} --observation {storage_name.collection} '
+         f'{test_name} -o {output_file} --plugin {PLUGIN} --module {PLUGIN} '
+         f'--lineage {test_storage_name.get_lineage(test_name)}').split()
     print(sys.argv)
     main_app.to_caom2()
 
@@ -127,6 +128,8 @@ def get_work_dir(value):
 def get_file_info(archive, file_id):
     if '.cat' in file_id:
         return {'type': 'text/plain'}
+    elif '.gif' in file_id:
+        return {'type': 'image/gif'}
     else:
         return {'type': 'application/fits'}
 

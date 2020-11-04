@@ -96,9 +96,9 @@ def get_storage_name(file_name):
         temp = f_name
         uri = file_name
     if is_ngvs(temp):
-        result = NGVSName(file_name=temp, scheme=scheme)
+        result = NGVSName(file_name=temp, scheme=scheme, entry=file_name)
     else:
-        result = MEGAPIPEName(file_name=temp)
+        result = MEGAPIPEName(file_name=temp, entry=file_name)
     result.file_uri = uri
     return result
 
@@ -111,11 +111,12 @@ class CFHTAdvancedProduct(mc.StorageName):
 
     NAME_PATTERN = '*'
 
-    def __init__(self, obs_id, file_name, collection, archive, scheme):
+    def __init__(self, obs_id, file_name, collection, archive, scheme, entry):
         super(CFHTAdvancedProduct, self).__init__(
             obs_id, collection=collection, archive=archive,
             collection_pattern=CFHTAdvancedProduct.NAME_PATTERN,
-            fname_on_disk=file_name, compression='', scheme=scheme)
+            fname_on_disk=file_name, compression='', scheme=scheme,
+            entry=entry)
         self._file_name = file_name
         self._file_uri = None
 
@@ -152,7 +153,7 @@ class CFHTAdvancedProduct(mc.StorageName):
     @property
     def use_metadata(self):
         return not ('mask.rd.reg' in self._file_name or
-                    '.flag' in self._file_name)
+                    '.flag' in self._file_name or '.gif' in self._file_name)
 
 
 class NGVSName(CFHTAdvancedProduct):
@@ -180,11 +181,12 @@ class NGVSName(CFHTAdvancedProduct):
     NGVS+0+0.l.i.Mg002.flag.fits.fz
     """
 
-    def __init__(self, file_name, scheme):
+    def __init__(self, file_name, scheme, entry):
         self.fname_in_ad = file_name
         obs_id = NGVSName.get_obs_id(file_name)
         super(NGVSName, self).__init__(
-            obs_id, file_name, NGVS_COLLECTION, NGVS_ARCHIVE, scheme)
+            obs_id, file_name, NGVS_COLLECTION, NGVS_ARCHIVE, scheme,
+            entry=entry)
         self._product_id = NGVSName.get_product_id(file_name)
         self._logger = logging.getLogger(__name__)
         self._logger.debug(self)
@@ -245,32 +247,58 @@ class NGVSName(CFHTAdvancedProduct):
 class MEGAPIPEName(CFHTAdvancedProduct):
     """
     Compression is varied, so handle it on a case-by-case basis.
+
+    This example from the story CADC-8590:
+    https://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/caom2ui/view?ID=
+        ivo%3A%2F%2Fcadc.nrc.ca%2FCFHTMEGAPIPE%3FMegaPipe.358.122
+
+    Is NOT like this example (from the previous excursion into building a
+    data engineering pipeline for MegaPrime):
+    http://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/caom2ui/view?ID=
+        ivo%3A%2F%2Fcadc.nrc.ca%2FCFHTMEGAPIPE%3FW3%2B2-3
+
+    SGw 03-11-20
+    The first observation is from MegaPipe 2.0. The naming convention changed
+    between the observations. There is a possibility that I may create data
+    with another naming convention, but the G024.234.... and W+1+1
+    conventions are definitely a thing of the past. There probably won’t be a
+    time when an observation like W3+2-3 will need to be re-created.
     """
 
-    def __init__(self, file_name):
+    def __init__(self, file_name, entry):
         obs_id = MEGAPIPEName.get_obs_id(file_name)
         super(MEGAPIPEName, self).__init__(
-            obs_id, file_name, MP_COLLECTION, MP_ARCHIVE, scheme='ad')
+            obs_id, file_name, MP_COLLECTION, MP_ARCHIVE, scheme='ad',
+            entry=entry)
         self._product_id = MEGAPIPEName.get_product_id(file_name)
         self._logger = logging.getLogger(__name__)
         self._logger.debug(self)
 
+    def __str__(self):
+        return f'{super(MEGAPIPEName, self).__str__()} {self.filter_name}'
+
     @property
     def filter_name(self):
         bits = self._file_name.split('.')
-        return bits[1]
+        return bits[3]
+
+    @property
+    def is_preview(self):
+        return '.gif' in self._file_name
 
     @staticmethod
     def get_obs_id(f_name):
         bits = f_name.split('.')
-        return bits[0]
+        return f'{bits[0]}.{bits[1]}.{bits[2]}'
 
     @staticmethod
     def get_product_id(f_name):
-        bits = f_name.split('.')
-        return f'{bits[0]}.{bits[1]}'
+        result = MEGAPIPEName.remove_extensions(f_name)
+        if 'weight' in result:
+            result = result.replace('.weight', '')
+        return result
 
     @staticmethod
     def remove_extensions(f_name):
         return f_name.replace('.fits', '').replace('.fz', '').replace(
-            '.header', '')
+            '.header', '').replace('.gif', '')
