@@ -153,7 +153,8 @@ class CFHTAdvancedProduct(mc.StorageName):
     @property
     def use_metadata(self):
         return not ('mask.rd.reg' in self._file_name or
-                    '.flag' in self._file_name or '.gif' in self._file_name)
+                    '.flag' in self._file_name or '.gif' in self._file_name or
+                    '.weight' in self._file_name)
 
 
 class NGVSName(CFHTAdvancedProduct):

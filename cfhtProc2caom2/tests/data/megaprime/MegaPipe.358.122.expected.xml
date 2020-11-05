@@ -28,9 +28,9 @@
       <caom2:dataProductType>image</caom2:dataProductType>
       <caom2:calibrationLevel>3</caom2:calibrationLevel>
       <caom2:provenance>
-        <caom2:name>SWarp</caom2:name>
-        <caom2:version>2.38.0</caom2:version>
-        <caom2:producer>2010-2012 IAP/CNRS/UPMC</caom2:producer>
+        <caom2:name>MEGAPIPE</caom2:name>
+        <caom2:version>2.0</caom2:version>
+        <caom2:producer>CADC</caom2:producer>
         <caom2:reference>http://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/en/megapipe/</caom2:reference>
         <caom2:lastExecuted>2018-03-20T14:21:53.000</caom2:lastExecuted>
         <caom2:inputs>
@@ -139,9 +139,9 @@
       <caom2:dataProductType>image</caom2:dataProductType>
       <caom2:calibrationLevel>3</caom2:calibrationLevel>
       <caom2:provenance>
-        <caom2:name>SWarp</caom2:name>
-        <caom2:version>2.38.0</caom2:version>
-        <caom2:producer>2010-2012 IAP/CNRS/UPMC</caom2:producer>
+        <caom2:name>MEGAPIPE</caom2:name>
+        <caom2:version>2.0</caom2:version>
+        <caom2:producer>CADC</caom2:producer>
         <caom2:reference>http://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/en/megapipe/</caom2:reference>
         <caom2:lastExecuted>2018-09-29T09:57:36.000</caom2:lastExecuted>
         <caom2:inputs>
@@ -252,14 +252,14 @@
       <caom2:dataProductType>image</caom2:dataProductType>
       <caom2:calibrationLevel>3</caom2:calibrationLevel>
       <caom2:provenance>
-        <caom2:name>SWarp</caom2:name>
-        <caom2:version>2.38.0</caom2:version>
-        <caom2:producer>2010-2012 IAP/CNRS/UPMC</caom2:producer>
+        <caom2:name>MEGAPIPE</caom2:name>
+        <caom2:version>2.0</caom2:version>
+        <caom2:producer>CADC</caom2:producer>
         <caom2:reference>http://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/en/megapipe/</caom2:reference>
         <caom2:lastExecuted>2018-03-21T17:22:22.000</caom2:lastExecuted>
         <caom2:inputs>
-          <caom2:planeURI>caom:CFHT/1624480/1624480p</caom2:planeURI>
           <caom2:planeURI>caom:CFHT/1624481/1624481p</caom2:planeURI>
+          <caom2:planeURI>caom:CFHT/1624480/1624480p</caom2:planeURI>
         </caom2:inputs>
       </caom2:provenance>
       <caom2:metrics>
@@ -364,15 +364,15 @@
       <caom2:dataProductType>image</caom2:dataProductType>
       <caom2:calibrationLevel>3</caom2:calibrationLevel>
       <caom2:provenance>
-        <caom2:name>SWarp</caom2:name>
-        <caom2:version>2.38.0</caom2:version>
-        <caom2:producer>2010-2012 IAP/CNRS/UPMC</caom2:producer>
+        <caom2:name>MEGAPIPE</caom2:name>
+        <caom2:version>2.0</caom2:version>
+        <caom2:producer>CADC</caom2:producer>
         <caom2:reference>http://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/en/megapipe/</caom2:reference>
         <caom2:lastExecuted>2018-03-22T18:09:06.000</caom2:lastExecuted>
         <caom2:inputs>
           <caom2:planeURI>caom:CFHT/1625070/1625070p</caom2:planeURI>
-          <caom2:planeURI>caom:CFHT/1625069/1625069p</caom2:planeURI>
           <caom2:planeURI>caom:CFHT/1625076/1625076p</caom2:planeURI>
+          <caom2:planeURI>caom:CFHT/1625069/1625069p</caom2:planeURI>
           <caom2:planeURI>caom:CFHT/1625077/1625077p</caom2:planeURI>
         </caom2:inputs>
       </caom2:provenance>
@@ -474,14 +474,14 @@
   </caom2:planes>
   <caom2:members>
     <caom2:observationURI>caom:CFHT/1624480</caom2:observationURI>
-    <caom2:observationURI>caom:CFHT/1625076</caom2:observationURI>
-    <caom2:observationURI>caom:CFHT/1625069</caom2:observationURI>
     <caom2:observationURI>caom:CFHT/2105340</caom2:observationURI>
     <caom2:observationURI>caom:CFHT/2105339</caom2:observationURI>
     <caom2:observationURI>caom:CFHT/1624481</caom2:observationURI>
-    <caom2:observationURI>caom:CFHT/1625063</caom2:observationURI>
-    <caom2:observationURI>caom:CFHT/2105341</caom2:observationURI>
     <caom2:observationURI>caom:CFHT/1625070</caom2:observationURI>
     <caom2:observationURI>caom:CFHT/1625077</caom2:observationURI>
+    <caom2:observationURI>caom:CFHT/2105341</caom2:observationURI>
+    <caom2:observationURI>caom:CFHT/1625069</caom2:observationURI>
+    <caom2:observationURI>caom:CFHT/1625063</caom2:observationURI>
+    <caom2:observationURI>caom:CFHT/1625076</caom2:observationURI>
   </caom2:members>
 </caom2:Observation>

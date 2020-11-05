@@ -213,16 +213,8 @@ def update(observation, **kwargs):
                 plane, max_meta_release, headers)
             if plane.product_id != storage_name.product_id:
                 continue
-            # logging.error(f'{len(plane.provenance.inputs)} '
-            #               f'{plane.product_id}')
             min_seeing = _minimize(min_seeing,
                                    _get_keyword(headers, 'FINALIQ'))
-            if (_informative_uri(storage_name.file_name) and
-                    plane.provenance is not None):
-                cc.append_plane_provenance_single(
-                    plane, headers, 'HISTORY', 'CFHT',
-                    _repair_history_provenance_value,
-                    observation.observation_id)
             for artifact in plane.artifacts.values():
                 if artifact.uri != storage_name.file_uri:
                     continue
@@ -241,24 +233,20 @@ def update(observation, **kwargs):
                             else:
                                 if chunk.position is not None:
                                     chunk.position.resolution = None
-                            #     _update_mp_time(chunk, headers,
-                            #                     observation.observation_id,
-                            #                     artifact.uri)
-            # elif MEGAPIPEName.is_catalog(storage_name.file_name):
-            #     _finish_catalog_plane(observation, plane)
+            if (_informative_uri(storage_name.file_name) and
+                    plane.provenance is not None):
+                cc.append_plane_provenance_single(
+                    plane, headers, 'HISTORY', 'CFHT',
+                    _repair_history_provenance_value,
+                    observation.observation_id)
 
-        # if storage_name.is_weight:
-        #     _update_observation_metadata(observation, headers, storage_name, uri)
-
+    observation.meta_release = max_meta_release
     if observation.environment is not None:
         observation.environment.seeing = min_seeing
     if (observation.target is not None and
             storage_name.collection == sn.MP_COLLECTION):
-        observation.meta_release = max_meta_release
         observation.target.standard = False
     cc.update_observation_members(observation)
-    # for plane in observation.planes.values():
-    #     logging.error(f'{storage_name.file_name} {len(plane.provenance.inputs)} {plane.product_id}')
     logging.debug('Done update.')
     return observation
 
@@ -285,21 +273,13 @@ def _accumulate_mp_bp(bp, storage_name):
     bp.clear('Chunk.position.resolution')
     bp.add_fits_attribute('Chunk.position.resolution', 'FINALIQ')
 
-    # bp.set('Observation.proposal.id', 'CFHTLS')
-    # bp.set('Observation.proposal.project', 'CFHTLS')
-    # bp.set('Observation.proposal.title',
-    #        'Canada-France-Hawaii Telescope Legacy Survey')
-
     bp.clear('Plane.dataRelease')
     bp.add_fits_attribute('Plane.dataRelease', 'DATE')
     bp.add_fits_attribute('Plane.dataRelease', 'REL_DATE')
 
-    bp.clear('Plane.provenance.name')
-    bp.add_fits_attribute('Plane.provenance.name', 'SOFTNAME')
-    bp.clear('Plane.provenance.producer')
-    bp.add_fits_attribute('Plane.provenance.producer', 'SOFTAUTH')
-    bp.clear('Plane.provenance.version')
-    bp.add_fits_attribute('Plane.provenance.version', 'SOFTVERS')
+    bp.set('Plane.provenance.name', 'MEGAPIPE')
+    bp.set('Plane.provenance.producer', 'CADC')
+    bp.set('Plane.provenance.version', '2.0')
     bp.set('Plane.provenance.reference',
            'http://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/en/megapipe/')
 
@@ -456,7 +436,7 @@ def _update_energy(chunk, headers, storage_name, obs_id):
     cc.build_chunk_energy_range(chunk, filter_name, filter_md)
     if storage_name.collection == sn.MP_COLLECTION:
         temp = _get_keyword(headers, 'FILTER')
-        # an attempt to keep the number of filter names lower
+        # an attempt to keep the number of unique filter names lower
         chunk.energy.bandpass_name = CAOM_FILTER_REPAIR_LOOKUP.get(temp)
     chunk.energy.resolving_power = None
     logging.debug(f'End _update_energy.')
@@ -487,35 +467,6 @@ def _update_observation_metadata(obs, headers, ngvs_name, uri):
         accumulate_bp(blueprint, uri)
         tc.add_headers_to_obs_by_blueprint(
             obs, [headers[1]], blueprint, uri, ngvs_name.product_id)
-
-
-# There's no time information in the test record?
-# def _update_mp_time(chunk, headers, obs_id, uri):
-#     logging.debug(f'Begin _update_mp_time for {obs_id} {uri}')
-#
-#     if chunk is not None:
-#         axis = Axis(ctype='TIME', cunit='d')
-#         date1 = _get_keyword(headers, 'DATE1')
-#         exp_time = _get_keyword(headers, 'EXPTIME')
-#         logging.error(f'date1 {date1} exptime {exp_time} {uri}')
-#         result = ac.get_datetime(date1)
-#         ref_coord = RefCoord(pix=0.5, val=result.value)
-#         time_function = CoordFunction1D(naxis=1,
-#                                         delta=mc.convert_to_days(exp_time),
-#                                         ref_coord=ref_coord)
-#         time_axis = CoordAxis1D(axis=axis,
-#                                 error=None,
-#                                 range=None,
-#                                 bounds=None,
-#                                 function=time_function)
-#         temporal_wcs = TemporalWCS(axis=time_axis,
-#                                    timesys='UTC',
-#                                    trefpos=None,
-#                                    mjdref=None,
-#                                    exposure=mc.to_float(exp_time),
-#                                    resolution=None)
-#         chunk.time = temporal_wcs
-#     logging.debug(f'End _update_mp_time.')
 
 
 def _update_ngvs_time(chunk, provenance, obs_id):
