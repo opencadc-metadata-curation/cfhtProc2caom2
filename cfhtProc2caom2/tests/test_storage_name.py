@@ -97,7 +97,7 @@ LOOKUP = {
 
 def test_single():
     test_entry = 'MegaPipe.358.122.G.MP9401.fits'
-    test_subject = storage_names.get_storage_name(test_entry)
+    test_subject = storage_names.get_storage_name(test_entry, test_entry)
     assert test_subject.obs_id == 'MegaPipe.358.122', 'wrong obs id'
     assert test_subject.product_id == 'MegaPipe.358.122.G.MP9401', \
         'wrong product id'
@@ -107,7 +107,7 @@ def test_single():
 def test_is_valid():
     for key, value in LOOKUP.items():
         for entry in value:
-            sn = storage_names.get_storage_name(entry)
+            sn = storage_names.get_storage_name(entry, entry)
             assert sn.is_valid()
             assert sn.obs_id == key, f'wrong obs id {sn.obs_id}'
 
@@ -138,7 +138,7 @@ def test_build_uris(gen_proc_mock):
 def get_lineage(obs_id):
     result = ''
     for ii in LOOKUP[obs_id]:
-        storage_name = storage_names.get_storage_name(ii)
+        storage_name = storage_names.get_storage_name(ii, ii)
         result = f'{result} {storage_name.lineage}'
     result = result.replace('.header', '')
     return result

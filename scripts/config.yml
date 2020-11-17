@@ -13,16 +13,16 @@ resource_id: ivo://cadc.nrc.ca/ams
 # - sc2tap queries entries on sc2.canfar.net
 # - ams/ queries production entries
 # tap_id: ivo://cadc.nrc.ca/sc2tap
-tap_id: ivo://cadc.nrc.ca/ams/
+tap_id: ivo://cadc.nrc.ca/ams/cfht
 # file that contains the list of entries to process
 todo_file_name: todo.txt
 # values True False
 # when True, the application will look for files with
 # .fits, .gz, .json endings as defining the work to be 
 # done.
-use_local_files: True
+use_local_files: False
 # values DEBUG INFO WARNING ERROR
-logging_level: DEBUG
+logging_level: INFO
 # values True False
 log_to_file: True
 # fully qualified name for a directory to write log files

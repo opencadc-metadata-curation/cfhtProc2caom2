@@ -99,6 +99,7 @@ def test_main_app(
         vo_client, data_client_mock, repo_get_mock, vo_mock, test_name):
     obs_id = os.path.basename(test_name)
     storage_name = storage_names.get_storage_name(
+        test_storage_name.LOOKUP[obs_id][0],
         test_storage_name.LOOKUP[obs_id][0])
     working_dir = get_work_dir(test_name)
     output_file = f'{TEST_DATA_DIR}/{working_dir}/{obs_id}.actual.xml'

@@ -80,11 +80,12 @@ MP_COLLECTION = 'CFHTMEGAPIPE'
 MP_ARCHIVE = 'CFHTSG'
 
 
-def get_storage_name(file_name):
+def get_storage_name(file_name, entry):
     """
     :param file_name may be a file name or a URI. The parameter has to be
         called 'file_name', because there's a constructor call that
         expects that.
+    :param entry str what came from the todo.txt file
     :return: The StorageName extension class for the entry
     """
     uri = None
@@ -96,9 +97,9 @@ def get_storage_name(file_name):
         temp = f_name
         uri = file_name
     if is_ngvs(temp):
-        result = NGVSName(file_name=temp, scheme=scheme, entry=file_name)
+        result = NGVSName(file_name=temp, scheme=scheme, entry=entry)
     else:
-        result = MEGAPIPEName(file_name=temp, entry=file_name)
+        result = MEGAPIPEName(file_name=temp, entry=entry)
     result.file_uri = uri
     return result
 

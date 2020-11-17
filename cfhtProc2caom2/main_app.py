@@ -133,7 +133,7 @@ def accumulate_bp(bp, uri):
     bp.configure_position_axes((1, 2))
 
     scheme, archive, file_name = mc.decompose_uri(uri)
-    storage_name = sn.get_storage_name(file_name)
+    storage_name = sn.get_storage_name(file_name, file_name)
     if sn.is_ngvs(uri):
         _accumulate_ngvs_bp(bp, storage_name)
     else:
@@ -185,9 +185,10 @@ def update(observation, **kwargs):
     uri = kwargs.get('uri')
 
     if uri is not None:
-        storage_name = sn.get_storage_name(uri)
+        storage_name = sn.get_storage_name(uri, uri)
     elif fqn is not None:
-        storage_name = sn.get_storage_name(os.path.basename(fqn))
+        temp = os.path.basename(fqn)
+        storage_name = sn.get_storage_name(temp, temp)
     else:
         raise mc.CadcException(f'Cannot define a MEGAPIPEName instance for '
                                f'{observation.observation_id}')
@@ -369,7 +370,7 @@ def get_artifact_product_type(uri):
 
 def get_calibration_level(uri):
     result = CalibrationLevel.PRODUCT
-    storage_name = sn.get_storage_name(uri)
+    storage_name = sn.get_storage_name(uri, uri)
     if storage_name.is_catalog:
         result = CalibrationLevel.ANALYSIS_PRODUCT
     return result
@@ -377,7 +378,7 @@ def get_calibration_level(uri):
 
 def get_data_product_type(uri):
     result = DataProductType.IMAGE
-    storage_name = sn.get_storage_name(uri)
+    storage_name = sn.get_storage_name(uri, uri)
     if storage_name.is_catalog:
         result = DataProductType.CATALOG
     return result
@@ -390,7 +391,7 @@ def get_ngvs_bandpass_name(uri):
         'r': 'r.MP9602',
         'u': 'u.MP9302',
         'z': 'z.MP9901'}
-    storage_name = sn.get_storage_name(uri)
+    storage_name = sn.get_storage_name(uri, uri)
     result = None
     if storage_name.filter_name is not None:
         result = reverse_filter_lookup.get(storage_name.filter_name)
@@ -405,7 +406,7 @@ def get_proposal_id(header):
 
 
 def get_provenance_version(uri):
-    storage_name = sn.get_storage_name(uri)
+    storage_name = sn.get_storage_name(uri, uri)
     return storage_name.version
 
 
@@ -588,7 +589,7 @@ def _filter_args(args):
         for ii in args.lineage:
             uri = ii.split('/', 1)[1]
             result.append(uri)
-            storage_name = sn.get_storage_name(uri)
+            storage_name = sn.get_storage_name(uri, uri)
             if not storage_name.use_metadata:
                 uris_for_later.append(uri)
     else:
