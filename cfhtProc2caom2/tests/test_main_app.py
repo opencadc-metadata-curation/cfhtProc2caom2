@@ -95,11 +95,12 @@ def pytest_generate_tests(metafunc):
 @patch('caom2pipe.manage_composable.repo_get')
 @patch('caom2utils.fits2caom2.CadcDataClient')
 def test_main_app(data_client_mock, repo_get_mock, vo_mock, test_name):
-    basename = os.path.basename(test_name)
-    storage_name = storage_names.get_storage_name(basename)
+    obs_id = os.path.basename(test_name)
+    storage_name = storage_names.get_storage_name(
+        test_storage_name.LOOKUP[obs_id][0])
     working_dir = get_work_dir(test_name)
-    output_file = f'{TEST_DATA_DIR}/{working_dir}/{basename}.actual.xml'
-    obs_path = f'{TEST_DATA_DIR}/{working_dir}/{basename}.expected.xml'
+    output_file = f'{TEST_DATA_DIR}/{working_dir}/{obs_id}.actual.xml'
+    obs_path = f'{TEST_DATA_DIR}/{working_dir}/{obs_id}.expected.xml'
     data_client_mock.return_value.get_file_info.side_effect = get_file_info
     repo_get_mock.side_effect = _repo_read_mock
     vo_mock.side_effect = _vo_mock

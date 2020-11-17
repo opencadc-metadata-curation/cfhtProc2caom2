@@ -71,28 +71,9 @@ import sys
 
 from mock import patch
 
-from caom2pipe import manage_composable as mc
 from cfhtProc2caom2 import main_app, storage_names
 
 LOOKUP = {
-    # 'W3+2-3': ['W3+2-3.G.cat',
-    #                  'W3+2-3.G.fits.header',
-    #                  'W3+2-3.G.weight.fits.header',
-    #                  'W3+2-3.I.cat',
-    #                  'W3+2-3.I.fits.header',
-    #                  'W3+2-3.I.weight.fits.header',
-    #                  'W3+2-3.I2.cat',
-    #                  'W3+2-3.I2.fits.header',
-    #                  'W3+2-3.I2.weight.fits.header',
-    #                  'W3+2-3.R.cat',
-    #                  'W3+2-3.R.fits.header',
-    #                  'W3+2-3.R.weight.fits.header',
-    #                  'W3+2-3.U.cat',
-    #                  'W3+2-3.U.fits.header',
-    #                  'W3+2-3.U.weight.fits.header',
-    #                  'W3+2-3.Z.cat',
-    #                  'W3+2-3.Z.fits.header',
-    #                  'W3+2-3.Z.weight.fits.header'],
       'MegaPipe.358.122': ['MegaPipe.358.122.G.MP9401.fits.header',
                            'MegaPipe.358.122.GRI.MP9605.fits.header',
                            'MegaPipe.358.122.I.MP9702.fits.header',
@@ -111,8 +92,6 @@ LOOKUP = {
                    'NGVS+0+0.l.i.Mg002.flag.fits.fz',
                    'NGVS+0+0.l.i.Mg002.sig.fits.header',
                    'NGVS+0+0.l.i.Mg002.weight.fits.fz.header',
-                   'NGVS+0+0_l_i_Mg002.psf',
-                   'psfex.NGVS+0+0.l.i.Mg002.psf',
                    'vos:ngvs/masks/NGVS+0+0.l.i.Mg002.flag.fits.fz']}
 
 
@@ -131,17 +110,6 @@ def test_is_valid():
             sn = storage_names.get_storage_name(entry)
             assert sn.is_valid()
             assert sn.obs_id == key, f'wrong obs id {sn.obs_id}'
-
-            # if sn.obs_id == 'W3+2-3':
-            #     assert sn.product_id in [
-            #         'W3+2-3.G',
-            #         'W3+2-3.I',
-            #         'W3+2-3.I2',
-            #         'W3+2-3.R',
-            #         'W3+2-3.U',
-            #         'W3+2-3.Z']
-            # else:
-            #     assert sn.product_id == 'l.i.Mg002'
 
 
 @patch('cfhtProc2caom2.main_app.gen_proc')

@@ -203,6 +203,11 @@ class NGVSName(CFHTAdvancedProduct):
         return result
 
     @property
+    def use_metadata(self):
+        return not ('mask.rd.reg' in self._file_name or
+                    '.flag' in self._file_name)
+
+    @property
     def version(self):
         bits = self._file_name.split('.')
         if len(bits) == 2:

@@ -164,10 +164,6 @@ def accumulate_bp(bp, uri):
 
     bp.set('Artifact.productType', 'get_artifact_product_type(uri)')
 
-    if not storage_name.is_weight:
-        bp.clear('Plane.metrics.magLimit')
-        bp.add_fits_attribute('Plane.metrics.magLimit', 'ML_5SIGA')
-
     if storage_name.collection == sn.MP_COLLECTION:
         _accumulate_mp_bp(bp, storage_name)
     else:
@@ -218,7 +214,8 @@ def update(observation, **kwargs):
             for artifact in plane.artifacts.values():
                 if artifact.uri != storage_name.file_uri:
                     continue
-                if artifact.product_type is ProductType.WEIGHT:
+                if (artifact.product_type is ProductType.WEIGHT and
+                        storage_name.collection == sn.MP_COLLECTION):
                     artifact.parts = None
                     continue
                 for part in artifact.parts.values():
@@ -227,10 +224,7 @@ def update(observation, **kwargs):
                             _update_energy(chunk, headers, storage_name,
                                            observation.observation_id)
                         if not storage_name.is_catalog:
-                            if storage_name.collection == sn.NGVS_COLLECTION:
-                                _update_ngvs_time(chunk, plane.provenance,
-                                                  observation.observation_id)
-                            else:
+                            if storage_name.collection == sn.MP_COLLECTION:
                                 if chunk.position is not None:
                                     chunk.position.resolution = None
             if (_informative_uri(storage_name.file_name) and
@@ -240,6 +234,17 @@ def update(observation, **kwargs):
                     _repair_history_provenance_value,
                     observation.observation_id)
 
+            # _update_ngvs_time is dependent on provenance information that is
+            # generated right before this
+            if (storage_name.collection == sn.NGVS_COLLECTION and
+                    not storage_name.is_catalog):
+                for artifact in plane.artifacts.values():
+                    if artifact.uri != storage_name.file_uri:
+                        continue
+                    for part in artifact.parts.values():
+                        for chunk in part.chunks:
+                            _update_ngvs_time(chunk, plane.provenance,
+                                              observation.observation_id)
     observation.meta_release = max_meta_release
     if observation.environment is not None:
         observation.environment.seeing = min_seeing
@@ -294,6 +299,8 @@ def _accumulate_mp_bp(bp, storage_name):
         bp.clear('Plane.provenance.lastExecuted')
         bp.add_fits_attribute('Plane.provenance.lastExecuted', 'DATE')
         bp.add_fits_attribute('Observation.target.name', 'OBJECT')
+        bp.clear('Plane.metrics.magLimit')
+        bp.add_fits_attribute('Plane.metrics.magLimit', 'ML_5SIGA')
 
     logging.debug(f'End _accumulate_mp_bp.')
 
@@ -337,6 +344,9 @@ def _accumulate_ngvs_bp(bp, storage_name):
     bp.set('Artifact.productType', 'get_artifact_product_type(uri)')
 
     bp.set('Chunk.energy.bandpassName', 'get_ngvs_bandpass_name(uri)')
+
+    bp.clear('Plane.metrics.magLimit')
+    bp.add_fits_attribute('Plane.metrics.magLimit', 'MAGLIM')
 
     logging.debug(f'End _accumulate_ngvs_bp.')
 
@@ -438,7 +448,8 @@ def _update_energy(chunk, headers, storage_name, obs_id):
         temp = _get_keyword(headers, 'FILTER')
         # an attempt to keep the number of unique filter names lower
         chunk.energy.bandpass_name = CAOM_FILTER_REPAIR_LOOKUP.get(temp)
-    chunk.energy.resolving_power = None
+    if storage_name.collection == sn.MP_COLLECTION:
+        chunk.energy.resolving_power = None
     logging.debug(f'End _update_energy.')
 
 
