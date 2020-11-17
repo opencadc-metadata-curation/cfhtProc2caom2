@@ -132,7 +132,7 @@ def test_build_uris(gen_proc_mock):
     assert LOOKUP[test_obs_id][1] not in generic_parser_text, 'expect cat'
     assert LOOKUP[test_obs_id][2] in generic_parser_text, 'no mask'
     assert LOOKUP[test_obs_id][3] in generic_parser_text, 'no flag'
-    assert LOOKUP[test_obs_id][8] in generic_parser_text, 'no vos flag'
+    assert LOOKUP[test_obs_id][6] in generic_parser_text, 'no vos flag'
 
 
 def get_lineage(obs_id):

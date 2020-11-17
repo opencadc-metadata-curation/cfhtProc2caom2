@@ -94,7 +94,9 @@ def pytest_generate_tests(metafunc):
 @patch('caom2pipe.astro_composable.get_vo_table')
 @patch('caom2pipe.manage_composable.repo_get')
 @patch('caom2utils.fits2caom2.CadcDataClient')
-def test_main_app(data_client_mock, repo_get_mock, vo_mock, test_name):
+@patch('caom2utils.fits2caom2.Client')
+def test_main_app(
+        vo_client, data_client_mock, repo_get_mock, vo_mock, test_name):
     obs_id = os.path.basename(test_name)
     storage_name = storage_names.get_storage_name(
         test_storage_name.LOOKUP[obs_id][0])
@@ -102,6 +104,7 @@ def test_main_app(data_client_mock, repo_get_mock, vo_mock, test_name):
     output_file = f'{TEST_DATA_DIR}/{working_dir}/{obs_id}.actual.xml'
     obs_path = f'{TEST_DATA_DIR}/{working_dir}/{obs_id}.expected.xml'
     data_client_mock.return_value.get_file_info.side_effect = get_file_info
+    vo_client.return_value.get_node.side_effect = _get_node_mock
     repo_get_mock.side_effect = _repo_read_mock
     vo_mock.side_effect = _vo_mock
 
@@ -133,6 +136,13 @@ def get_file_info(archive, file_id):
         return {'type': 'image/gif'}
     else:
         return {'type': 'application/fits'}
+
+
+def _get_node_mock(uri, **kwargs):
+    node = type('', (), {})()
+    node.props = {'length': 42,
+                  'MD5': '1234'}
+    return node
 
 
 def _get_local(obs_id):

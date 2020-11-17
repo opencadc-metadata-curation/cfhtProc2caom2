@@ -447,7 +447,7 @@
           <caom2:productType>auxiliary</caom2:productType>
           <caom2:releaseType>data</caom2:releaseType>
           <caom2:contentType>application/fits</caom2:contentType>
-          <caom2:contentLength>18316800</caom2:contentLength>
+          <caom2:contentLength>42</caom2:contentLength>
           <caom2:contentChecksum>md5:37333ea2e1091036375e7b41e81dfddb</caom2:contentChecksum>
           <caom2:parts/>
         </caom2:artifact>
