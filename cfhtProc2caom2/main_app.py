@@ -85,10 +85,10 @@ from caom2pipe import translate_composable as tc
 from cfhtProc2caom2 import storage_names as sn
 
 
-__all__ = ['ngvs_main_app', 'to_caom2', 'update', 'APPLICATION']
+__all__ = ['cfht_proc_main_app', 'to_caom2', 'update', 'APPLICATION']
 
 
-APPLICATION = 'ngvs2caom2'
+APPLICATION = 'cfhtProc2caom2'
 INSTRUMENT = 'MegaPrime'
 
 # filter names have to conform to those of the SVO filter service, because
@@ -617,7 +617,7 @@ def to_caom2():
     return result
            
 
-def ngvs_main_app():
+def cfht_proc_main_app():
     args = get_gen_proc_arg_parser().parse_args()
     try:
         result = to_caom2()
