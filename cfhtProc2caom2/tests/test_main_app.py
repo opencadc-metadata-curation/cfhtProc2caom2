@@ -67,88 +67,105 @@
 # ***********************************************************************
 #
 
+import logging
+import os
 import sys
 
 from mock import patch
 
+from astropy.io.votable import parse_single_table
+from cfhtProc2caom2 import main_app, storage_names
 from caom2pipe import manage_composable as mc
-from ngvs2caom2 import main_app, storage_names
 
-LOOKUP = {'W3+2-3': ['W3+2-3.G.cat',
-                     'W3+2-3.G.fits.header',
-                     'W3+2-3.G.weight.fits.header',
-                     'W3+2-3.I.cat',
-                     'W3+2-3.I.fits.header',
-                     'W3+2-3.I.weight.fits.header',
-                     'W3+2-3.I2.cat',
-                     'W3+2-3.I2.fits.header',
-                     'W3+2-3.I2.weight.fits.header',
-                     'W3+2-3.R.cat',
-                     'W3+2-3.R.fits.header',
-                     'W3+2-3.R.weight.fits.header',
-                     'W3+2-3.U.cat',
-                     'W3+2-3.U.fits.header',
-                     'W3+2-3.U.weight.fits.header',
-                     'W3+2-3.Z.cat',
-                     'W3+2-3.Z.fits.header',
-                     'W3+2-3.Z.weight.fits.header'],
-          'NGVS+0+0': ['NGVS+0+0.l.i.Mg002.fits.header',
-                       'NGVS+0+0.l.i.Mg002.cat',
-                       'NGVS+0+0.l.i.Mg002.fits.mask.rd.reg',
-                       'NGVS+0+0.l.i.Mg002.flag.fits.fz',
-                       'NGVS+0+0.l.i.Mg002.sig.fits.header',
-                       'NGVS+0+0.l.i.Mg002.weight.fits.fz.header',
-                       'NGVS+0+0_l_i_Mg002.psf',
-                       'psfex.NGVS+0+0.l.i.Mg002.psf',
-                       'vos:ngvs/masks/NGVS+0+0.l.i.Mg002.flag.fits.fz']}
+import test_storage_name
+
+THIS_DIR = os.path.dirname(os.path.realpath(__file__))
+TEST_DATA_DIR = os.path.join(THIS_DIR, 'data')
+PLUGIN = os.path.join(os.path.dirname(THIS_DIR), 'main_app.py')
 
 
-def test_is_valid():
-    for key, value in LOOKUP.items():
-        for entry in value:
-            sn = storage_names.get_storage_name(entry)
-            assert sn.is_valid()
-            assert sn.obs_id == key, f'wrong obs id {sn.obs_id}'
-
-            if sn.obs_id == 'W3+2-3':
-                assert sn.product_id in [
-                    'W3+2-3.G',
-                    'W3+2-3.I',
-                    'W3+2-3.I2',
-                    'W3+2-3.R',
-                    'W3+2-3.U',
-                    'W3+2-3.Z']
-            else:
-                assert sn.product_id == 'l.i.Mg002'
+def pytest_generate_tests(metafunc):
+    obs_id_list = []
+    for key, value in test_storage_name.LOOKUP.items():
+        obs_id_list.append(key)
+    metafunc.parametrize('test_name', obs_id_list)
 
 
-@patch('ngvs2caom2.main_app.gen_proc')
-def test_build_uris(gen_proc_mock):
-    test_obs_id = 'NGVS+0+0'
-    test_lineage = get_lineage(test_obs_id)
-    test_name = 'consistent_local_lineage'
-    sys.argv = (f'{main_app.APPLICATION} '
-                f'--observation COLLECTION {test_name} --lineage '
-                f'{test_lineage}').split()
+@patch('caom2pipe.astro_composable.get_vo_table')
+@patch('caom2pipe.manage_composable.repo_get')
+@patch('caom2utils.fits2caom2.CadcDataClient')
+@patch('caom2utils.fits2caom2.Client')
+def test_main_app(
+        vo_client, data_client_mock, repo_get_mock, vo_mock, test_name):
+    obs_id = os.path.basename(test_name)
+    storage_name = storage_names.get_storage_name(
+        test_storage_name.LOOKUP[obs_id][0],
+        test_storage_name.LOOKUP[obs_id][0])
+    working_dir = get_work_dir(test_name)
+    output_file = f'{TEST_DATA_DIR}/{working_dir}/{obs_id}.actual.xml'
+    obs_path = f'{TEST_DATA_DIR}/{working_dir}/{obs_id}.expected.xml'
+    data_client_mock.return_value.get_file_info.side_effect = get_file_info
+    vo_client.return_value.get_node.side_effect = _get_node_mock
+    repo_get_mock.side_effect = _repo_read_mock
+    vo_mock.side_effect = _vo_mock
+
+    sys.argv = \
+        (f'{main_app.APPLICATION} --no_validate --local '
+         f'{_get_local(test_name)} --observation {storage_name.collection} '
+         f'{test_name} -o {output_file} --plugin {PLUGIN} --module {PLUGIN} '
+         f'--lineage {test_storage_name.get_lineage(test_name)}').split()
+    print(sys.argv)
     main_app.to_caom2()
-    assert gen_proc_mock.called, 'should be called'
-    args, kwargs = gen_proc_mock.call_args
-    generic_parser = vars(args[0]).get('use_generic_parser')
-    assert generic_parser is not None, 'expect a generic_parser'
-    generic_parser_text = ' '.join(ii for ii in generic_parser)
-    assert LOOKUP[test_obs_id][0] not in generic_parser_text, 'expect product'
-    assert LOOKUP[test_obs_id][5] not in generic_parser_text, 'expect weight'
-    assert LOOKUP[test_obs_id][4] not in generic_parser_text, 'expect sig'
-    assert LOOKUP[test_obs_id][1] not in generic_parser_text, 'expect cat'
-    assert LOOKUP[test_obs_id][2] in generic_parser_text, 'no mask'
-    assert LOOKUP[test_obs_id][3] in generic_parser_text, 'no flag'
-    assert LOOKUP[test_obs_id][8] in generic_parser_text, 'no vos flag'
+
+    compare_result = mc.compare_observations(output_file, obs_path)
+    if compare_result is not None:
+        raise AssertionError(compare_result)
+    # assert False  # cause I want to see logging messages
 
 
-def get_lineage(obs_id):
+def get_work_dir(value):
+    working_dir = 'megaprime'
+    if 'NGVS' in value:
+        working_dir = 'ngvs'
+    return working_dir
+
+
+def get_file_info(archive, file_id):
+    if '.cat' in file_id:
+        return {'type': 'text/plain'}
+    elif '.gif' in file_id:
+        return {'type': 'image/gif'}
+    else:
+        return {'type': 'application/fits'}
+
+
+def _get_node_mock(uri, **kwargs):
+    node = type('', (), {})()
+    node.props = {'length': 42,
+                  'MD5': '1234'}
+    return node
+
+
+def _get_local(obs_id):
     result = ''
-    for ii in LOOKUP[obs_id]:
-        storage_name = storage_names.get_storage_name(ii)
-        result = f'{result} {storage_name.lineage}'
-    result = result.replace('.header', '')
+    for ii in test_storage_name.LOOKUP[obs_id]:
+        work_dir = get_work_dir(ii)
+        result = f'{result} {TEST_DATA_DIR}/{work_dir}/{ii}'
     return result
+
+
+def _repo_read_mock(ignore1, ignore2, obs_id, ignore4):
+    work_dir = get_work_dir(obs_id)
+    fqn = f'{TEST_DATA_DIR}/{work_dir}/{obs_id}.xml'
+    return mc.read_obs_from_file(fqn)
+
+
+def _vo_mock(url):
+    try:
+        x = url.split('/')
+        filter_name = x[-1].replace('&VERB=0', '')
+        votable = parse_single_table(
+            f'{TEST_DATA_DIR}/{filter_name}.xml')
+        return votable, None
+    except Exception as e:
+        logging.error(f'get_vo_table failure for url {url}')

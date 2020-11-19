@@ -1,25 +1,28 @@
-working_directory: /usr/src/app/ngvs2caom2
+working_directory: /usr/src/app
 # the netrc_filename value must be a fully-qualified name
 # netrc_filename: /usr/src/app/netrc
 # this is the name of the proxy certificate file supplied 
 # to the container. It must be a fully-qualified name. 
 # One of netrc_filename or proxy_filename must have a value.
 proxy_file_name: /usr/src/app/cadcproxy.pem
-# operational value is ivo://cadc.nrc.ca/caom2repo
-# - modifies entries on sc2.canfar.net
-resource_id: ivo://cadc.nrc.ca/sc2repo
-# operational value is ivo://cadc.nrc.ca/ams/neossat
-# - queries entries on sc2.canfar.net
-tap_id: ivo://cadc.nrc.ca/sc2tap
+# operational value is ivo://cadc.nrc.ca/ams
+# resource_id: ivo://cadc.nrc.ca/sc2repo
+# - sc2repo modifies entries on sc2.canfar.net
+# - ams modifies values in production
+resource_id: ivo://cadc.nrc.ca/ams
+# - sc2tap queries entries on sc2.canfar.net
+# - ams/ queries production entries
+# tap_id: ivo://cadc.nrc.ca/sc2tap
+tap_id: ivo://cadc.nrc.ca/ams/cfht
 # file that contains the list of entries to process
 todo_file_name: todo.txt
 # values True False
 # when True, the application will look for files with
 # .fits, .gz, .json endings as defining the work to be 
 # done.
-use_local_files: True
+use_local_files: False
 # values DEBUG INFO WARNING ERROR
-logging_level: DEBUG
+logging_level: INFO
 # values True False
 log_to_file: True
 # fully qualified name for a directory to write log files
@@ -47,8 +50,8 @@ progress_file_name: progress.txt
 # ad stream value - sorry
 # set stream to 'default', if using TaskType STORE or PULL
 stream: default
-archive: NGVS
-collection: NGVS
+archive: CFHTSG
+collection: CFHTMEGAPIPE
 #
 # CADC service execution metrics
 #
@@ -74,15 +77,12 @@ interval: 600
 # how to control the work that gets done
 # possible values are:
 # - scrape - read the headers, write out the xml - kind of a test mode
-# - store - calls cadc-data to put a file from local storage (use_local_files must be set to True)
+# - store - calls cadc-data to put a file. If use_local_files is True, looks in
+#           working_directory
 # - ingest - read the headers, write the xml to the endpoint found by resource_id
 # - modify - create a footprint and previews for an existing CAOM model record
-# - pull - put a file retrieved from a URL
-task_types: 
+task_types:
   - ingest
 features:
-  supports_composite: False
-  supports_latest_caom: False
-  supports_multiple_files: False
   use_file_names: True
   use_urls: False

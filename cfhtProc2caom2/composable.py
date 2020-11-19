@@ -68,79 +68,39 @@
 #
 
 import logging
-import os
 import sys
+import traceback
 
-from mock import patch
-
-from astropy.io.votable import parse_single_table
-from ngvs2caom2 import main_app, storage_names
-from caom2pipe import manage_composable as mc
-
-import test_storage_name
-
-THIS_DIR = os.path.dirname(os.path.realpath(__file__))
-TEST_DATA_DIR = os.path.join(THIS_DIR, 'data')
-PLUGIN = os.path.join(os.path.dirname(THIS_DIR), 'main_app.py')
+from caom2pipe import name_builder_composable as nbc
+from caom2pipe import run_composable as rc
+from cfhtProc2caom2 import main_app, storage_names
 
 
-def pytest_generate_tests(metafunc):
-    obs_id_list = []
-    for key, value in test_storage_name.LOOKUP.items():
-        obs_id_list.append(key)
-    metafunc.parametrize('test_name', obs_id_list)
+META_VISITORS = []
+DATA_VISITORS = []
 
 
-@patch('caom2pipe.astro_composable.get_vo_table')
-@patch('caom2pipe.manage_composable.repo_get')
-@patch('caom2utils.fits2caom2.CadcDataClient')
-def test_main_app(data_client_mock, repo_get_mock, vo_mock, test_name):
-    basename = os.path.basename(test_name)
-    output_file = f'{TEST_DATA_DIR}/{basename}.actual.xml'
-    obs_path = f'{TEST_DATA_DIR}/{basename}.expected.xml'
-    data_client_mock.return_value.get_file_info.side_effect = get_file_info
-    repo_get_mock.side_effect = _repo_read_mock
-    vo_mock.side_effect = _vo_mock
+def _run():
+    """
+    Uses a todo file to identify the work to be done.
 
-    sys.argv = \
-        (f'{main_app.APPLICATION} --no_validate --local {_get_local(test_name)} '
-         f'--observation COLLECTION {test_name} '
-         f'-o {output_file} --plugin {PLUGIN} --module {PLUGIN} --lineage '
-         f'{test_storage_name.get_lineage(test_name)}').split()
-    print(sys.argv)
-    main_app.to_caom2()
-
-    compare_result = mc.compare_observations(output_file, obs_path)
-    if compare_result is not None:
-        raise AssertionError(compare_result)
-    # assert False  # cause I want to see logging messages
+    :return 0 if successful, -1 if there's any sort of failure. Return status
+        is used by airflow for task instance management and reporting.
+    """
+    name_builder = nbc.FileNameBuilder(storage_names.get_storage_name)
+    return rc.run_by_todo(config=None, name_builder=name_builder,
+                          command_name=main_app.APPLICATION,
+                          meta_visitors=META_VISITORS,
+                          data_visitors=DATA_VISITORS)
 
 
-def get_file_info(archive, file_id):
-    if '.cat' in file_id:
-        return {'type': 'text/plain'}
-    else:
-        return {'type': 'application/fits'}
-
-
-def _get_local(obs_id):
-    result = ''
-    for ii in test_storage_name.LOOKUP[obs_id]:
-        result = f'{result} {TEST_DATA_DIR}/{ii}'
-    return result
-
-
-def _repo_read_mock(ignore1, ignore2, obs_id, ignore4):
-    fqn = f'{TEST_DATA_DIR}/{obs_id}.xml'
-    return mc.read_obs_from_file(fqn)
-
-
-def _vo_mock(url):
+def run():
+    """Wraps _run in exception handling, with sys.exit calls."""
     try:
-        x = url.split('/')
-        filter_name = x[-1].replace('&VERB=0', '')
-        votable = parse_single_table(
-            f'{TEST_DATA_DIR}/{filter_name}.xml')
-        return votable, None
+        result = _run()
+        sys.exit(result)
     except Exception as e:
-        logging.error(f'get_vo_table failure for url {url}')
+        logging.error(e)
+        tb = traceback.format_exc()
+        logging.error(tb)
+        sys.exit(-1)
