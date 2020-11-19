@@ -1,8 +1,9 @@
 #!/bin/bash
 
-IMAGE="opencadc/cfhtProc2caom2"
+IMAGE="opencadc/cfhtproc2caom2"
 CMD="cfht_proc"
-# echo "Get a proxy certificate"
+
+echo "Get a proxy certificate"
 cp $HOME/.ssl/cadcproxy.pem ./ || exit $?
 
 echo "Get image ${IMAGE}"
