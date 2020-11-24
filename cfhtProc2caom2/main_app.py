@@ -228,12 +228,25 @@ def update(observation, **kwargs):
                             if storage_name.collection == sn.MP_COLLECTION:
                                 if chunk.position is not None:
                                     chunk.position.resolution = None
+
+                        # SGw - 24-11-20 - set observable/axis to None: there
+                        # is no such information in the files
+                        if chunk.observable_axis is not None:
+                            chunk.observable_axis = None
+                        if chunk.observable is not None:
+                            chunk.observable = None
+
             if (_informative_uri(storage_name.file_name) and
                     plane.provenance is not None):
                 cc.append_plane_provenance_single(
                     plane, headers, 'HISTORY', 'CFHT',
                     _repair_history_provenance_value,
                     observation.observation_id)
+                if plane.provenance.run_id == 'None':
+                    plane.provenance.run_id = None
+                if (plane.provenance.keywords is not None and
+                        'None' in plane.provenance.keywords):
+                    plane.provenance.keywords.remove('None')
 
             # _update_ngvs_time is dependent on provenance information that is
             # generated right before this

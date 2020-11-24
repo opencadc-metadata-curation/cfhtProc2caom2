@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<caom2:Observation xmlns:caom2="http://www.opencadc.org/caom2/xml/v2.4" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="caom2:DerivedObservation" caom2:id="2a4d3cc1-18a0-401e-8304-f5dc3e85ccf3">
+  <caom2:collection>NGVS</caom2:collection>
+  <caom2:observationID>NGVS+0+0</caom2:observationID>
+  <caom2:metaRelease>2022-01-01T00:00:00.000</caom2:metaRelease>
+  <caom2:algorithm>
+    <caom2:name>composite</caom2:name>
+  </caom2:algorithm>
+</caom2:Observation>
