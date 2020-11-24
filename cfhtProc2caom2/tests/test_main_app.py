@@ -103,6 +103,7 @@ def test_main_app(
         test_storage_name.LOOKUP[obs_id][0])
     working_dir = get_work_dir(test_name)
     output_file = f'{TEST_DATA_DIR}/{working_dir}/{obs_id}.actual.xml'
+    input_file = f'{TEST_DATA_DIR}/{working_dir}/{obs_id}.in.xml'
     obs_path = f'{TEST_DATA_DIR}/{working_dir}/{obs_id}.expected.xml'
     data_client_mock.return_value.get_file_info.side_effect = get_file_info
     vo_client.return_value.get_node.side_effect = _get_node_mock
@@ -111,9 +112,9 @@ def test_main_app(
 
     sys.argv = \
         (f'{main_app.APPLICATION} --no_validate --local '
-         f'{_get_local(test_name)} --observation {storage_name.collection} '
-         f'{test_name} -o {output_file} --plugin {PLUGIN} --module {PLUGIN} '
-         f'--lineage {test_storage_name.get_lineage(test_name)}').split()
+         f'{_get_local(test_name)} -i {input_file} -o {output_file} --plugin '
+         f'{PLUGIN} --module {PLUGIN} --lineage '
+         f'{test_storage_name.get_lineage(test_name)}').split()
     print(sys.argv)
     main_app.to_caom2()
 
