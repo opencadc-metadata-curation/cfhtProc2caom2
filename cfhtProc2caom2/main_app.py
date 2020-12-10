@@ -393,7 +393,7 @@ def get_data_product_type(uri):
     result = DataProductType.IMAGE
     storage_name = sn.get_storage_name(uri, uri)
     if storage_name.is_catalog:
-        result = DataProductType.CATALOG
+        result = DataProductType.MEASUREMENTS
     return result
 
 
