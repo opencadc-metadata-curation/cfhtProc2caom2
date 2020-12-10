@@ -393,7 +393,13 @@ def get_data_product_type(uri):
     result = DataProductType.IMAGE
     storage_name = sn.get_storage_name(uri, uri)
     if storage_name.is_catalog:
-        result = DataProductType.CATALOG
+        # PD 09-12-20
+        # I need to modify the ObsCore view to filter the observations with
+        # DataProductType.catalog out (not compliant to spec) but there is a
+        # different value measurements that means roughly the same thing.
+        # There should be a DataProductType constant declared in the py library
+        # for this value.
+        result = DataProductType.MEASUREMENTS
     return result
 
 
