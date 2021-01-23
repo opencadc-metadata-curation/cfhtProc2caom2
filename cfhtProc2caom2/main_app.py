@@ -238,7 +238,12 @@ def update(observation, **kwargs):
 
             if (_informative_uri(storage_name.file_name) and
                     plane.provenance is not None):
-                cc.append_plane_provenance_single(
+                # SGw - 22-01-21
+                # When re-processing, I sometimes find that an image wasn't as
+                # well calibrated as I thought it was and it gets removed from
+                # the next generation data products. So I would like the
+                # ability to remove inputs
+                cc.update_plane_provenance_single(
                     plane, headers, 'HISTORY', 'CFHT',
                     _repair_history_provenance_value,
                     observation.observation_id)

@@ -86,6 +86,7 @@ LOOKUP = {
                            'MegaPipe.358.122.I.MP9702.weight.fits.header',
                            'MegaPipe.358.122.R.MP9601.fits.gif',
                            'MegaPipe.358.122.R.MP9601.weight.fits.header'],
+      'MegaPipe.209.126': ['MegaPipe.209.126.R.MP9602.fits.header'],
       'NGVS+0+0': ['NGVS+0+0.l.i.Mg002.fits.header',
                    'NGVS+0+0.l.i.Mg002.cat',
                    'NGVS+0+0.l.i.Mg002.fits.mask.rd.reg',
