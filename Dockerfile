@@ -9,7 +9,6 @@ RUN pip install cadcdata \
     cadctap \
     caom2 \
     caom2repo \
-    caom2utils \
     ftputil \
     importlib-metadata \
     PyYAML \
@@ -25,7 +24,8 @@ ARG OPENCADC_REPO=opencadc
 ARG PIPE_BRANCH=master
 ARG PIPE_REPO=opencadc
 
-RUN pip install git+https://github.com/${OPENCADC_REPO}/caom2tools@${OPENCADC_BRANCH}#egg=caom2tools&subdirectory=caom2utils
+RUN git clone https://github.com/${OPENCADC_REPO}/caom2tools.git --branch ${OPENCADC_BRANCH} && \
+    pip install ./caom2tools/caom2utils
 
 RUN pip install git+https://github.com/${PIPE_REPO}/caom2pipe@${PIPE_BRANCH}#egg=caom2pipe
 
