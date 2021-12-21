@@ -11,6 +11,7 @@ RUN pip install cadcdata \
     caom2repo \
     ftputil \
     importlib-metadata \
+    python-dateutil \
     PyYAML \
     spherical-geometry \
     vos
