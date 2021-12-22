@@ -132,14 +132,6 @@ class CFHTProductMapping(cc.TelescopeMapping):
     def accumulate_blueprint(self, bp, application=None):
         super().accumulate_blueprint(bp, APPLICATION)
         bp.configure_position_axes((1, 2))
-
-        # TODO - should this call be in here twice?
-        if sn.is_ngvs(self._storage_name.file_uri):
-            self._accumulate_ngvs_bp(bp)
-        else:
-            self._accumulate_mp_bp(bp)
-
-        # they're all DerivedObservations
         bp.set('DerivedObservation.members', {})
         bp.set('Observation.type', 'OBJECT')
 
@@ -164,13 +156,6 @@ class CFHTProductMapping(cc.TelescopeMapping):
 
         bp.set('Artifact.productType', 'get_artifact_product_type()')
         bp.set('Artifact.releaseType', 'data')
-
-        if self._storage_name.collection == sn.MP_COLLECTION:
-            self._accumulate_mp_bp(bp)
-        else:
-            self._accumulate_ngvs_bp(bp)
-
-        self._logger.debug('Done accumulate_bp.')
 
     def update(self, observation, file_info, caom_repo_client):
         """
@@ -245,21 +230,11 @@ class CFHTProductMapping(cc.TelescopeMapping):
                             'None' in plane.provenance.keywords):
                         plane.provenance.keywords.remove('None')
 
-                # _update_ngvs_time is dependent on provenance information
+                # _update_time is dependent on provenance information
                 # that is generated right before this
-                if (self._storage_name.collection == sn.NGVS_COLLECTION and
-                        not self._storage_name.is_catalog):
-                    for artifact in plane.artifacts.values():
-                        if artifact.uri != self._storage_name.file_uri:
-                            continue
-                        for part in artifact.parts.values():
-                            for chunk in part.chunks:
-                                self._update_ngvs_time(
-                                    chunk,
-                                    plane.provenance,
-                                    observation.observation_id,
-                                    caom_repo_client,
-                                )
+                self._update_time(
+                    plane, observation.observation_id, caom_repo_client
+                )
         observation.meta_release = max_meta_release
         if observation.environment is not None:
             observation.environment.seeing = min_seeing
@@ -269,105 +244,6 @@ class CFHTProductMapping(cc.TelescopeMapping):
         cc.update_observation_members(observation)
         self._logger.debug('Done update.')
         return observation
-
-    def _accumulate_mp_bp(self, bp):
-        self._logger.debug(
-            f'Begin _accumulate_mp_bp for {self._storage_name.file_name}'
-        )
-
-        bp.clear('Observation.metaRelease')
-        bp.add_fits_attribute('Observation.metaRelease', 'DATE')
-        bp.add_fits_attribute('Observation.metaRelease', 'REL_DATE')
-
-        bp.set('Observation.algorithm.name', 'MEGAPIPE')
-
-        bp.set('Observation.environment.photometric', True)
-        bp.clear('Observation.environment.seeing')
-        bp.add_fits_attribute('Observation.environment.seeing', 'FINALIQ')
-
-        bp.set('Observation.proposal.id', 'get_proposal_id()')
-
-        bp.clear('Plane.metaRelease')
-        bp.add_fits_attribute('Plane.metaRelease', 'DATE')
-        bp.add_fits_attribute('Plane.metaRelease', 'REL_DATE')
-
-        bp.clear('Chunk.position.resolution')
-        bp.add_fits_attribute('Chunk.position.resolution', 'FINALIQ')
-
-        bp.clear('Plane.dataRelease')
-        bp.add_fits_attribute('Plane.dataRelease', 'DATE')
-        bp.add_fits_attribute('Plane.dataRelease', 'REL_DATE')
-
-        bp.set('Plane.provenance.name', 'MEGAPIPE')
-        bp.set('Plane.provenance.producer', 'CADC')
-        bp.set('Plane.provenance.version', '2.0')
-        bp.set('Plane.provenance.reference',
-               'http://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/en/megapipe/')
-
-        if self._storage_name.is_preview:
-            bp.set('Artifact.productType', ProductType.PREVIEW)
-
-        bp.clear('Chunk.position.coordsys')
-        bp.add_fits_attribute('Chunk.position.coordsys', 'RADECSYS')
-
-        bp.clear('Observation.target.name')
-        if not self._storage_name.is_weight:
-            bp.clear('Plane.provenance.lastExecuted')
-            bp.add_fits_attribute('Plane.provenance.lastExecuted', 'DATE')
-            bp.add_fits_attribute('Observation.target.name', 'OBJECT')
-            bp.clear('Plane.metrics.magLimit')
-            bp.add_fits_attribute('Plane.metrics.magLimit', 'ML_5SIGA')
-
-        self._logger.debug(f'End _accumulate_mp_bp.')
-
-    def _accumulate_ngvs_bp(self, bp):
-        self._logger.debug(
-            f'Begin _accumulate_ngvs_bp for {self._storage_name.file_name}.'
-        )
-        bp.clear('Observation.algorithm.name')
-
-        # NGVS
-        # JJK - comments by email - 28-03-20
-        # if _informative_uri(uri):
-        # make sure information set from header keywords is only set for
-        # the fits files where it's accessible
-        bp.set('Observation.metaRelease', '2022-01-01 00:00:00')
-
-        bp.set('Observation.proposal.pi', 'Laura Ferrarese')
-        bp.set('Observation.proposal.project', 'NGVS')
-        bp.set('Observation.proposal.title',
-               'Next Generation Virgo Cluster Survey')
-        bp.set('Observation.proposal.keywords', 'Galaxy Cluster Dwarfs')
-
-        bp.set('Observation.target.name', 'get_target_name()')
-        if 'weight' not in self._storage_name.file_uri:
-            bp.set('Observation.target.type', 'field')
-
-        bp.set('Plane.dataRelease', '2022-01-01T00:00:00')
-        bp.set('Plane.metaRelease', '2022-01-01T00:00:00')
-        # SGw 28-07-20
-        # The last 4 characters in the ID column (l128 vs g002 vs g004)
-        # refer to variation in the pipeline. If they could be captured as
-        # plane.provenance.name = MegaPipe_g004 that would be great.
-        bp.set(
-            'Plane.provenance.name', f'MegaPipe_{self._storage_name.version}'
-        )
-        bp.clear('Plane.provenance.keywords')
-        bp.add_fits_attribute('Plane.provenance.keywords', 'COMBINET')
-        bp.set('Plane.provenance.project', 'NGVS')
-        bp.set('Plane.provenance.reference',
-               'http://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/en/community/ngvs/'
-               'docs/ngvsdoc.html')
-        bp.set('Plane.provenance.version', 'get_provenance_version()')
-
-        bp.set('Artifact.productType', 'get_artifact_product_type()')
-
-        bp.set('Chunk.energy.bandpassName', 'get_ngvs_bandpass_name()')
-
-        bp.clear('Plane.metrics.magLimit')
-        bp.add_fits_attribute('Plane.metrics.magLimit', 'MAGLIM')
-
-        self._logger.debug(f'End _accumulate_ngvs_bp.')
 
     def _get_keyword(self, keyword):
         result = None
@@ -409,18 +285,6 @@ class CFHTProductMapping(cc.TelescopeMapping):
             result = DataProductType.MEASUREMENTS
         return result
 
-    def get_ngvs_bandpass_name(self, ext):
-        reverse_filter_lookup = {
-            'i': 'i.MP9703',
-            'g': 'g.MP9402',
-            'r': 'r.MP9602',
-            'u': 'u.MP9302',
-            'z': 'z.MP9901'}
-        result = None
-        if self._storage_name.filter_name is not None:
-            result = reverse_filter_lookup.get(self._storage_name.filter_name)
-        return result
-
     def get_proposal_id(self, ext):
         # JJK - 23-03-20
         # Replace with value of ProposalID from the first input ‘member’
@@ -448,12 +312,6 @@ class CFHTProductMapping(cc.TelescopeMapping):
             result = True
         return result
 
-    def _finish_catalog_plane(self, observation, plane):
-        self._logger.debug(f'Begin _finish_catalog_plane for '
-                      f'{observation.observation_id}.')
-        plane.meta_release = observation.meta_release
-        self._logger.debug('Done _finish_catalog_plane.')
-
     def _minimize(self, x, candidate):
         result = x
         if candidate is not None:
@@ -476,88 +334,6 @@ class CFHTProductMapping(cc.TelescopeMapping):
             chunk.energy.resolving_power = None
         self._logger.debug(f'End _update_energy.')
 
-    def _update_observation_metadata(self, obs, ngvs_name):
-        """
-        Why this method exists:
-
-        The NGVS weight files have almost no metadata in the primary HDU, but
-        all the needed metadata in subsequent HDUs.
-
-        It's not possible to apply extension
-        numbers for non-chunk blueprint entries, so that means that to use the
-        information captured in the blueprint, the header that's provided
-        must be manipulated instead. There is only access to the header
-        information in this extension of the fitscaom2 module (i.e. this file)
-        during the execution of the 'update' step of fits2caom2 execution.
-        Hence the self-referential implementation. Maybe it will result in an
-        infinite loop and I'll be sad.
-        """
-        n_axis = self._headers[0].get('NAXIS')
-        if n_axis == 0:
-            self._logger.warning(
-                f'Resetting the header/blueprint relationship for '
-                f'{ngvs_name.file_name} in {obs.observation_id}'
-            )
-            module = importlib.import_module(__name__)
-            blueprint = ObsBlueprint(module=module)
-            self.accumulate_bp(blueprint)
-            tc.add_headers_to_obs_by_blueprint(
-                obs,
-                [self._headers[1]],
-                blueprint,
-                self._storage_name.file_uri,
-                ngvs_name.product_id,
-            )
-
-    def _update_ngvs_time(self, chunk, provenance, obs_id, caom_repo_client):
-        self._logger.debug(f'Begin _update_ngvs_time for {obs_id}')
-        if (chunk is not None and provenance is not None and
-                len(provenance.inputs) > 0):
-            config = mc.Config()
-            metrics = mc.Metrics(config)
-            bounds = CoordBounds1D()
-            min_date = 0
-            max_date = sys.float_info.max
-            exposure = 0
-            for entry in provenance.inputs:
-                ip_obs_id, ip_product_id = (
-                    mc.CaomName.decompose_provenance_input(entry.uri)
-                )
-                self._logger.info(
-                    f'Retrieving provenance metadata for {ip_obs_id}.'
-                )
-                ip_obs = clc.repo_get(
-                    caom_repo_client, 'CFHT', ip_obs_id, metrics
-                )
-                if ip_obs is not None:
-                    ip_plane = ip_obs.planes.get(ip_product_id)
-                    if (ip_plane is not None and ip_plane.time is not None and
-                            ip_plane.time.bounds is not None):
-                        bounds.samples.append(CoordRange1D(
-                            RefCoord(pix=0.5, val=ip_plane.time.bounds.lower),
-                            RefCoord(pix=1.5, val=ip_plane.time.bounds.upper)))
-                        min_date = min(ip_plane.time.bounds.lower, min_date)
-                        max_date = max(ip_plane.time.bounds.upper, max_date)
-                        exposure += ip_plane.time.exposure
-            axis = Axis(ctype='TIME', cunit='d')
-            time_axis = CoordAxis1D(
-                axis=axis,
-                error=None,
-                range=None,
-                bounds=bounds,
-                function=None,
-            )
-            temporal_wcs = TemporalWCS(
-                axis=time_axis,
-                timesys=None,
-                trefpos=None,
-                mjdref=None,
-                exposure=mc.to_float(exposure),
-                resolution=None,
-            )
-            chunk.time = temporal_wcs
-        self._logger.debug(f'End _update_ngvs_time.')
-
     def _update_release_date(self, plane, max_meta_release):
         self._logger.debug(f'Begin _update_release_date for {plane.product_id}')
         if plane.meta_release is None:
@@ -573,6 +349,206 @@ class CFHTProductMapping(cc.TelescopeMapping):
             plane.data_release = plane.meta_release
         self._logger.debug('End _update_release_date')
         return max_meta_release
+
+    def _update_time(self, plane, obs_id, caom_repo_client):
+        pass
+
+
+class NGVSProductMapping(CFHTProductMapping):
+
+    def __init__(self, storage_name, headers):
+        super().__init__(storage_name, headers)
+
+    def accumulate_blueprint(self, bp, application=None):
+        super().accumulate_blueprint(bp, APPLICATION)
+        bp.clear('Observation.algorithm.name')
+
+        # NGVS
+        # JJK - comments by email - 28-03-20
+        # if _informative_uri(uri):
+        # make sure information set from header keywords is only set for
+        # the fits files where it's accessible
+        bp.set('Observation.metaRelease', '2022-01-01 00:00:00')
+
+        bp.set('Observation.proposal.pi', 'Laura Ferrarese')
+        bp.set('Observation.proposal.project', 'NGVS')
+        bp.set(
+            'Observation.proposal.title',
+            'Next Generation Virgo Cluster Survey',
+        )
+        bp.set('Observation.proposal.keywords', 'Galaxy Cluster Dwarfs')
+
+        bp.set('Observation.target.name', 'get_target_name()')
+        if 'weight' not in self._storage_name.file_uri:
+            bp.set('Observation.target.type', 'field')
+
+        bp.set('Plane.dataRelease', '2022-01-01T00:00:00')
+        bp.set('Plane.metaRelease', '2022-01-01T00:00:00')
+        # SGw 28-07-20
+        # The last 4 characters in the ID column (l128 vs g002 vs g004)
+        # refer to variation in the pipeline. If they could be captured as
+        # plane.provenance.name = MegaPipe_g004 that would be great.
+        bp.set(
+            'Plane.provenance.name', f'MegaPipe_{self._storage_name.version}'
+        )
+        bp.clear('Plane.provenance.keywords')
+        bp.add_fits_attribute('Plane.provenance.keywords', 'COMBINET')
+        bp.set('Plane.provenance.project', 'NGVS')
+        bp.set(
+            'Plane.provenance.reference',
+            'http://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/en/community/ngvs/'
+            'docs/ngvsdoc.html',
+        )
+        bp.set('Plane.provenance.version', 'get_provenance_version()')
+        bp.clear('Plane.metrics.magLimit')
+        bp.add_fits_attribute('Plane.metrics.magLimit', 'MAGLIM')
+
+        bp.set('Artifact.productType', 'get_artifact_product_type()')
+
+        bp.set('Chunk.energy.bandpassName', 'get_bandpass_name()')
+
+        self._logger.debug(f'End accumulate_bp.')
+
+    def get_bandpass_name(self, ext):
+        reverse_filter_lookup = {
+            'i': 'i.MP9703',
+            'g': 'g.MP9402',
+            'r': 'r.MP9602',
+            'u': 'u.MP9302',
+            'z': 'z.MP9901'}
+        result = None
+        if self._storage_name.filter_name is not None:
+            result = reverse_filter_lookup.get(self._storage_name.filter_name)
+        return result
+
+    def _update_time(self, plane, obs_id, caom_repo_client):
+        self._logger.debug(f'Begin _update_time for {obs_id}')
+        if (
+            not self._storage_name.is_catalog
+            and plane.provenance is not None
+            and len(plane.provenance.inputs) > 0
+        ):
+            for artifact in plane.artifacts.values():
+                if artifact.uri != self._storage_name.file_uri:
+                    continue
+                for part in artifact.parts.values():
+                    for chunk in part.chunks:
+                        config = mc.Config()
+                        metrics = mc.Metrics(config)
+                        bounds = CoordBounds1D()
+                        min_date = 0
+                        max_date = sys.float_info.max
+                        exposure = 0
+                        for entry in plane.provenance.inputs:
+                            ip_obs_id, ip_product_id = (
+                                mc.CaomName.decompose_provenance_input(
+                                    entry.uri,
+                                )
+                            )
+                            self._logger.info(
+                                f'Retrieving provenance metadata for '
+                                f'{ip_obs_id}.'
+                            )
+                            ip_obs = clc.repo_get(
+                                caom_repo_client, 'CFHT', ip_obs_id, metrics
+                            )
+                            if ip_obs is not None:
+                                ip_plane = ip_obs.planes.get(ip_product_id)
+                                if (
+                                    ip_plane is not None
+                                    and ip_plane.time is not None
+                                    and ip_plane.time.bounds is not None
+                                ):
+                                    bounds.samples.append(
+                                        CoordRange1D(
+                                            RefCoord(
+                                                pix=0.5,
+                                                val=ip_plane.time.bounds.lower,
+                                            ),
+                                            RefCoord(
+                                                pix=1.5,
+                                                val=ip_plane.time.bounds.upper,
+                                            ),
+                                        ),
+                                    )
+                                    min_date = min(
+                                        ip_plane.time.bounds.lower, min_date
+                                    )
+                                    max_date = max(
+                                        ip_plane.time.bounds.upper, max_date
+                                    )
+                                    exposure += ip_plane.time.exposure
+                        axis = Axis(ctype='TIME', cunit='d')
+                        time_axis = CoordAxis1D(
+                            axis=axis,
+                            error=None,
+                            range=None,
+                            bounds=bounds,
+                            function=None,
+                        )
+                        temporal_wcs = TemporalWCS(
+                            axis=time_axis,
+                            timesys=None,
+                            trefpos=None,
+                            mjdref=None,
+                            exposure=mc.to_float(exposure),
+                            resolution=None,
+                        )
+                        chunk.time = temporal_wcs
+        self._logger.debug(f'End _update_time.')
+
+
+class MegapipeProductMapping(CFHTProductMapping):
+
+    def __init__(self, storage_name, headers):
+        super().__init__(storage_name, headers)
+
+    def accumulate_blueprint(self, bp, application=None):
+        super().accumulate_blueprint(bp, APPLICATION)
+        self._logger.debug(
+            f'Begin _accumulate_mp_bp for {self._storage_name.file_name}'
+        )
+        bp.clear('Observation.metaRelease')
+        bp.add_fits_attribute('Observation.metaRelease', 'DATE')
+        bp.add_fits_attribute('Observation.metaRelease', 'REL_DATE')
+
+        bp.set('Observation.algorithm.name', 'MEGAPIPE')
+
+        bp.set('Observation.environment.photometric', True)
+        bp.clear('Observation.environment.seeing')
+        bp.add_fits_attribute('Observation.environment.seeing', 'FINALIQ')
+
+        bp.clear('Plane.metaRelease')
+        bp.add_fits_attribute('Plane.metaRelease', 'DATE')
+        bp.add_fits_attribute('Plane.metaRelease', 'REL_DATE')
+        bp.clear('Plane.dataRelease')
+        bp.add_fits_attribute('Plane.dataRelease', 'DATE')
+        bp.add_fits_attribute('Plane.dataRelease', 'REL_DATE')
+
+        bp.set('Plane.provenance.name', 'MEGAPIPE')
+        bp.set('Plane.provenance.producer', 'CADC')
+        bp.set('Plane.provenance.version', '2.0')
+        bp.set('Plane.provenance.reference',
+            'http://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/en/megapipe/')
+
+        if self._storage_name.is_preview:
+            bp.set('Artifact.productType', ProductType.PREVIEW)
+
+        bp.clear('Chunk.position.resolution')
+        bp.add_fits_attribute('Chunk.position.resolution', 'FINALIQ')
+
+        bp.clear('Chunk.position.coordsys')
+        bp.add_fits_attribute('Chunk.position.coordsys', 'RADECSYS')
+
+        bp.clear('Observation.target.name')
+        if not self._storage_name.is_weight:
+            bp.clear('Plane.provenance.lastExecuted')
+            bp.add_fits_attribute('Plane.provenance.lastExecuted', 'DATE')
+            bp.add_fits_attribute('Observation.target.name', 'OBJECT')
+            bp.clear('Plane.metrics.magLimit')
+            bp.add_fits_attribute('Plane.metrics.magLimit', 'ML_5SIGA')
+
+        self._logger.debug(f'End accumulate_blueprint.')
 
 
 def _repair_history_provenance_value(value, obs_id):

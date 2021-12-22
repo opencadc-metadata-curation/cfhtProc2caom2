@@ -68,7 +68,7 @@
 #
 
 from caom2pipe import caom_composable as cc
-from cfhtProc2caom2 import main_app
+from cfhtProc2caom2 import main_app, storage_names
 
 
 class CFHTProcFits2caom2Visitor(cc.Fits2caom2Visitor):
@@ -77,7 +77,12 @@ class CFHTProcFits2caom2Visitor(cc.Fits2caom2Visitor):
         super().__init__(observation, **kwargs)
 
     def _get_mapping(self, headers):
-        return main_app.CFHTProductMapping(self._storage_name, headers)
+        if storage_names.is_ngvs(self._storage_name.file_name):
+            return main_app.NGVSProductMapping(self._storage_name, headers)
+        else:
+            return main_app.MegapipeProductMapping(
+                self._storage_name, headers
+            )
 
 
 def visit(observation, **kwargs):
