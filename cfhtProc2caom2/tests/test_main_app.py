@@ -69,14 +69,12 @@
 
 import logging
 import os
-import pytest
-import sys
 
 from mock import patch
 
 from caom2.diff import get_differences
 from astropy.io.votable import parse_single_table
-from cfhtProc2caom2 import main_app, storage_names, fits2caom2_augmentation
+from cfhtProc2caom2 import storage_names, fits2caom2_augmentation
 from caom2pipe import astro_composable as ac
 from caom2pipe import manage_composable as mc
 from caom2pipe import reader_composable as rdc
@@ -95,40 +93,6 @@ def pytest_generate_tests(metafunc):
     metafunc.parametrize('test_name', obs_id_list)
 
 
-@pytest.mark.skip('')
-@patch('caom2pipe.astro_composable.get_vo_table')
-@patch('caom2pipe.manage_composable.repo_get')
-@patch('caom2utils.fits2caom2.CadcDataClient')
-@patch('caom2utils.fits2caom2.Client')
-def test_main_app(
-        vo_client, data_client_mock, repo_get_mock, vo_mock, test_name):
-    obs_id = os.path.basename(test_name)
-    storage_name = storage_names.get_storage_name(
-        test_storage_name.LOOKUP[obs_id][0],
-        test_storage_name.LOOKUP[obs_id][0])
-    working_dir = get_work_dir(test_name)
-    output_file = f'{TEST_DATA_DIR}/{working_dir}/{obs_id}.actual.xml'
-    input_file = f'{TEST_DATA_DIR}/{working_dir}/{obs_id}.in.xml'
-    obs_path = f'{TEST_DATA_DIR}/{working_dir}/{obs_id}.expected.xml'
-    data_client_mock.return_value.get_file_info.side_effect = get_file_info
-    vo_client.return_value.get_node.side_effect = _get_node_mock
-    repo_get_mock.side_effect = _repo_read_mock
-    vo_mock.side_effect = _vo_mock
-
-    sys.argv = \
-        (f'{main_app.APPLICATION} --no_validate --local '
-         f'{_get_local(test_name)} -i {input_file} -o {output_file} --plugin '
-         f'{PLUGIN} --module {PLUGIN} --lineage '
-         f'{test_storage_name.get_lineage(test_name)}').split()
-    print(sys.argv)
-    main_app.to_caom2()
-
-    compare_result = mc.compare_observations(output_file, obs_path)
-    if compare_result is not None:
-        raise AssertionError(compare_result)
-    # assert False  # cause I want to see logging messages
-
-
 @patch('caom2pipe.client_composable.repo_get')
 @patch('caom2utils.data_util.get_local_headers_from_fits')
 @patch('caom2pipe.astro_composable.get_vo_table')
@@ -138,6 +102,10 @@ def test_visitor(vo_mock, header_mock, repo_mock, test_name):
     repo_mock.side_effect = _repo_read_mock
     dir_name = 'ngvs' if 'NGVS' in test_name else 'megaprime'
     observation = None
+    expected_fqn = f'{TEST_DATA_DIR}/{dir_name}/{test_name}.expected.xml'
+    in_fqn = expected_fqn.replace('.expected', '.in')
+    if os.path.exists(in_fqn):
+        observation = mc.read_obs_from_file(in_fqn)
     for f_name in test_storage_name.LOOKUP[test_name]:
         if f_name.startswith('vos'):
             continue
@@ -147,15 +115,12 @@ def test_visitor(vo_mock, header_mock, repo_mock, test_name):
         storage_name = storage_names.get_storage_name(temp_f_name, fqn)
         metadata_reader = rdc.FileMetadataReader()
         metadata_reader.set(storage_name)
-        logging.error(metadata_reader.file_info.keys())
-        if 'cat' in f_name:
-            metadata_reader.file_info[storage_name.file_uri].file_type = (
-                'text/plain'
-            )
-        else:
-            metadata_reader.file_info[storage_name.file_uri].file_type = (
-                'application/fits'
-            )
+        file_type = 'application/fits'
+        if '.cat' in f_name:
+            file_type = 'text/plain'
+        elif '.gif' in f_name:
+            file_type = 'image/gif'
+        metadata_reader.file_info[storage_name.file_uri].file_type = file_type
         kwargs = {
             'storage_name': storage_name,
             'metadata_reader': metadata_reader,
@@ -163,9 +128,13 @@ def test_visitor(vo_mock, header_mock, repo_mock, test_name):
         }
         observation = fits2caom2_augmentation.visit(observation, **kwargs)
 
-    expected_fqn = f'{TEST_DATA_DIR}/{dir_name}/{test_name}.expected.xml'
     expected = mc.read_obs_from_file(expected_fqn)
-    compare_result = get_differences(expected, observation)
+    try:
+        compare_result = get_differences(expected, observation)
+    except Exception as e:
+        actual_fqn = expected_fqn.replace('expected', 'actual')
+        mc.write_obs_to_file(observation, actual_fqn)
+        raise e
     if compare_result is not None:
         actual_fqn = expected_fqn.replace('expected', 'actual')
         mc.write_obs_to_file(observation, actual_fqn)
@@ -177,39 +146,8 @@ def test_visitor(vo_mock, header_mock, repo_mock, test_name):
         raise AssertionError(msg)
 
 
-def get_work_dir(value):
-    working_dir = 'megaprime'
-    if 'NGVS' in value:
-        working_dir = 'ngvs'
-    return working_dir
-
-
-def get_file_info(archive, file_id):
-    if '.cat' in file_id:
-        return {'type': 'text/plain'}
-    elif '.gif' in file_id:
-        return {'type': 'image/gif'}
-    else:
-        return {'type': 'application/fits'}
-
-
-def _get_node_mock(uri, **kwargs):
-    node = type('', (), {})()
-    node.props = {'length': 42,
-                  'MD5': '1234'}
-    return node
-
-
-def _get_local(obs_id):
-    result = ''
-    for ii in test_storage_name.LOOKUP[obs_id]:
-        work_dir = get_work_dir(ii)
-        result = f'{result} {TEST_DATA_DIR}/{work_dir}/{ii}'
-    return result
-
-
 def _repo_read_mock(ignore1, ignore2, obs_id, ignore4):
-    work_dir = get_work_dir(obs_id)
+    work_dir = 'ngvs' if 'NGVS' in obs_id else 'megaprime'
     fqn = f'{TEST_DATA_DIR}/{work_dir}/{obs_id}.xml'
     return mc.read_obs_from_file(fqn)
 

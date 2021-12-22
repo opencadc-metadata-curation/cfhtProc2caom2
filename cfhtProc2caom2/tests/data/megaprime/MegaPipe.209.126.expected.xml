@@ -47,82 +47,6 @@
       <caom2:metrics>
         <caom2:magLimit>24.64</caom2:magLimit>
       </caom2:metrics>
-      <caom2:position>
-        <caom2:bounds xsi:type="caom2:Polygon">
-          <caom2:points>
-            <caom2:point>
-              <caom2:cval1>116.99415501423572</caom2:cval1>
-              <caom2:cval2>-26.741671450734145</caom2:cval2>
-            </caom2:point>
-            <caom2:point>
-              <caom2:cval1>117.57197086515862</caom2:cval1>
-              <caom2:cval2>-26.7416715678128</caom2:cval2>
-            </caom2:point>
-            <caom2:point>
-              <caom2:cval1>117.57329954037573</caom2:cval1>
-              <caom2:cval2>-27.257684955987344</caom2:cval2>
-            </caom2:point>
-            <caom2:point>
-              <caom2:cval1>116.99282607327058</caom2:cval1>
-              <caom2:cval2>-27.257684836272617</caom2:cval2>
-            </caom2:point>
-          </caom2:points>
-          <caom2:samples>
-            <caom2:vertices>
-              <caom2:vertex>
-                <caom2:cval1>117.57329954037574</caom2:cval1>
-                <caom2:cval2>-27.257684955987326</caom2:cval2>
-                <caom2:type>2</caom2:type>
-              </caom2:vertex>
-              <caom2:vertex>
-                <caom2:cval1>116.99282607327055</caom2:cval1>
-                <caom2:cval2>-27.25768483627262</caom2:cval2>
-                <caom2:type>1</caom2:type>
-              </caom2:vertex>
-              <caom2:vertex>
-                <caom2:cval1>116.99415501423573</caom2:cval1>
-                <caom2:cval2>-26.741671450734128</caom2:cval2>
-                <caom2:type>1</caom2:type>
-              </caom2:vertex>
-              <caom2:vertex>
-                <caom2:cval1>117.57197086515863</caom2:cval1>
-                <caom2:cval2>-26.741671567812805</caom2:cval2>
-                <caom2:type>1</caom2:type>
-              </caom2:vertex>
-              <caom2:vertex>
-                <caom2:cval1>0.0</caom2:cval1>
-                <caom2:cval2>0.0</caom2:cval2>
-                <caom2:type>0</caom2:type>
-              </caom2:vertex>
-            </caom2:vertices>
-          </caom2:samples>
-        </caom2:bounds>
-        <caom2:dimension>
-          <caom2:naxis1>10000</caom2:naxis1>
-          <caom2:naxis2>10000</caom2:naxis2>
-        </caom2:dimension>
-        <caom2:sampleSize>0.185768447408928</caom2:sampleSize>
-      </caom2:position>
-      <caom2:energy>
-        <caom2:bounds>
-          <caom2:lower>4.14500065002595e-07</caom2:lower>
-          <caom2:upper>5.60045812549225e-07</caom2:upper>
-          <caom2:samples>
-            <caom2:sample>
-              <caom2:lower>4.14500065002595e-07</caom2:lower>
-              <caom2:upper>5.60045812549225e-07</caom2:upper>
-            </caom2:sample>
-          </caom2:samples>
-        </caom2:bounds>
-        <caom2:dimension>1</caom2:dimension>
-        <caom2:sampleSize>1.4554574754663007e-07</caom2:sampleSize>
-        <caom2:bandpassName>g.MP9402</caom2:bandpassName>
-        <caom2:energyBands>
-          <caom2:emBand>Optical</caom2:emBand>
-        </caom2:energyBands>
-      </caom2:energy>
-      <caom2:time/>
-      <caom2:polarization/>
       <caom2:artifacts>
         <caom2:artifact caom2:id="00000000-0000-0000-bb2d-3385b95d7f61" caom2:lastModified="2019-04-03T17:13:39.332" caom2:maxLastModified="2020-11-27T18:13:40.427" caom2:metaChecksum="md5:550ca9c053fb0d686420039b8b3ecae6" caom2:accMetaChecksum="md5:3aa59ba7c84d52734427f7b491f9e347">
           <caom2:uri>ad:CFHTSG/MegaPipe.209.126.G.MP9402.fits</caom2:uri>
@@ -224,10 +148,6 @@
       <caom2:dataRelease>2019-03-06T12:36:01.000</caom2:dataRelease>
       <caom2:dataProductType>http://www.opencadc.org/caom2/DataProductType#catalog</caom2:dataProductType>
       <caom2:calibrationLevel>4</caom2:calibrationLevel>
-      <caom2:position/>
-      <caom2:energy/>
-      <caom2:time/>
-      <caom2:polarization/>
       <caom2:artifacts>
         <caom2:artifact caom2:id="19e4120b-0797-4a2f-ae78-1af78d936a0c" caom2:lastModified="2020-11-25T05:02:48.491" caom2:maxLastModified="2020-11-25T05:02:48.491" caom2:metaChecksum="md5:47549c3eb4334eec62b2d958356809cb" caom2:accMetaChecksum="md5:e960ab0e7daf26637c86f4c12330bff5">
           <caom2:uri>ad:CFHTSG/MegaPipe.209.126.G.MP9402.cat</caom2:uri>
@@ -262,88 +182,13 @@
       <caom2:metrics>
         <caom2:magLimit>24.31</caom2:magLimit>
       </caom2:metrics>
-      <caom2:position>
-        <caom2:bounds xsi:type="caom2:Polygon">
-          <caom2:points>
-            <caom2:point>
-              <caom2:cval1>116.99415501423572</caom2:cval1>
-              <caom2:cval2>-26.741671450734145</caom2:cval2>
-            </caom2:point>
-            <caom2:point>
-              <caom2:cval1>117.57197086515862</caom2:cval1>
-              <caom2:cval2>-26.7416715678128</caom2:cval2>
-            </caom2:point>
-            <caom2:point>
-              <caom2:cval1>117.57329954037573</caom2:cval1>
-              <caom2:cval2>-27.257684955987344</caom2:cval2>
-            </caom2:point>
-            <caom2:point>
-              <caom2:cval1>116.99282607327058</caom2:cval1>
-              <caom2:cval2>-27.257684836272617</caom2:cval2>
-            </caom2:point>
-          </caom2:points>
-          <caom2:samples>
-            <caom2:vertices>
-              <caom2:vertex>
-                <caom2:cval1>117.57329954037574</caom2:cval1>
-                <caom2:cval2>-27.257684955987326</caom2:cval2>
-                <caom2:type>2</caom2:type>
-              </caom2:vertex>
-              <caom2:vertex>
-                <caom2:cval1>116.99282607327055</caom2:cval1>
-                <caom2:cval2>-27.25768483627262</caom2:cval2>
-                <caom2:type>1</caom2:type>
-              </caom2:vertex>
-              <caom2:vertex>
-                <caom2:cval1>116.99415501423573</caom2:cval1>
-                <caom2:cval2>-26.741671450734128</caom2:cval2>
-                <caom2:type>1</caom2:type>
-              </caom2:vertex>
-              <caom2:vertex>
-                <caom2:cval1>117.57197086515863</caom2:cval1>
-                <caom2:cval2>-26.741671567812805</caom2:cval2>
-                <caom2:type>1</caom2:type>
-              </caom2:vertex>
-              <caom2:vertex>
-                <caom2:cval1>0.0</caom2:cval1>
-                <caom2:cval2>0.0</caom2:cval2>
-                <caom2:type>0</caom2:type>
-              </caom2:vertex>
-            </caom2:vertices>
-          </caom2:samples>
-        </caom2:bounds>
-        <caom2:dimension>
-          <caom2:naxis1>10000</caom2:naxis1>
-          <caom2:naxis2>10000</caom2:naxis2>
-        </caom2:dimension>
-        <caom2:sampleSize>0.185768447408928</caom2:sampleSize>
-      </caom2:position>
-      <caom2:energy>
-        <caom2:bounds>
-          <caom2:lower>5.672198175011651e-07</caom2:lower>
-          <caom2:upper>6.89157788875015e-07</caom2:upper>
-          <caom2:samples>
-            <caom2:sample>
-              <caom2:lower>5.672198175011651e-07</caom2:lower>
-              <caom2:upper>6.89157788875015e-07</caom2:upper>
-            </caom2:sample>
-          </caom2:samples>
-        </caom2:bounds>
-        <caom2:dimension>1</caom2:dimension>
-        <caom2:sampleSize>1.219379713738499e-07</caom2:sampleSize>
-        <caom2:bandpassName>r.MP9602</caom2:bandpassName>
-        <caom2:energyBands>
-          <caom2:emBand>Optical</caom2:emBand>
-        </caom2:energyBands>
-      </caom2:energy>
-      <caom2:time/>
-      <caom2:polarization/>
       <caom2:artifacts>
         <caom2:artifact caom2:id="00000000-0000-0000-992a-09828c20112a" caom2:lastModified="2020-12-02T08:15:44.365" caom2:maxLastModified="2020-12-02T08:15:44.365" caom2:metaChecksum="md5:c4590ca71a859a632fa710b95501c896" caom2:accMetaChecksum="md5:ecaaa2fa4a150d600fbbf1693ec1668f">
           <caom2:uri>ad:CFHTSG/MegaPipe.209.126.R.MP9602.fits</caom2:uri>
           <caom2:productType>science</caom2:productType>
           <caom2:releaseType>data</caom2:releaseType>
           <caom2:contentType>application/fits</caom2:contentType>
+          <caom2:contentLength>4697</caom2:contentLength>
           <caom2:contentChecksum>md5:a1fa10376177901f419ebc46310c0ca9</caom2:contentChecksum>
           <caom2:parts>
             <caom2:part caom2:id="00000000-0000-0000-a2a2-777e2668b938" caom2:lastModified="2019-04-03T17:13:39.332" caom2:maxLastModified="2020-12-02T08:15:44.365" caom2:metaChecksum="md5:1841d5d405d708e16ce0e4832d37c233" caom2:accMetaChecksum="md5:37102c131f9d50a3995feb579b5df16e">
@@ -438,10 +283,6 @@
       <caom2:dataRelease>2020-09-21T21:04:38.000</caom2:dataRelease>
       <caom2:dataProductType>measurements</caom2:dataProductType>
       <caom2:calibrationLevel>4</caom2:calibrationLevel>
-      <caom2:position/>
-      <caom2:energy/>
-      <caom2:time/>
-      <caom2:polarization/>
       <caom2:artifacts>
         <caom2:artifact caom2:id="31517c9d-1f36-40bb-a7b5-3658ffd78765" caom2:lastModified="2020-12-02T08:15:46.019" caom2:maxLastModified="2020-12-02T08:15:46.019" caom2:metaChecksum="md5:22e3c78be97831f2ae1e68049a6a8d2d" caom2:accMetaChecksum="md5:166a1054b819a9db5f717d9cc99368a6">
           <caom2:uri>ad:CFHTSG/MegaPipe.209.126.R.MP9602.cat</caom2:uri>

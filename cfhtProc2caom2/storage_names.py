@@ -73,13 +73,13 @@ from urllib.parse import urlparse
 from caom2pipe import manage_composable as mc
 
 
-__all__ = ['get_storage_name', 'is_ngvs', 'MEGAPIPEName', 'MP_ARCHIVE',
+__all__ = ['get_storage_name', 'is_ngvs', 'MEGAPIPEName', 'MP_URI_NAME',
            'MP_COLLECTION', 'NGVSName', 'NGVS_ARCHIVE', 'NGVS_COLLECTION']
 
 NGVS_COLLECTION = 'NGVS'
 NGVS_ARCHIVE = 'NGVS'
 MP_COLLECTION = 'CFHTMEGAPIPE'
-MP_ARCHIVE = 'CFHTSG'
+MP_URI_NAME = 'CFHTSG'
 
 
 def get_storage_name(file_name, entry):
@@ -118,7 +118,11 @@ class CFHTAdvancedProduct(mc.StorageName):
 
     NAME_PATTERN = '*'
 
-    def __init__(self, obs_id, file_name, collection, scheme, entry):
+    def __init__(
+        self, obs_id, file_name, collection, scheme, entry, uri_name=None,
+    ):
+        # uri_name - because the collection is CFHTMEGAPIPE, but the
+        # uri is cadc:CFHTSG/<file name here>
         temp_file_name = file_name.replace('.header', '')
         super(CFHTAdvancedProduct, self).__init__(
             obs_id,
@@ -128,6 +132,7 @@ class CFHTAdvancedProduct(mc.StorageName):
             compression='',
             scheme=scheme,
             entry=entry,
+            uri_name=uri_name,
         )
         self._file_name = temp_file_name
 
@@ -273,7 +278,12 @@ class MEGAPIPEName(CFHTAdvancedProduct):
     def __init__(self, file_name, entry):
         obs_id = MEGAPIPEName.get_obs_id(file_name)
         super(MEGAPIPEName, self).__init__(
-            obs_id, file_name, MP_COLLECTION, scheme='ad', entry=entry
+            obs_id,
+            file_name,
+            MP_COLLECTION,
+            scheme='ad',
+            entry=entry,
+            uri_name=MP_URI_NAME,
         )
         self._product_id = MEGAPIPEName.get_product_id(file_name)
         self._logger = logging.getLogger(__name__)

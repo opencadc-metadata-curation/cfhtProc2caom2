@@ -71,7 +71,6 @@ import importlib
 import logging
 import sys
 
-from caom2repo import CAOM2RepoClient
 from caom2 import Observation, CalibrationLevel, DataProductType, ProductType
 from caom2 import TemporalWCS, CoordAxis1D, Axis, CoordBounds1D, CoordRange1D
 from caom2 import RefCoord
@@ -213,18 +212,12 @@ class CFHTProductMapping(cc.TelescopeMapping):
                         continue
                     for part in artifact.parts.values():
                         for chunk in part.chunks:
-                            if self._informative_uri(
-                                    self._storage_name.file_name
-                            ):
+                            if self._informative_uri():
                                 self._update_energy(
                                     chunk,
                                     self._storage_name,
                                     observation.observation_id,
                                 )
-                            # if not self._storage_name.is_catalog:
-                            #     if self._storage_name.collection == sn.MP_COLLECTION:
-                            #         if chunk.position is not None:
-                            #             chunk.position.resolution = None
                             if self._storage_name.collection == sn.MP_COLLECTION:
                                 if chunk.position is not None:
                                     chunk.position.resolution = None
@@ -236,8 +229,7 @@ class CFHTProductMapping(cc.TelescopeMapping):
                             if chunk.observable is not None:
                                 chunk.observable = None
 
-                if (self._informative_uri(self._storage_name.file_name) and
-                        plane.provenance is not None):
+                if self._informative_uri() and plane.provenance is not None:
                     # SGw - 22-01-21
                     # When re-processing, I sometimes find that an image
                     # wasn't as well calibrated as I thought it was and it gets
@@ -442,7 +434,7 @@ class CFHTProductMapping(cc.TelescopeMapping):
     def get_target_name(self, ext):
         return self._storage_name.file_name.split('.')[0]
 
-    def _informative_uri(self, ext):
+    def _informative_uri(self):
         result = False
         if (
             '.weight' not in self._storage_name.file_uri
@@ -450,6 +442,7 @@ class CFHTProductMapping(cc.TelescopeMapping):
                 and '.cat' not in self._storage_name.file_uri
                 and '.mask' not in self._storage_name.file_uri
                 and '.flag' not in self._storage_name.file_uri
+                and '.gif' not in self._storage_name.file_uri
         ):
             # all the excluded names have fewer useful keywords
             result = True
@@ -602,69 +595,3 @@ def _repair_history_provenance_value(value, obs_id):
                 results.append([prov_obs_id, prov_prod_id])
     logging.debug(f'End _repair_history_provenance_value')
     return results
-
-
-# def _build_blueprints(uris):
-#     """This application relies on the caom2utils fits2caom2 ObsBlueprint
-#     definition for mapping FITS file values to CAOM model element
-#     attributes. This method builds the DRAO-ST blueprint for a single
-#     artifact.
-#
-#     The blueprint handles the mapping of values with cardinality of 1:1
-#     between the blueprint entries and the model attributes.
-#
-#     :param uris The artifact URIs for the files to be processed."""
-#     module = importlib.import_module(__name__)
-#     blueprints = {}
-#     for uri in uris:
-#         blueprint = ObsBlueprint(module=module)
-#         accumulate_bp(blueprint, uri)
-#         blueprints[uri] = blueprint
-#     return blueprints
-#
-#
-# def _filter_args(args):
-#     uris_for_later = []
-#     result = []
-#     if args.lineage:
-#         for ii in args.lineage:
-#             uri = ii.split('/', 1)[1]
-#             result.append(uri)
-#             storage_name = sn.get_storage_name(uri, uri)
-#             if not storage_name.use_metadata:
-#                 uris_for_later.append(uri)
-#     else:
-#         raise mc.CadcException(
-#             f'Could not define uri from these args {args}')
-#     return result, uris_for_later
-#
-#
-# def to_caom2():
-#     parser = get_gen_proc_arg_parser()
-#     args = parser.parse_args()
-#     # set the arguments for those files that, despite being fits files,
-#     # are processed with a generic parser - do this because fits2caom2
-#     # manages parser creation based on file names, mostly
-#     #
-#     uris, generic_uris = _filter_args(args)
-#     blueprints = _build_blueprints(uris)
-#     if len(generic_uris) > 0:
-#         sys.argv.append('--use_generic_parser')
-#         for ii in generic_uris:
-#             sys.argv.append(ii)
-#         args = parser.parse_args()
-#     result = gen_proc(args, blueprints)
-#     logging.debug(f'Done {APPLICATION} processing.')
-#     return result
-#
-#
-# def cfht_proc_main_app():
-#     args = get_gen_proc_arg_parser().parse_args()
-#     try:
-#         result = to_caom2()
-#         sys.exit(result)
-#     except Exception as e:
-#         logging.error(f'Failed {APPLICATION} execution for {args}.')
-#         tb = traceback.format_exc()
-#         logging.debug(tb)
-#         sys.exit(-1)
