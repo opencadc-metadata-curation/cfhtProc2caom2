@@ -74,9 +74,12 @@ import sys
 
 from mock import patch
 
+from caom2.diff import get_differences
 from astropy.io.votable import parse_single_table
-from cfhtProc2caom2 import main_app, storage_names
+from cfhtProc2caom2 import main_app, storage_names, fits2caom2_augmentation
+from caom2pipe import astro_composable as ac
 from caom2pipe import manage_composable as mc
+from caom2pipe import reader_composable as rdc
 
 import test_storage_name
 
@@ -126,8 +129,52 @@ def test_main_app(
     # assert False  # cause I want to see logging messages
 
 
-def test_visit(test_name):
-    pass
+@patch('caom2pipe.client_composable.repo_get')
+@patch('caom2utils.data_util.get_local_headers_from_fits')
+@patch('caom2pipe.astro_composable.get_vo_table')
+def test_visitor(vo_mock, header_mock, repo_mock, test_name):
+    vo_mock.side_effect = _vo_mock
+    header_mock.side_effect = ac.make_headers_from_file
+    repo_mock.side_effect = _repo_read_mock
+    dir_name = 'ngvs' if 'NGVS' in test_name else 'megaprime'
+    observation = None
+    for f_name in test_storage_name.LOOKUP[test_name]:
+        if f_name.startswith('vos'):
+            continue
+
+        fqn = f'{TEST_DATA_DIR}/{dir_name}/{f_name}'
+        temp_f_name = f_name
+        storage_name = storage_names.get_storage_name(temp_f_name, fqn)
+        metadata_reader = rdc.FileMetadataReader()
+        metadata_reader.set(storage_name)
+        logging.error(metadata_reader.file_info.keys())
+        if 'cat' in f_name:
+            metadata_reader.file_info[storage_name.file_uri].file_type = (
+                'text/plain'
+            )
+        else:
+            metadata_reader.file_info[storage_name.file_uri].file_type = (
+                'application/fits'
+            )
+        kwargs = {
+            'storage_name': storage_name,
+            'metadata_reader': metadata_reader,
+            'caom_repo_client': repo_mock,
+        }
+        observation = fits2caom2_augmentation.visit(observation, **kwargs)
+
+    expected_fqn = f'{TEST_DATA_DIR}/{dir_name}/{test_name}.expected.xml'
+    expected = mc.read_obs_from_file(expected_fqn)
+    compare_result = get_differences(expected, observation)
+    if compare_result is not None:
+        actual_fqn = expected_fqn.replace('expected', 'actual')
+        mc.write_obs_to_file(observation, actual_fqn)
+        compare_text = '\n'.join([r for r in compare_result])
+        msg = (
+            f'Differences found in observation {expected.observation_id}\n'
+            f'{compare_text}'
+        )
+        raise AssertionError(msg)
 
 
 def get_work_dir(value):

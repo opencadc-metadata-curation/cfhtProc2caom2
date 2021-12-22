@@ -3,7 +3,7 @@
 # ******************  CANADIAN ASTRONOMY DATA CENTRE  *******************
 # *************  CENTRE CANADIEN DE DONNÉES ASTRONOMIQUES  **************
 #
-#  (c) 2020.                            (c) 2020.
+#  (c) 2021.                            (c) 2021.
 #  Government of Canada                 Gouvernement du Canada
 #  National Research Council            Conseil national de recherches
 #  Ottawa, Canada, K1A 0R6              Ottawa, Canada, K1A 0R6
@@ -62,48 +62,23 @@
 #  <http://www.gnu.org/licenses/>.      pas le cas, consultez :
 #                                       <http://www.gnu.org/licenses/>.
 #
-#  $Revision: 4 $
+#  : 4 $
 #
 # ***********************************************************************
 #
 
-from cfhtProc2caom2 import storage_names
-
-LOOKUP = {
-      'MegaPipe.358.122': ['MegaPipe.358.122.G.MP9401.fits.header',
-                           'MegaPipe.358.122.GRI.MP9605.fits.header',
-                           'MegaPipe.358.122.I.MP9702.fits.header',
-                           'MegaPipe.358.122.R.MP9601.fits.header',
-                           'MegaPipe.358.122.G.MP9401.fits.gif',
-                           'MegaPipe.358.122.G.MP9401.weight.fits.header',
-                           'MegaPipe.358.122.GRI.MP9605.fits.gif',
-                           'MegaPipe.358.122.GRI.MP9605.weight.fits.header',
-                           'MegaPipe.358.122.I.MP9702.fits.gif',
-                           'MegaPipe.358.122.I.MP9702.weight.fits.header',
-                           'MegaPipe.358.122.R.MP9601.fits.gif',
-                           'MegaPipe.358.122.R.MP9601.weight.fits.header'],
-      'MegaPipe.209.126': ['MegaPipe.209.126.R.MP9602.fits.header'],
-      'NGVS+0+0': ['NGVS+0+0.l.i.Mg002.fits.header',
-                   'NGVS+0+0.l.i.Mg002.cat',
-                   'NGVS+0+0.l.i.Mg002.fits.mask.rd.reg',
-                   'NGVS+0+0.l.i.Mg002.flag.fits.fz',
-                   'NGVS+0+0.l.i.Mg002.sig.fits.header',
-                   'NGVS+0+0.l.i.Mg002.weight.fits.fz.header',
-                   'vos:ngvs/masks/NGVS+0+0.l.i.Mg002.flag.fits.fz']}
+from caom2pipe import caom_composable as cc
+from cfhtProc2caom2 import main_app
 
 
-def test_single():
-    test_entry = 'MegaPipe.358.122.G.MP9401.fits'
-    test_subject = storage_names.get_storage_name(test_entry, test_entry)
-    assert test_subject.obs_id == 'MegaPipe.358.122', 'wrong obs id'
-    assert test_subject.product_id == 'MegaPipe.358.122.G.MP9401', \
-        'wrong product id'
-    assert test_subject.filter_name == 'G', 'wrong filter name'
+class CFHTProcFits2caom2Visitor(cc.Fits2caom2Visitor):
+
+    def __init__(self, observation, **kwargs):
+        super().__init__(observation, **kwargs)
+
+    def _get_mapping(self, headers):
+        return main_app.CFHTProductMapping(self._storage_name, headers)
 
 
-def test_is_valid():
-    for key, value in LOOKUP.items():
-        for entry in value:
-            sn = storage_names.get_storage_name(entry, entry)
-            assert sn.is_valid()
-            assert sn.obs_id == key, f'wrong obs id {sn.obs_id}'
+def visit(observation, **kwargs):
+    return CFHTProcFits2caom2Visitor(observation, **kwargs).visit()

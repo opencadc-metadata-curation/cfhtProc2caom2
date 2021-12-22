@@ -69,23 +69,22 @@
 
 import importlib
 import logging
-import os
 import sys
-import traceback
 
 from caom2repo import CAOM2RepoClient
 from caom2 import Observation, CalibrationLevel, DataProductType, ProductType
 from caom2 import TemporalWCS, CoordAxis1D, Axis, CoordBounds1D, CoordRange1D
-from caom2 import RefCoord, CoordFunction1D, RefCoord
-from caom2utils import ObsBlueprint, get_gen_proc_arg_parser, gen_proc
+from caom2 import RefCoord
+from caom2utils import ObsBlueprint, update_artifact_meta
 from caom2pipe import astro_composable as ac
 from caom2pipe import caom_composable as cc
+from caom2pipe import client_composable as clc
 from caom2pipe import manage_composable as mc
 from caom2pipe import translate_composable as tc
 from cfhtProc2caom2 import storage_names as sn
 
 
-__all__ = ['cfht_proc_main_app', 'to_caom2', 'update', 'APPLICATION']
+__all__ = ['APPLICATION', 'CFHTProductMapping']
 
 
 APPLICATION = 'cfhtProc2caom2'
@@ -126,31 +125,26 @@ CAOM_FILTER_REPAIR_LOOKUP = {'I.MP9703': 'i.MP9703',
                              'Z.MP9801': 'z.MP9801'}
 
 
-class Telescope(object):
+class CFHTProductMapping(cc.TelescopeMapping):
 
-    def __init__(self, uri, headers):
-        self._uri = uri
-        self._headers = headers
-        self._logger = logging.getLogger(self.__class__.__name__)
+    def __init__(self, storage_name, headers):
+        super().__init__(storage_name, headers)
 
-    def accumulate_bp(bp, uri):
-        """Configure the telescope-specific ObsBlueprint at the CAOM model
-        Observation level."""
-        logging.debug(f'Begin accumulate_bp for {uri}.')
+    def accumulate_blueprint(self, bp, application=None):
+        super().accumulate_blueprint(bp, APPLICATION)
         bp.configure_position_axes((1, 2))
 
-        scheme, archive, file_name = mc.decompose_uri(uri)
-        storage_name = sn.get_storage_name(file_name, file_name)
-        if sn.is_ngvs(uri):
-            _accumulate_ngvs_bp(bp, storage_name)
+        # TODO - should this call be in here twice?
+        if sn.is_ngvs(self._storage_name.file_uri):
+            self._accumulate_ngvs_bp(bp)
         else:
-            _accumulate_mp_bp(bp, storage_name)
+            self._accumulate_mp_bp(bp)
 
         # they're all DerivedObservations
         bp.set('DerivedObservation.members', {})
         bp.set('Observation.type', 'OBJECT')
 
-        bp.set('Observation.proposal.id', 'get_proposal_id(header)')
+        bp.set('Observation.proposal.id', 'get_proposal_id()')
 
         bp.clear('Plane.metaRelease')
         bp.add_fits_attribute('Plane.metaRelease', 'REL_DATE')
@@ -165,93 +159,92 @@ class Telescope(object):
         bp.set('Observation.telescope.geoLocationY', y)
         bp.set('Observation.telescope.geoLocationZ', z)
 
-        bp.set('Plane.calibrationLevel', 'get_calibration_level(uri)')
-        bp.set('Plane.dataProductType', 'get_data_product_type(uri)')
+        bp.set('Plane.calibrationLevel', 'get_calibration_level()')
+        bp.set('Plane.dataProductType', 'get_data_product_type()')
         bp.set('Plane.provenance.producer', 'CADC')
 
-        bp.set('Artifact.productType', 'get_artifact_product_type(uri)')
+        bp.set('Artifact.productType', 'get_artifact_product_type()')
+        bp.set('Artifact.releaseType', 'data')
 
-        if storage_name.collection == sn.MP_COLLECTION:
-            _accumulate_mp_bp(bp, storage_name)
+        if self._storage_name.collection == sn.MP_COLLECTION:
+            self._accumulate_mp_bp(bp)
         else:
-            _accumulate_ngvs_bp(bp, storage_name)
+            self._accumulate_ngvs_bp(bp)
 
-        logging.debug('Done accumulate_bp.')
+        self._logger.debug('Done accumulate_bp.')
 
-
-    def update(observation, **kwargs):
-        """Called to fill multiple CAOM model elements and/or attributes, must
-        have this signature for import_module loading and execution.
-
-        :param observation A CAOM Observation model instance.
-        :param **kwargs Everything else."""
-        logging.debug('Begin update.')
+    def update(self, observation, file_info, caom_repo_client):
+        """
+        Called to fill multiple CAOM model elements and/or attributes.
+        """
         mc.check_param(observation, Observation)
-        fqn = kwargs.get('fqn')
-        headers = kwargs.get('headers')
-        uri = kwargs.get('uri')
-
-        if uri is not None:
-            storage_name = sn.get_storage_name(uri, uri)
-        elif fqn is not None:
-            temp = os.path.basename(fqn)
-            storage_name = sn.get_storage_name(temp, temp)
-        else:
-            raise mc.CadcException(f'Cannot define a MEGAPIPEName instance for '
-                                   f'{observation.observation_id}')
-        if headers is None:
-            logging.warning(f'No metadata for {storage_name.file_name}')
-            return observation
-
-        logging.debug(f'Update for {observation.observation_id} with '
-                      f'{storage_name.file_name}.')
+        self._logger.debug(
+            f'Update for {observation.observation_id} with '
+            f'{self._storage_name.file_name}.'
+        )
 
         max_meta_release = observation.meta_release
         min_seeing = None
         if (observation.environment is not None and
                 observation.environment.seeing is not None):
             min_seeing = observation.environment.seeing
-        if not storage_name.is_catalog:
-            for plane in observation.planes.values():
-                max_meta_release = _update_release_date(
-                    plane, max_meta_release, headers)
-                if plane.product_id != storage_name.product_id:
+        for plane in observation.planes.values():
+            max_meta_release = self._update_release_date(
+                plane, max_meta_release
+            )
+            if plane.product_id != self._storage_name.product_id:
+                continue
+            min_seeing = self._minimize(
+                min_seeing, self._get_keyword('FINALIQ')
+            )
+            for artifact in plane.artifacts.values():
+                if artifact.uri != self._storage_name.file_uri:
+                    self._logger.debug(
+                        f'Artifact uri is {artifact.uri} but working on '
+                        f'{self._storage_name.file_uri}. Continuing.'
+                    )
                     continue
-                min_seeing = _minimize(min_seeing,
-                                       _get_keyword(headers, 'FINALIQ'))
-                for artifact in plane.artifacts.values():
-                    if artifact.uri != storage_name.file_uri:
-                        continue
+                update_artifact_meta(artifact, file_info)
+
+                if not self._storage_name.is_catalog:
                     if (artifact.product_type is ProductType.WEIGHT and
-                            storage_name.collection == sn.MP_COLLECTION):
+                            self._storage_name.collection == sn.MP_COLLECTION):
                         artifact.parts = None
                         continue
                     for part in artifact.parts.values():
                         for chunk in part.chunks:
-                            if _informative_uri(storage_name.file_name):
-                                _update_energy(chunk, headers, storage_name,
-                                               observation.observation_id)
-                            if not storage_name.is_catalog:
-                                if storage_name.collection == sn.MP_COLLECTION:
-                                    if chunk.position is not None:
-                                        chunk.position.resolution = None
+                            if self._informative_uri(
+                                    self._storage_name.file_name
+                            ):
+                                self._update_energy(
+                                    chunk,
+                                    self._storage_name,
+                                    observation.observation_id,
+                                )
+                            # if not self._storage_name.is_catalog:
+                            #     if self._storage_name.collection == sn.MP_COLLECTION:
+                            #         if chunk.position is not None:
+                            #             chunk.position.resolution = None
+                            if self._storage_name.collection == sn.MP_COLLECTION:
+                                if chunk.position is not None:
+                                    chunk.position.resolution = None
 
-                            # SGw - 24-11-20 - set observable/axis to None: there
-                            # is no such information in the files
+                            # SGw - 24-11-20 - set observable/axis to None:
+                            # there is no such information in the files
                             if chunk.observable_axis is not None:
                                 chunk.observable_axis = None
                             if chunk.observable is not None:
                                 chunk.observable = None
 
-                if (_informative_uri(storage_name.file_name) and
+                if (self._informative_uri(self._storage_name.file_name) and
                         plane.provenance is not None):
                     # SGw - 22-01-21
-                    # When re-processing, I sometimes find that an image wasn't as
-                    # well calibrated as I thought it was and it gets removed from
-                    # the next generation data products. So I would like the
-                    # ability to remove inputs
+                    # When re-processing, I sometimes find that an image
+                    # wasn't as well calibrated as I thought it was and it gets
+                    # removed from the next generation data products. So I
+                    # would like the ability to remove inputs
                     cc.update_plane_provenance_single(
-                        plane, headers, 'HISTORY', 'CFHT',
+                        plane, self._headers, 'HISTORY', 'CFHT',
                         _repair_history_provenance_value,
                         observation.observation_id)
                     if plane.provenance.run_id == 'None':
@@ -260,30 +253,35 @@ class Telescope(object):
                             'None' in plane.provenance.keywords):
                         plane.provenance.keywords.remove('None')
 
-                # _update_ngvs_time is dependent on provenance information that is
-                # generated right before this
-                if (storage_name.collection == sn.NGVS_COLLECTION and
-                        not storage_name.is_catalog):
+                # _update_ngvs_time is dependent on provenance information
+                # that is generated right before this
+                if (self._storage_name.collection == sn.NGVS_COLLECTION and
+                        not self._storage_name.is_catalog):
                     for artifact in plane.artifacts.values():
-                        if artifact.uri != storage_name.file_uri:
+                        if artifact.uri != self._storage_name.file_uri:
                             continue
                         for part in artifact.parts.values():
                             for chunk in part.chunks:
-                                _update_ngvs_time(chunk, plane.provenance,
-                                                  observation.observation_id)
+                                self._update_ngvs_time(
+                                    chunk,
+                                    plane.provenance,
+                                    observation.observation_id,
+                                    caom_repo_client,
+                                )
         observation.meta_release = max_meta_release
         if observation.environment is not None:
             observation.environment.seeing = min_seeing
         if (observation.target is not None and
-                storage_name.collection == sn.MP_COLLECTION):
+                self._storage_name.collection == sn.MP_COLLECTION):
             observation.target.standard = False
         cc.update_observation_members(observation)
-        logging.debug('Done update.')
+        self._logger.debug('Done update.')
         return observation
 
-
-    def _accumulate_mp_bp(bp, storage_name):
-        logging.debug(f'Begin _accumulate_mp_bp for {storage_name.file_name}')
+    def _accumulate_mp_bp(self, bp):
+        self._logger.debug(
+            f'Begin _accumulate_mp_bp for {self._storage_name.file_name}'
+        )
 
         bp.clear('Observation.metaRelease')
         bp.add_fits_attribute('Observation.metaRelease', 'DATE')
@@ -295,7 +293,7 @@ class Telescope(object):
         bp.clear('Observation.environment.seeing')
         bp.add_fits_attribute('Observation.environment.seeing', 'FINALIQ')
 
-        bp.set('Observation.proposal.id', 'get_proposal_id(header)')
+        bp.set('Observation.proposal.id', 'get_proposal_id()')
 
         bp.clear('Plane.metaRelease')
         bp.add_fits_attribute('Plane.metaRelease', 'DATE')
@@ -314,25 +312,26 @@ class Telescope(object):
         bp.set('Plane.provenance.reference',
                'http://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/en/megapipe/')
 
-        if storage_name.is_preview:
+        if self._storage_name.is_preview:
             bp.set('Artifact.productType', ProductType.PREVIEW)
 
         bp.clear('Chunk.position.coordsys')
         bp.add_fits_attribute('Chunk.position.coordsys', 'RADECSYS')
 
         bp.clear('Observation.target.name')
-        if not storage_name.is_weight:
+        if not self._storage_name.is_weight:
             bp.clear('Plane.provenance.lastExecuted')
             bp.add_fits_attribute('Plane.provenance.lastExecuted', 'DATE')
             bp.add_fits_attribute('Observation.target.name', 'OBJECT')
             bp.clear('Plane.metrics.magLimit')
             bp.add_fits_attribute('Plane.metrics.magLimit', 'ML_5SIGA')
 
-        logging.debug(f'End _accumulate_mp_bp.')
+        self._logger.debug(f'End _accumulate_mp_bp.')
 
-
-    def _accumulate_ngvs_bp(bp, storage_name):
-        logging.debug(f'Begin _accumulate_ngvs_bp for {storage_name.file_name}.')
+    def _accumulate_ngvs_bp(self, bp):
+        self._logger.debug(
+            f'Begin _accumulate_ngvs_bp for {self._storage_name.file_name}.'
+        )
         bp.clear('Observation.algorithm.name')
 
         # NGVS
@@ -348,120 +347,121 @@ class Telescope(object):
                'Next Generation Virgo Cluster Survey')
         bp.set('Observation.proposal.keywords', 'Galaxy Cluster Dwarfs')
 
-        bp.set('Observation.target.name', 'get_target_name(uri)')
-        if 'weight' not in storage_name.file_uri:
+        bp.set('Observation.target.name', 'get_target_name()')
+        if 'weight' not in self._storage_name.file_uri:
             bp.set('Observation.target.type', 'field')
 
         bp.set('Plane.dataRelease', '2022-01-01T00:00:00')
         bp.set('Plane.metaRelease', '2022-01-01T00:00:00')
         # SGw 28-07-20
-        # The last 4 characters in the ID column (l128 vs g002 vs g004) refer to
-        # variation in the pipeline. If they could be captured as
+        # The last 4 characters in the ID column (l128 vs g002 vs g004)
+        # refer to variation in the pipeline. If they could be captured as
         # plane.provenance.name = MegaPipe_g004 that would be great.
-        bp.set('Plane.provenance.name', f'MegaPipe_{storage_name.version}')
+        bp.set(
+            'Plane.provenance.name', f'MegaPipe_{self._storage_name.version}'
+        )
         bp.clear('Plane.provenance.keywords')
         bp.add_fits_attribute('Plane.provenance.keywords', 'COMBINET')
         bp.set('Plane.provenance.project', 'NGVS')
         bp.set('Plane.provenance.reference',
                'http://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/en/community/ngvs/'
                'docs/ngvsdoc.html')
-        bp.set('Plane.provenance.version', 'get_provenance_version(uri)')
+        bp.set('Plane.provenance.version', 'get_provenance_version()')
 
-        bp.set('Artifact.productType', 'get_artifact_product_type(uri)')
+        bp.set('Artifact.productType', 'get_artifact_product_type()')
 
-        bp.set('Chunk.energy.bandpassName', 'get_ngvs_bandpass_name(uri)')
+        bp.set('Chunk.energy.bandpassName', 'get_ngvs_bandpass_name()')
 
         bp.clear('Plane.metrics.magLimit')
         bp.add_fits_attribute('Plane.metrics.magLimit', 'MAGLIM')
 
-        logging.debug(f'End _accumulate_ngvs_bp.')
+        self._logger.debug(f'End _accumulate_ngvs_bp.')
 
-
-    def _get_keyword(headers, keyword):
-        result = headers[0].get(keyword)
-        if result is None and len(headers) > 1:
-            result = headers[1].get(keyword)
+    def _get_keyword(self, keyword):
+        result = None
+        if len(self._headers) > 0:
+            result = self._headers[0].get(keyword)
+            if result is None and len(self._headers) > 1:
+                result = self._headers[1].get(keyword)
         return result
 
-
-    def get_artifact_product_type(uri):
+    def get_artifact_product_type(self, ext):
         result = ProductType.SCIENCE
-        if 'weight' in uri or '.sig' in uri:
+        if (
+            'weight' in self._storage_name.file_uri
+                or '.sig' in self._storage_name.file_uri
+        ):
             result = ProductType.WEIGHT
-        elif 'mask.rd.reg' in uri or '.flag' in uri:
+        elif (
+            'mask.rd.reg' in self._storage_name.file_uri
+            or '.flag' in self._storage_name.file_uri
+        ):
             result = ProductType.AUXILIARY
         return result
 
-
-    def get_calibration_level(uri):
+    def get_calibration_level(self, ext):
         result = CalibrationLevel.PRODUCT
-        storage_name = sn.get_storage_name(uri, uri)
-        if storage_name.is_catalog:
+        if self._storage_name.is_catalog:
             result = CalibrationLevel.ANALYSIS_PRODUCT
         return result
 
-
-    def get_data_product_type(uri):
+    def get_data_product_type(self, ext):
         result = DataProductType.IMAGE
-        storage_name = sn.get_storage_name(uri, uri)
-        if storage_name.is_catalog:
+        if self._storage_name.is_catalog:
             # PD 09-12-20
-            # I need to modify the ObsCore view to filter the observations with
-            # DataProductType.catalog out (not compliant to spec) but there is a
-            # different value measurements that means roughly the same thing.
-            # There should be a DataProductType constant declared in the py library
-            # for this value.
+            # I need to modify the ObsCore view to filter the observations
+            # with DataProductType.catalog out (not compliant to spec) but
+            # there is a different value measurements that means roughly the
+            # same thing. There should be a DataProductType constant declared
+            # in the py library for this value.
             result = DataProductType.MEASUREMENTS
         return result
 
-
-    def get_ngvs_bandpass_name(uri):
+    def get_ngvs_bandpass_name(self, ext):
         reverse_filter_lookup = {
             'i': 'i.MP9703',
             'g': 'g.MP9402',
             'r': 'r.MP9602',
             'u': 'u.MP9302',
             'z': 'z.MP9901'}
-        storage_name = sn.get_storage_name(uri, uri)
         result = None
-        if storage_name.filter_name is not None:
-            result = reverse_filter_lookup.get(storage_name.filter_name)
+        if self._storage_name.filter_name is not None:
+            result = reverse_filter_lookup.get(self._storage_name.filter_name)
         return result
 
-
-    def get_proposal_id(header):
+    def get_proposal_id(self, ext):
         # JJK - 23-03-20
-        # Replace with value of ProposalID from the first input ‘member’  from list
+        # Replace with value of ProposalID from the first input ‘member’
+        # from list
         # TODO
         return None
 
+    def get_provenance_version(self, ext):
+        return self._storage_name.version
 
-    def get_provenance_version(uri):
-        storage_name = sn.get_storage_name(uri, uri)
-        return storage_name.version
+    def get_target_name(self, ext):
+        return self._storage_name.file_name.split('.')[0]
 
-
-    def get_target_name(uri):
-        return mc.CaomName(uri).file_name.split('.')[0]
-
-
-    def _informative_uri(uri):
+    def _informative_uri(self, ext):
         result = False
-        if ('.weight' not in uri and '.sig' not in uri and '.cat' not in uri and
-                '.mask' not in uri and '.flag' not in uri):
+        if (
+            '.weight' not in self._storage_name.file_uri
+                and '.sig' not in self._storage_name.file_uri
+                and '.cat' not in self._storage_name.file_uri
+                and '.mask' not in self._storage_name.file_uri
+                and '.flag' not in self._storage_name.file_uri
+        ):
             # all the excluded names have fewer useful keywords
             result = True
         return result
 
-
-    def _finish_catalog_plane(observation, plane):
-        logging.debug(f'Begin _finish_catalog_plane for '
+    def _finish_catalog_plane(self, observation, plane):
+        self._logger.debug(f'Begin _finish_catalog_plane for '
                       f'{observation.observation_id}.')
         plane.meta_release = observation.meta_release
-        logging.debug('Done _finish_catalog_plane.')
+        self._logger.debug('Done _finish_catalog_plane.')
 
-
-    def _minimize(x, candidate):
+    def _minimize(self, x, candidate):
         result = x
         if candidate is not None:
             if x is None:
@@ -470,22 +470,20 @@ class Telescope(object):
                 result = min(x, candidate)
         return result
 
-
-    def _update_energy(chunk, headers, storage_name, obs_id):
-        logging.debug(f'Begin _update_energy for {obs_id}')
+    def _update_energy(self, chunk, storage_name, obs_id):
+        self._logger.debug(f'Begin _update_energy for {obs_id}')
         filter_name = storage_name.filter_name
         filter_md = filter_cache.get_svo_filter(INSTRUMENT, filter_name)
         cc.build_chunk_energy_range(chunk, filter_name, filter_md)
         if storage_name.collection == sn.MP_COLLECTION:
-            temp = _get_keyword(headers, 'FILTER')
+            temp = self._get_keyword('FILTER')
             # an attempt to keep the number of unique filter names lower
             chunk.energy.bandpass_name = CAOM_FILTER_REPAIR_LOOKUP.get(temp)
         if storage_name.collection == sn.MP_COLLECTION:
             chunk.energy.resolving_power = None
-        logging.debug(f'End _update_energy.')
+        self._logger.debug(f'End _update_energy.')
 
-
-    def _update_observation_metadata(obs, headers, ngvs_name, uri):
+    def _update_observation_metadata(self, obs, ngvs_name):
         """
         Why this method exists:
 
@@ -501,37 +499,43 @@ class Telescope(object):
         Hence the self-referential implementation. Maybe it will result in an
         infinite loop and I'll be sad.
         """
-        n_axis = headers[0].get('NAXIS')
+        n_axis = self._headers[0].get('NAXIS')
         if n_axis == 0:
-            logging.warning(f'Resetting the header/blueprint relationship for '
-                            f'{ngvs_name.file_name} in {obs.observation_id}')
+            self._logger.warning(
+                f'Resetting the header/blueprint relationship for '
+                f'{ngvs_name.file_name} in {obs.observation_id}'
+            )
             module = importlib.import_module(__name__)
             blueprint = ObsBlueprint(module=module)
-            accumulate_bp(blueprint, uri)
+            self.accumulate_bp(blueprint)
             tc.add_headers_to_obs_by_blueprint(
-                obs, [headers[1]], blueprint, uri, ngvs_name.product_id)
+                obs,
+                [self._headers[1]],
+                blueprint,
+                self._storage_name.file_uri,
+                ngvs_name.product_id,
+            )
 
-
-    def _update_ngvs_time(chunk, provenance, obs_id):
-        logging.debug(f'Begin _update_ngvs_time for {obs_id}')
+    def _update_ngvs_time(self, chunk, provenance, obs_id, caom_repo_client):
+        self._logger.debug(f'Begin _update_ngvs_time for {obs_id}')
         if (chunk is not None and provenance is not None and
                 len(provenance.inputs) > 0):
-            # bounds = ctor
             config = mc.Config()
-            config.get_executors()
-            subject = mc.define_subject(config)
-            client = CAOM2RepoClient(
-                subject, config.logging_level, 'ivo://cadc.nrc.ca/ams')
             metrics = mc.Metrics(config)
             bounds = CoordBounds1D()
             min_date = 0
             max_date = sys.float_info.max
             exposure = 0
             for entry in provenance.inputs:
-                ip_obs_id, ip_product_id = mc.CaomName.decompose_provenance_input(
-                    entry.uri)
-                logging.info(f'Retrieving provenance metadata for {ip_obs_id}.')
-                ip_obs = mc.repo_get(client, 'CFHT', ip_obs_id, metrics)
+                ip_obs_id, ip_product_id = (
+                    mc.CaomName.decompose_provenance_input(entry.uri)
+                )
+                self._logger.info(
+                    f'Retrieving provenance metadata for {ip_obs_id}.'
+                )
+                ip_obs = clc.repo_get(
+                    caom_repo_client, 'CFHT', ip_obs_id, metrics
+                )
                 if ip_obs is not None:
                     ip_plane = ip_obs.planes.get(ip_product_id)
                     if (ip_plane is not None and ip_plane.time is not None and
@@ -543,32 +547,38 @@ class Telescope(object):
                         max_date = max(ip_plane.time.bounds.upper, max_date)
                         exposure += ip_plane.time.exposure
             axis = Axis(ctype='TIME', cunit='d')
-            time_axis = CoordAxis1D(axis=axis,
-                                    error=None,
-                                    range=None,
-                                    bounds=bounds,
-                                    function=None)
-            temporal_wcs = TemporalWCS(axis=time_axis, timesys=None, trefpos=None,
-                                       mjdref=None, exposure=mc.to_float(exposure),
-                                       resolution=None)
+            time_axis = CoordAxis1D(
+                axis=axis,
+                error=None,
+                range=None,
+                bounds=bounds,
+                function=None,
+            )
+            temporal_wcs = TemporalWCS(
+                axis=time_axis,
+                timesys=None,
+                trefpos=None,
+                mjdref=None,
+                exposure=mc.to_float(exposure),
+                resolution=None,
+            )
             chunk.time = temporal_wcs
-        logging.debug(f'End _update_ngvs_time.')
+        self._logger.debug(f'End _update_ngvs_time.')
 
-
-    def _update_release_date(plane, max_meta_release, headers):
-        logging.debug(f'Begin _update_release_date for {plane.product_id}')
+    def _update_release_date(self, plane, max_meta_release):
+        self._logger.debug(f'Begin _update_release_date for {plane.product_id}')
         if plane.meta_release is None:
-            plane.meta_release = mc.make_time(_get_keyword(headers, 'DATE'))
+            plane.meta_release = mc.make_time(self._get_keyword('DATE'))
             if plane.meta_release is None:
                 plane.meta_release = mc.make_time(
-                    _get_keyword(headers, 'REL_DATE'))
+                    self._get_keyword('REL_DATE'))
 
         if plane.meta_release is not None:
             max_meta_release = max(max_meta_release, plane.meta_release)
 
         if plane.data_release is None and plane.meta_release is not None:
             plane.data_release = plane.meta_release
-        logging.debug('End _update_release_date')
+        self._logger.debug('End _update_release_date')
         return max_meta_release
 
 
