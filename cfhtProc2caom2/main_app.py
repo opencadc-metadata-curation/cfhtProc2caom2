@@ -67,19 +67,17 @@
 # ***********************************************************************
 #
 
-import importlib
 import logging
 import sys
 
 from caom2 import Observation, CalibrationLevel, DataProductType, ProductType
 from caom2 import TemporalWCS, CoordAxis1D, Axis, CoordBounds1D, CoordRange1D
 from caom2 import RefCoord
-from caom2utils import ObsBlueprint, update_artifact_meta
+from caom2utils import update_artifact_meta
 from caom2pipe import astro_composable as ac
 from caom2pipe import caom_composable as cc
 from caom2pipe import client_composable as clc
 from caom2pipe import manage_composable as mc
-from caom2pipe import translate_composable as tc
 from cfhtProc2caom2 import storage_names as sn
 
 
@@ -191,35 +189,25 @@ class CFHTProductMapping(cc.TelescopeMapping):
                 update_artifact_meta(artifact, file_info)
 
                 if not self._storage_name.is_catalog:
-                    if (artifact.product_type is ProductType.WEIGHT and
-                            self._storage_name.collection == sn.MP_COLLECTION):
-                        artifact.parts = None
+                    if self._update_parts(artifact):
                         continue
                     for part in artifact.parts.values():
                         for chunk in part.chunks:
                             if self._informative_uri():
                                 self._update_energy(
-                                    chunk,
-                                    self._storage_name,
-                                    observation.observation_id,
+                                    chunk, observation.observation_id
                                 )
-                            if self._storage_name.collection == sn.MP_COLLECTION:
-                                if chunk.position is not None:
-                                    chunk.position.resolution = None
-
+                            self._update_position(chunk)
                             # SGw - 24-11-20 - set observable/axis to None:
                             # there is no such information in the files
-                            if chunk.observable_axis is not None:
-                                chunk.observable_axis = None
-                            if chunk.observable is not None:
-                                chunk.observable = None
+                            cc.reset_observable(chunk)
 
                 if self._informative_uri() and plane.provenance is not None:
                     # SGw - 22-01-21
                     # When re-processing, I sometimes find that an image
-                    # wasn't as well calibrated as I thought it was and it gets
-                    # removed from the next generation data products. So I
-                    # would like the ability to remove inputs
+                    # wasn't as well calibrated as I thought it was and it
+                    # gets removed from the next generation data products. So
+                    # I would like the ability to remove inputs
                     cc.update_plane_provenance_single(
                         plane, self._headers, 'HISTORY', 'CFHT',
                         _repair_history_provenance_value,
@@ -230,17 +218,14 @@ class CFHTProductMapping(cc.TelescopeMapping):
                             'None' in plane.provenance.keywords):
                         plane.provenance.keywords.remove('None')
 
-                # _update_time is dependent on provenance information
-                # that is generated right before this
-                self._update_time(
-                    plane, observation.observation_id, caom_repo_client
-                )
+            # _update_time is dependent on provenance information
+            # that is generated right before this
+            self._update_time(
+                plane, observation.observation_id, caom_repo_client
+            )
         observation.meta_release = max_meta_release
         if observation.environment is not None:
             observation.environment.seeing = min_seeing
-        if (observation.target is not None and
-                self._storage_name.collection == sn.MP_COLLECTION):
-            observation.target.standard = False
         cc.update_observation_members(observation)
         self._logger.debug('Done update.')
         return observation
@@ -321,18 +306,21 @@ class CFHTProductMapping(cc.TelescopeMapping):
                 result = min(x, candidate)
         return result
 
-    def _update_energy(self, chunk, storage_name, obs_id):
+    def _update_energy(self, chunk, obs_id):
         self._logger.debug(f'Begin _update_energy for {obs_id}')
-        filter_name = storage_name.filter_name
-        filter_md = filter_cache.get_svo_filter(INSTRUMENT, filter_name)
-        cc.build_chunk_energy_range(chunk, filter_name, filter_md)
-        if storage_name.collection == sn.MP_COLLECTION:
-            temp = self._get_keyword('FILTER')
-            # an attempt to keep the number of unique filter names lower
-            chunk.energy.bandpass_name = CAOM_FILTER_REPAIR_LOOKUP.get(temp)
-        if storage_name.collection == sn.MP_COLLECTION:
-            chunk.energy.resolving_power = None
+        filter_md = filter_cache.get_svo_filter(
+            INSTRUMENT, self._storage_name.filter_name
+        )
+        cc.build_chunk_energy_range(
+            chunk, self._storage_name.filter_name, filter_md
+        )
         self._logger.debug(f'End _update_energy.')
+
+    def _update_parts(self, artifact):
+        return False
+
+    def _update_position(self, chunk):
+        pass
 
     def _update_release_date(self, plane, max_meta_release):
         self._logger.debug(f'Begin _update_release_date for {plane.product_id}')
@@ -517,6 +505,7 @@ class MegapipeProductMapping(CFHTProductMapping):
         bp.set('Observation.environment.photometric', True)
         bp.clear('Observation.environment.seeing')
         bp.add_fits_attribute('Observation.environment.seeing', 'FINALIQ')
+        bp.set('Observation.target.standard', False)
 
         bp.clear('Plane.metaRelease')
         bp.add_fits_attribute('Plane.metaRelease', 'DATE')
@@ -549,6 +538,24 @@ class MegapipeProductMapping(CFHTProductMapping):
             bp.add_fits_attribute('Plane.metrics.magLimit', 'ML_5SIGA')
 
         self._logger.debug(f'End accumulate_blueprint.')
+
+    def _update_energy(self, chunk, obs_id):
+        super()._update_energy(chunk, obs_id)
+        temp = self._get_keyword('FILTER')
+        # an attempt to keep the number of unique filter names lower
+        chunk.energy.bandpass_name = CAOM_FILTER_REPAIR_LOOKUP.get(temp)
+        chunk.energy.resolving_power = None
+        self._logger.debug(f'End _update_energy.')
+
+    def _update_parts(self, artifact):
+        if artifact.product_type is ProductType.WEIGHT:
+            artifact.parts = None
+            return True
+        return False
+
+    def _update_position(self, chunk):
+        if chunk.position is not None:
+            chunk.position.resolution = None
 
 
 def _repair_history_provenance_value(value, obs_id):
