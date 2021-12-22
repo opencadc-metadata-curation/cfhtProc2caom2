@@ -70,34 +70,40 @@
 from cfhtProc2caom2 import storage_names
 
 LOOKUP = {
-      'MegaPipe.358.122': ['MegaPipe.358.122.G.MP9401.fits.header',
-                           'MegaPipe.358.122.GRI.MP9605.fits.header',
-                           'MegaPipe.358.122.I.MP9702.fits.header',
-                           'MegaPipe.358.122.R.MP9601.fits.header',
-                           'MegaPipe.358.122.G.MP9401.fits.gif',
-                           'MegaPipe.358.122.G.MP9401.weight.fits.header',
-                           'MegaPipe.358.122.GRI.MP9605.fits.gif',
-                           'MegaPipe.358.122.GRI.MP9605.weight.fits.header',
-                           'MegaPipe.358.122.I.MP9702.fits.gif',
-                           'MegaPipe.358.122.I.MP9702.weight.fits.header',
-                           'MegaPipe.358.122.R.MP9601.fits.gif',
-                           'MegaPipe.358.122.R.MP9601.weight.fits.header'],
-      'MegaPipe.209.126': ['MegaPipe.209.126.R.MP9602.fits.header'],
-      'NGVS+0+0': ['NGVS+0+0.l.i.Mg002.fits.header',
-                   'NGVS+0+0.l.i.Mg002.cat',
-                   'NGVS+0+0.l.i.Mg002.fits.mask.rd.reg',
-                   'NGVS+0+0.l.i.Mg002.flag.fits.fz',
-                   'NGVS+0+0.l.i.Mg002.sig.fits.header',
-                   'NGVS+0+0.l.i.Mg002.weight.fits.fz.header',
-                   'vos:ngvs/masks/NGVS+0+0.l.i.Mg002.flag.fits.fz']}
+    'MegaPipe.358.122': [
+        'MegaPipe.358.122.G.MP9401.fits.header',
+        'MegaPipe.358.122.GRI.MP9605.fits.header',
+        'MegaPipe.358.122.I.MP9702.fits.header',
+        'MegaPipe.358.122.R.MP9601.fits.header',
+        'MegaPipe.358.122.G.MP9401.fits.gif',
+        'MegaPipe.358.122.G.MP9401.weight.fits.header',
+        'MegaPipe.358.122.GRI.MP9605.fits.gif',
+        'MegaPipe.358.122.GRI.MP9605.weight.fits.header',
+        'MegaPipe.358.122.I.MP9702.fits.gif',
+        'MegaPipe.358.122.I.MP9702.weight.fits.header',
+        'MegaPipe.358.122.R.MP9601.fits.gif',
+        'MegaPipe.358.122.R.MP9601.weight.fits.header',
+    ],
+    'MegaPipe.209.126': ['MegaPipe.209.126.R.MP9602.fits.header'],
+    'NGVS+0+0': [
+        'NGVS+0+0.l.i.Mg002.fits.header',
+        'NGVS+0+0.l.i.Mg002.cat',
+        'NGVS+0+0.l.i.Mg002.fits.mask.rd.reg',
+        'NGVS+0+0.l.i.Mg002.flag.fits.fz',
+        'NGVS+0+0.l.i.Mg002.sig.fits.header',
+        'NGVS+0+0.l.i.Mg002.weight.fits.fz.header',
+        'vos:ngvs/masks/NGVS+0+0.l.i.Mg002.flag.fits.fz',
+    ],
+}
 
 
 def test_single():
     test_entry = 'MegaPipe.358.122.G.MP9401.fits'
     test_subject = storage_names.get_storage_name(test_entry, test_entry)
     assert test_subject.obs_id == 'MegaPipe.358.122', 'wrong obs id'
-    assert test_subject.product_id == 'MegaPipe.358.122.G.MP9401', \
-        'wrong product id'
+    assert (
+        test_subject.product_id == 'MegaPipe.358.122.G.MP9401'
+    ), 'wrong product id'
     assert test_subject.filter_name == 'G', 'wrong filter name'
 
 

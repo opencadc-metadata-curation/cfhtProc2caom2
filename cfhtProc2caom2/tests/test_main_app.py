@@ -156,8 +156,7 @@ def _vo_mock(url):
     try:
         x = url.split('/')
         filter_name = x[-1].replace('&VERB=0', '')
-        votable = parse_single_table(
-            f'{TEST_DATA_DIR}/{filter_name}.xml')
+        votable = parse_single_table(f'{TEST_DATA_DIR}/{filter_name}.xml')
         return votable, None
     except Exception as e:
         logging.error(f'get_vo_table failure for url {url}')

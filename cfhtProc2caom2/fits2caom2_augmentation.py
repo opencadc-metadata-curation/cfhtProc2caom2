@@ -72,7 +72,6 @@ from cfhtProc2caom2 import main_app, storage_names
 
 
 class CFHTProcFits2caom2Visitor(cc.Fits2caom2Visitor):
-
     def __init__(self, observation, **kwargs):
         super().__init__(observation, **kwargs)
 
@@ -80,9 +79,7 @@ class CFHTProcFits2caom2Visitor(cc.Fits2caom2Visitor):
         if storage_names.is_ngvs(self._storage_name.file_name):
             return main_app.NGVSProductMapping(self._storage_name, headers)
         else:
-            return main_app.MegapipeProductMapping(
-                self._storage_name, headers
-            )
+            return main_app.MegapipeProductMapping(self._storage_name, headers)
 
 
 def visit(observation, **kwargs):

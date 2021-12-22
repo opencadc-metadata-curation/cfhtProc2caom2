@@ -88,10 +88,13 @@ def _run():
         is used by airflow for task instance management and reporting.
     """
     name_builder = nbc.FileNameBuilder(storage_names.get_storage_name)
-    return rc.run_by_todo(config=None, name_builder=name_builder,
-                          command_name=main_app.APPLICATION,
-                          meta_visitors=META_VISITORS,
-                          data_visitors=DATA_VISITORS)
+    return rc.run_by_todo(
+        config=None,
+        name_builder=name_builder,
+        command_name=main_app.APPLICATION,
+        meta_visitors=META_VISITORS,
+        data_visitors=DATA_VISITORS,
+    )
 
 
 def run():

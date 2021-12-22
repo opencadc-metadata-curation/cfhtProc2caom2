@@ -73,8 +73,16 @@ from urllib.parse import urlparse
 from caom2pipe import manage_composable as mc
 
 
-__all__ = ['get_storage_name', 'is_ngvs', 'MEGAPIPEName', 'MP_URI_NAME',
-           'MP_COLLECTION', 'NGVSName', 'NGVS_ARCHIVE', 'NGVS_COLLECTION']
+__all__ = [
+    'get_storage_name',
+    'is_ngvs',
+    'MEGAPIPEName',
+    'MP_URI_NAME',
+    'MP_COLLECTION',
+    'NGVSName',
+    'NGVS_ARCHIVE',
+    'NGVS_COLLECTION',
+]
 
 NGVS_COLLECTION = 'NGVS'
 NGVS_ARCHIVE = 'NGVS'
@@ -119,7 +127,13 @@ class CFHTAdvancedProduct(mc.StorageName):
     NAME_PATTERN = '*'
 
     def __init__(
-        self, obs_id, file_name, collection, scheme, entry, uri_name=None,
+        self,
+        obs_id,
+        file_name,
+        collection,
+        scheme,
+        entry,
+        uri_name=None,
     ):
         # uri_name - because the collection is CFHTMEGAPIPE, but the
         # uri is cadc:CFHTSG/<file name here>
@@ -157,9 +171,12 @@ class CFHTAdvancedProduct(mc.StorageName):
 
     @property
     def use_metadata(self):
-        return not ('mask.rd.reg' in self._file_name or
-                    '.flag' in self._file_name or '.gif' in self._file_name or
-                    '.weight' in self._file_name)
+        return not (
+            'mask.rd.reg' in self._file_name
+            or '.flag' in self._file_name
+            or '.gif' in self._file_name
+            or '.weight' in self._file_name
+        )
 
 
 class NGVSName(CFHTAdvancedProduct):
@@ -208,8 +225,9 @@ class NGVSName(CFHTAdvancedProduct):
 
     @property
     def use_metadata(self):
-        return not ('mask.rd.reg' in self._file_name or
-                    '.flag' in self._file_name)
+        return not (
+            'mask.rd.reg' in self._file_name or '.flag' in self._file_name
+        )
 
     @property
     def version(self):
@@ -244,10 +262,17 @@ class NGVSName(CFHTAdvancedProduct):
     @staticmethod
     def remove_extensions(name):
         """How to get the file_id from a file_name."""
-        return name.replace('.fits', '').replace('.fz', '').replace(
-            '.header', '').replace('.sig', '').replace('.weight', '').replace(
-            '.cat', '').replace('.mask.rd.reg', '').replace(
-            '.flag', '').replace('.psf', '')
+        return (
+            name.replace('.fits', '')
+            .replace('.fz', '')
+            .replace('.header', '')
+            .replace('.sig', '')
+            .replace('.weight', '')
+            .replace('.cat', '')
+            .replace('.mask.rd.reg', '')
+            .replace('.flag', '')
+            .replace('.psf', '')
+        )
 
     @staticmethod
     def use_later_extensions(name):
@@ -315,5 +340,9 @@ class MEGAPIPEName(CFHTAdvancedProduct):
 
     @staticmethod
     def remove_extensions(f_name):
-        return f_name.replace('.fits', '').replace('.fz', '').replace(
-            '.header', '').replace('.gif', '')
+        return (
+            f_name.replace('.fits', '')
+            .replace('.fz', '')
+            .replace('.header', '')
+            .replace('.gif', '')
+        )

@@ -89,41 +89,45 @@ INSTRUMENT = 'MegaPrime'
 
 # filter names have to conform to those of the SVO filter service, because
 # they're going to be used to create a URL to query from there
-FILTER_REPAIR_LOOKUP = {'i': 'i_sdss',  # i.MP9703
-                        'I2': 'i',      # i.MP9702
-                        'I': 'i1',      # i.MP9701
-                        'g': 'g_sdss',  # g.MP9402
-                        'G': 'g',       # g.MP9401
-                        'GRI': 'gri',   # gri.MP9605
-                        'r': 'r_sdss',  # r.MP9602
-                        'R': 'r',       # r.MP9601
-                        'u': 'u_sdss',  # u.MP9302
-                        'U': 'u',       # u.MP9301
-                        'z': 'z_sdss',  # z.MP9901
-                        'Z': 'z'}       # z.MP9801
+FILTER_REPAIR_LOOKUP = {
+    'i': 'i_sdss',  # i.MP9703
+    'I2': 'i',  # i.MP9702
+    'I': 'i1',  # i.MP9701
+    'g': 'g_sdss',  # g.MP9402
+    'G': 'g',  # g.MP9401
+    'GRI': 'gri',  # gri.MP9605
+    'r': 'r_sdss',  # r.MP9602
+    'R': 'r',  # r.MP9601
+    'u': 'u_sdss',  # u.MP9302
+    'U': 'u',  # u.MP9301
+    'z': 'z_sdss',  # z.MP9901
+    'Z': 'z',
+}  # z.MP9801
 filter_cache = ac.FilterMetadataCache(
-    FILTER_REPAIR_LOOKUP, {}, 'CFHT', {}, 'NONE')
+    FILTER_REPAIR_LOOKUP, {}, 'CFHT', {}, 'NONE'
+)
 
 # because 1 is never enough ... and also because, in an effort to keep
 # the number of filter names smaller, they have to have the case of
 # CFHT, which is filter name letters are lower-case, but CFHT parts
 # numbers are upper-case.
-CAOM_FILTER_REPAIR_LOOKUP = {'I.MP9703': 'i.MP9703',
-                             'I.MP9702': 'i.MP9702',
-                             'I.MP9701': 'i.MP9701',
-                             'G.MP9402': 'g.MP9402',
-                             'G.MP9401': 'g.MP9401',
-                             'GRI.MP9605': 'gri.MP9605',
-                             'R.MP9602': 'r.MP9602',
-                             'R.MP9601': 'r.MP9601',
-                             'U.MP9302': 'u.MP9302',
-                             'U.MP9301': 'u.MP9301',
-                             'Z.MP9901': 'z.MP9901',
-                             'Z.MP9801': 'z.MP9801'}
+CAOM_FILTER_REPAIR_LOOKUP = {
+    'I.MP9703': 'i.MP9703',
+    'I.MP9702': 'i.MP9702',
+    'I.MP9701': 'i.MP9701',
+    'G.MP9402': 'g.MP9402',
+    'G.MP9401': 'g.MP9401',
+    'GRI.MP9605': 'gri.MP9605',
+    'R.MP9602': 'r.MP9602',
+    'R.MP9601': 'r.MP9601',
+    'U.MP9302': 'u.MP9302',
+    'U.MP9301': 'u.MP9301',
+    'Z.MP9901': 'z.MP9901',
+    'Z.MP9801': 'z.MP9801',
+}
 
 
 class CFHTProductMapping(cc.TelescopeMapping):
-
     def __init__(self, storage_name, headers):
         super().__init__(storage_name, headers)
 
@@ -167,8 +171,10 @@ class CFHTProductMapping(cc.TelescopeMapping):
 
         max_meta_release = observation.meta_release
         min_seeing = None
-        if (observation.environment is not None and
-                observation.environment.seeing is not None):
+        if (
+            observation.environment is not None
+            and observation.environment.seeing is not None
+        ):
             min_seeing = observation.environment.seeing
         for plane in observation.planes.values():
             max_meta_release = self._update_release_date(
@@ -209,13 +215,19 @@ class CFHTProductMapping(cc.TelescopeMapping):
                     # gets removed from the next generation data products. So
                     # I would like the ability to remove inputs
                     cc.update_plane_provenance_single(
-                        plane, self._headers, 'HISTORY', 'CFHT',
+                        plane,
+                        self._headers,
+                        'HISTORY',
+                        'CFHT',
                         _repair_history_provenance_value,
-                        observation.observation_id)
+                        observation.observation_id,
+                    )
                     if plane.provenance.run_id == 'None':
                         plane.provenance.run_id = None
-                    if (plane.provenance.keywords is not None and
-                            'None' in plane.provenance.keywords):
+                    if (
+                        plane.provenance.keywords is not None
+                        and 'None' in plane.provenance.keywords
+                    ):
                         plane.provenance.keywords.remove('None')
 
             # _update_time is dependent on provenance information
@@ -242,7 +254,7 @@ class CFHTProductMapping(cc.TelescopeMapping):
         result = ProductType.SCIENCE
         if (
             'weight' in self._storage_name.file_uri
-                or '.sig' in self._storage_name.file_uri
+            or '.sig' in self._storage_name.file_uri
         ):
             result = ProductType.WEIGHT
         elif (
@@ -287,11 +299,11 @@ class CFHTProductMapping(cc.TelescopeMapping):
         result = False
         if (
             '.weight' not in self._storage_name.file_uri
-                and '.sig' not in self._storage_name.file_uri
-                and '.cat' not in self._storage_name.file_uri
-                and '.mask' not in self._storage_name.file_uri
-                and '.flag' not in self._storage_name.file_uri
-                and '.gif' not in self._storage_name.file_uri
+            and '.sig' not in self._storage_name.file_uri
+            and '.cat' not in self._storage_name.file_uri
+            and '.mask' not in self._storage_name.file_uri
+            and '.flag' not in self._storage_name.file_uri
+            and '.gif' not in self._storage_name.file_uri
         ):
             # all the excluded names have fewer useful keywords
             result = True
@@ -323,12 +335,15 @@ class CFHTProductMapping(cc.TelescopeMapping):
         pass
 
     def _update_release_date(self, plane, max_meta_release):
-        self._logger.debug(f'Begin _update_release_date for {plane.product_id}')
+        self._logger.debug(
+            f'Begin _update_release_date for {plane.product_id}'
+        )
         if plane.meta_release is None:
             plane.meta_release = mc.make_time(self._get_keyword('DATE'))
             if plane.meta_release is None:
                 plane.meta_release = mc.make_time(
-                    self._get_keyword('REL_DATE'))
+                    self._get_keyword('REL_DATE')
+                )
 
         if plane.meta_release is not None:
             max_meta_release = max(max_meta_release, plane.meta_release)
@@ -343,7 +358,6 @@ class CFHTProductMapping(cc.TelescopeMapping):
 
 
 class NGVSProductMapping(CFHTProductMapping):
-
     def __init__(self, storage_name, headers):
         super().__init__(storage_name, headers)
 
@@ -403,7 +417,8 @@ class NGVSProductMapping(CFHTProductMapping):
             'g': 'g.MP9402',
             'r': 'r.MP9602',
             'u': 'u.MP9302',
-            'z': 'z.MP9901'}
+            'z': 'z.MP9901',
+        }
         result = None
         if self._storage_name.filter_name is not None:
             result = reverse_filter_lookup.get(self._storage_name.filter_name)
@@ -428,10 +443,11 @@ class NGVSProductMapping(CFHTProductMapping):
                         max_date = sys.float_info.max
                         exposure = 0
                         for entry in plane.provenance.inputs:
-                            ip_obs_id, ip_product_id = (
-                                mc.CaomName.decompose_provenance_input(
-                                    entry.uri,
-                                )
+                            (
+                                ip_obs_id,
+                                ip_product_id,
+                            ) = mc.CaomName.decompose_provenance_input(
+                                entry.uri,
                             )
                             self._logger.info(
                                 f'Retrieving provenance metadata for '
@@ -487,7 +503,6 @@ class NGVSProductMapping(CFHTProductMapping):
 
 
 class MegapipeProductMapping(CFHTProductMapping):
-
     def __init__(self, storage_name, headers):
         super().__init__(storage_name, headers)
 
@@ -517,8 +532,10 @@ class MegapipeProductMapping(CFHTProductMapping):
         bp.set('Plane.provenance.name', 'MEGAPIPE')
         bp.set('Plane.provenance.producer', 'CADC')
         bp.set('Plane.provenance.version', '2.0')
-        bp.set('Plane.provenance.reference',
-            'http://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/en/megapipe/')
+        bp.set(
+            'Plane.provenance.reference',
+            'http://www.cadc-ccda.hia-iha.nrc-cnrc.gc.ca/en/megapipe/',
+        )
 
         if self._storage_name.is_preview:
             bp.set('Artifact.productType', ProductType.PREVIEW)
