@@ -49,7 +49,7 @@
       </caom2:metrics>
       <caom2:artifacts>
         <caom2:artifact caom2:id="00000000-0000-0000-bb2d-3385b95d7f61" caom2:lastModified="2019-04-03T17:13:39.332" caom2:maxLastModified="2020-11-27T18:13:40.427" caom2:metaChecksum="md5:550ca9c053fb0d686420039b8b3ecae6" caom2:accMetaChecksum="md5:3aa59ba7c84d52734427f7b491f9e347">
-          <caom2:uri>ad:CFHTSG/MegaPipe.209.126.G.MP9402.fits</caom2:uri>
+          <caom2:uri>cadc:CFHTSG/MegaPipe.209.126.G.MP9402.fits</caom2:uri>
           <caom2:productType>science</caom2:productType>
           <caom2:releaseType>data</caom2:releaseType>
           <caom2:contentType>application/fits</caom2:contentType>
@@ -123,7 +123,7 @@
           </caom2:parts>
         </caom2:artifact>
         <caom2:artifact caom2:id="00000000-0000-0000-b0ef-dcdd4ec5024d" caom2:lastModified="2019-04-03T17:13:39.332" caom2:maxLastModified="2019-04-03T17:13:39.332" caom2:metaChecksum="md5:9db69b54c5ce727722fd168b517ea856" caom2:accMetaChecksum="md5:0b76eb06978af5982a4a8c542032859a">
-          <caom2:uri>ad:CFHTSG/MegaPipe.209.126.G.MP9402.fits.gif</caom2:uri>
+          <caom2:uri>cadc:CFHTSG/MegaPipe.209.126.G.MP9402.fits.gif</caom2:uri>
           <caom2:productType>preview</caom2:productType>
           <caom2:releaseType>data</caom2:releaseType>
           <caom2:contentType>image/gif</caom2:contentType>
@@ -132,7 +132,7 @@
           <caom2:parts/>
         </caom2:artifact>
         <caom2:artifact caom2:id="00000000-0000-0000-91a1-eb4a8967d5b9" caom2:lastModified="2019-04-03T17:13:39.332" caom2:maxLastModified="2019-04-03T17:13:39.332" caom2:metaChecksum="md5:c03791cd62d70eb8a003714d9a6b31c9" caom2:accMetaChecksum="md5:187be4ede6cb8ad2315a1afce316a96b">
-          <caom2:uri>ad:CFHTSG/MegaPipe.209.126.G.MP9402.weight.fits.fz</caom2:uri>
+          <caom2:uri>cadc:CFHTSG/MegaPipe.209.126.G.MP9402.weight.fits.fz</caom2:uri>
           <caom2:productType>weight</caom2:productType>
           <caom2:releaseType>data</caom2:releaseType>
           <caom2:contentType>application/fits</caom2:contentType>
@@ -150,7 +150,7 @@
       <caom2:calibrationLevel>4</caom2:calibrationLevel>
       <caom2:artifacts>
         <caom2:artifact caom2:id="19e4120b-0797-4a2f-ae78-1af78d936a0c" caom2:lastModified="2020-11-25T05:02:48.491" caom2:maxLastModified="2020-11-25T05:02:48.491" caom2:metaChecksum="md5:47549c3eb4334eec62b2d958356809cb" caom2:accMetaChecksum="md5:e960ab0e7daf26637c86f4c12330bff5">
-          <caom2:uri>ad:CFHTSG/MegaPipe.209.126.G.MP9402.cat</caom2:uri>
+          <caom2:uri>cadc:CFHTSG/MegaPipe.209.126.G.MP9402.cat</caom2:uri>
           <caom2:productType>science</caom2:productType>
           <caom2:releaseType>data</caom2:releaseType>
           <caom2:contentType>text/plain</caom2:contentType>
@@ -184,7 +184,7 @@
       </caom2:metrics>
       <caom2:artifacts>
         <caom2:artifact caom2:id="00000000-0000-0000-992a-09828c20112a" caom2:lastModified="2020-12-02T08:15:44.365" caom2:maxLastModified="2020-12-02T08:15:44.365" caom2:metaChecksum="md5:c4590ca71a859a632fa710b95501c896" caom2:accMetaChecksum="md5:ecaaa2fa4a150d600fbbf1693ec1668f">
-          <caom2:uri>ad:CFHTSG/MegaPipe.209.126.R.MP9602.fits</caom2:uri>
+          <caom2:uri>cadc:CFHTSG/MegaPipe.209.126.R.MP9602.fits</caom2:uri>
           <caom2:productType>science</caom2:productType>
           <caom2:releaseType>data</caom2:releaseType>
           <caom2:contentType>application/fits</caom2:contentType>
@@ -258,7 +258,7 @@
           </caom2:parts>
         </caom2:artifact>
         <caom2:artifact caom2:id="00000000-0000-0000-9227-a0bd94da5d78" caom2:lastModified="2020-12-02T08:15:48.262" caom2:maxLastModified="2020-12-02T08:15:48.262" caom2:metaChecksum="md5:97df4f7199a4572c0d8928b639c1f35c" caom2:accMetaChecksum="md5:a9fd390108f135901abbc24833dc9661">
-          <caom2:uri>ad:CFHTSG/MegaPipe.209.126.R.MP9602.fits.gif</caom2:uri>
+          <caom2:uri>cadc:CFHTSG/MegaPipe.209.126.R.MP9602.fits.gif</caom2:uri>
           <caom2:productType>preview</caom2:productType>
           <caom2:releaseType>data</caom2:releaseType>
           <caom2:contentType>image/gif</caom2:contentType>
@@ -267,7 +267,7 @@
           <caom2:parts/>
         </caom2:artifact>
         <caom2:artifact caom2:id="00000000-0000-0000-9aec-2c6874d5ab55" caom2:lastModified="2020-12-02T08:15:50.089" caom2:maxLastModified="2020-12-02T08:15:50.089" caom2:metaChecksum="md5:3c8f4434230aac4d0bd0a9d3828d2a93" caom2:accMetaChecksum="md5:1ffe9f0ca01ea12997e72ea7887c3039">
-          <caom2:uri>ad:CFHTSG/MegaPipe.209.126.R.MP9602.weight.fits.fz</caom2:uri>
+          <caom2:uri>cadc:CFHTSG/MegaPipe.209.126.R.MP9602.weight.fits.fz</caom2:uri>
           <caom2:productType>weight</caom2:productType>
           <caom2:releaseType>data</caom2:releaseType>
           <caom2:contentType>application/fits</caom2:contentType>
@@ -285,7 +285,7 @@
       <caom2:calibrationLevel>4</caom2:calibrationLevel>
       <caom2:artifacts>
         <caom2:artifact caom2:id="31517c9d-1f36-40bb-a7b5-3658ffd78765" caom2:lastModified="2020-12-02T08:15:46.019" caom2:maxLastModified="2020-12-02T08:15:46.019" caom2:metaChecksum="md5:22e3c78be97831f2ae1e68049a6a8d2d" caom2:accMetaChecksum="md5:166a1054b819a9db5f717d9cc99368a6">
-          <caom2:uri>ad:CFHTSG/MegaPipe.209.126.R.MP9602.cat</caom2:uri>
+          <caom2:uri>cadc:CFHTSG/MegaPipe.209.126.R.MP9602.cat</caom2:uri>
           <caom2:productType>science</caom2:productType>
           <caom2:releaseType>data</caom2:releaseType>
           <caom2:contentType>text/plain</caom2:contentType>

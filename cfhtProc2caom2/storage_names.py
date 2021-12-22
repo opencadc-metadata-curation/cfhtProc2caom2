@@ -100,10 +100,10 @@ def get_storage_name(file_name, entry):
     """
     parsed_entry = urlparse(entry)
     if parsed_entry.scheme is None or parsed_entry.scheme == '':
-        scheme = 'ad'
+        scheme = 'cadc'
         temp = file_name
     elif parsed_entry.scheme == 'vos':
-        scheme = 'ad'
+        scheme = 'cadc'
         temp = basename(parsed_entry.path)
     else:
         scheme = parsed_entry.scheme
@@ -306,7 +306,7 @@ class MEGAPIPEName(CFHTAdvancedProduct):
             obs_id,
             file_name,
             MP_COLLECTION,
-            scheme='ad',
+            scheme='cadc',
             entry=entry,
             uri_name=MP_URI_NAME,
         )

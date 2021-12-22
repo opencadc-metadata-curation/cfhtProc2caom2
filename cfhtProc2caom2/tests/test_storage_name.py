@@ -105,6 +105,7 @@ def test_single():
         test_subject.product_id == 'MegaPipe.358.122.G.MP9401'
     ), 'wrong product id'
     assert test_subject.filter_name == 'G', 'wrong filter name'
+    assert test_subject.file_uri == f'cadc:CFHTSG/{test_entry}'
 
 
 def test_is_valid():
