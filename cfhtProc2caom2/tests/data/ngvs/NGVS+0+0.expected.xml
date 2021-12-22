@@ -50,10 +50,11 @@
       </caom2:metrics>
       <caom2:artifacts>
         <caom2:artifact caom2:id="b66e2bd2-eb2d-4052-a30f-89016bfcfd37">
-          <caom2:uri>ad:NGVS/NGVS+0+0.l.i.Mg002.fits</caom2:uri>
+          <caom2:uri>cadc:NGVS/NGVS+0+0.l.i.Mg002.fits</caom2:uri>
           <caom2:productType>science</caom2:productType>
           <caom2:releaseType>data</caom2:releaseType>
           <caom2:contentType>application/fits</caom2:contentType>
+          <caom2:contentLength>4410</caom2:contentLength>
           <caom2:parts>
             <caom2:part caom2:id="fb946864-5036-4706-bea7-c8e41d7d5614">
               <caom2:name>0</caom2:name>
@@ -187,24 +188,27 @@
           </caom2:parts>
         </caom2:artifact>
         <caom2:artifact caom2:id="d9da0cb3-dec1-4ca9-a639-1763946bc254">
-          <caom2:uri>ad:NGVS/NGVS+0+0.l.i.Mg002.fits.mask.rd.reg</caom2:uri>
+          <caom2:uri>cadc:NGVS/NGVS+0+0.l.i.Mg002.fits.mask.rd.reg</caom2:uri>
           <caom2:productType>auxiliary</caom2:productType>
           <caom2:releaseType>data</caom2:releaseType>
           <caom2:contentType>application/fits</caom2:contentType>
+          <caom2:contentLength>3</caom2:contentLength>
           <caom2:parts/>
         </caom2:artifact>
         <caom2:artifact caom2:id="929273a0-6ba7-4ef7-b9c4-2b7054eca6e0">
-          <caom2:uri>ad:NGVS/NGVS+0+0.l.i.Mg002.flag.fits.fz</caom2:uri>
+          <caom2:uri>cadc:NGVS/NGVS+0+0.l.i.Mg002.flag.fits.fz</caom2:uri>
           <caom2:productType>auxiliary</caom2:productType>
           <caom2:releaseType>data</caom2:releaseType>
           <caom2:contentType>application/fits</caom2:contentType>
+          <caom2:contentLength>3</caom2:contentLength>
           <caom2:parts/>
         </caom2:artifact>
         <caom2:artifact caom2:id="3efe1d30-412e-430a-8db9-921d9dc4beeb">
-          <caom2:uri>ad:NGVS/NGVS+0+0.l.i.Mg002.sig.fits</caom2:uri>
+          <caom2:uri>cadc:NGVS/NGVS+0+0.l.i.Mg002.sig.fits</caom2:uri>
           <caom2:productType>weight</caom2:productType>
           <caom2:releaseType>data</caom2:releaseType>
           <caom2:contentType>application/fits</caom2:contentType>
+          <caom2:contentLength>1822</caom2:contentLength>
           <caom2:parts>
             <caom2:part caom2:id="724e858f-7120-42f3-aa32-47ff5ad1d75e">
               <caom2:name>0</caom2:name>
@@ -316,10 +320,11 @@
           </caom2:parts>
         </caom2:artifact>
         <caom2:artifact caom2:id="9a1429e8-42cf-465f-80e2-2fb1ea7bce45">
-          <caom2:uri>ad:NGVS/NGVS+0+0.l.i.Mg002.weight.fits.fz</caom2:uri>
+          <caom2:uri>cadc:NGVS/NGVS+0+0.l.i.Mg002.weight.fits.fz</caom2:uri>
           <caom2:productType>weight</caom2:productType>
           <caom2:releaseType>data</caom2:releaseType>
           <caom2:contentType>application/fits</caom2:contentType>
+          <caom2:contentLength>2604</caom2:contentLength>
           <caom2:parts>
             <caom2:part caom2:id="515d24fc-17ec-4418-9f2e-01800fc5ecef">
               <caom2:name>0</caom2:name>
@@ -435,20 +440,11 @@
           </caom2:parts>
         </caom2:artifact>
         <caom2:artifact caom2:id="123c8458-3b64-4408-b1b5-cd1bc3878db8">
-          <caom2:uri>ad:NGVS/NGVS+0+0.l.i.Mg002.cat</caom2:uri>
+          <caom2:uri>cadc:NGVS/NGVS+0+0.l.i.Mg002.cat</caom2:uri>
           <caom2:productType>science</caom2:productType>
           <caom2:releaseType>data</caom2:releaseType>
           <caom2:contentType>text/plain</caom2:contentType>
           <caom2:contentLength>3</caom2:contentLength>
-          <caom2:parts/>
-        </caom2:artifact>
-        <caom2:artifact caom2:id="255e44ac-5dc8-44d6-a71e-0467cf61933c">
-          <caom2:uri>vos:ngvs/masks/NGVS+0+0.l.i.Mg002.flag.fits.fz</caom2:uri>
-          <caom2:productType>auxiliary</caom2:productType>
-          <caom2:releaseType>data</caom2:releaseType>
-          <caom2:contentType>application/fits</caom2:contentType>
-          <caom2:contentLength>42</caom2:contentLength>
-          <caom2:contentChecksum>md5:37333ea2e1091036375e7b41e81dfddb</caom2:contentChecksum>
           <caom2:parts/>
         </caom2:artifact>
       </caom2:artifacts>

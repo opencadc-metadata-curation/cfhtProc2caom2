@@ -68,16 +68,26 @@
 #
 
 import logging
+from os.path import basename
+from urllib.parse import urlparse
 from caom2pipe import manage_composable as mc
 
 
-__all__ = ['get_storage_name', 'is_ngvs', 'MEGAPIPEName', 'MP_ARCHIVE',
-           'MP_COLLECTION', 'NGVSName', 'NGVS_ARCHIVE', 'NGVS_COLLECTION']
+__all__ = [
+    'get_storage_name',
+    'is_ngvs',
+    'MEGAPIPEName',
+    'MP_URI_NAME',
+    'MP_COLLECTION',
+    'NGVSName',
+    'NGVS_ARCHIVE',
+    'NGVS_COLLECTION',
+]
 
 NGVS_COLLECTION = 'NGVS'
 NGVS_ARCHIVE = 'NGVS'
 MP_COLLECTION = 'CFHTMEGAPIPE'
-MP_ARCHIVE = 'CFHTSG'
+MP_URI_NAME = 'CFHTSG'
 
 
 def get_storage_name(file_name, entry):
@@ -88,19 +98,23 @@ def get_storage_name(file_name, entry):
     :param entry str what came from the todo.txt file
     :return: The StorageName extension class for the entry
     """
-    uri = None
-    temp = file_name
-    scheme = 'ad'
-    if '/' in file_name:
-        # parameter is a URI, adjust accordingly
-        scheme, archive, f_name = mc.decompose_uri(file_name)
-        temp = f_name
-        uri = file_name
+    parsed_entry = urlparse(entry)
+    if parsed_entry.scheme is None or parsed_entry.scheme == '':
+        scheme = 'cadc'
+        temp = file_name
+    elif parsed_entry.scheme == 'vos':
+        scheme = 'cadc'
+        temp = basename(parsed_entry.path)
+    else:
+        scheme = parsed_entry.scheme
+        temp = basename(parsed_entry.path)
     if is_ngvs(temp):
         result = NGVSName(file_name=temp, scheme=scheme, entry=entry)
     else:
         result = MEGAPIPEName(file_name=temp, entry=entry)
-    result.file_uri = uri
+    result.source_names = [entry]
+    result.destination_uris = [result.file_uri]
+    logging.debug(result)
     return result
 
 
@@ -112,29 +126,33 @@ class CFHTAdvancedProduct(mc.StorageName):
 
     NAME_PATTERN = '*'
 
-    def __init__(self, obs_id, file_name, collection, archive, scheme, entry):
+    def __init__(
+        self,
+        obs_id,
+        file_name,
+        collection,
+        scheme,
+        entry,
+        uri_name=None,
+    ):
+        # uri_name - because the collection is CFHTMEGAPIPE, but the
+        # uri is cadc:CFHTSG/<file name here>
+        temp_file_name = file_name.replace('.header', '')
         super(CFHTAdvancedProduct, self).__init__(
-            obs_id, collection=collection, archive=archive,
+            obs_id,
+            collection=collection,
             collection_pattern=CFHTAdvancedProduct.NAME_PATTERN,
-            fname_on_disk=file_name, compression='', scheme=scheme,
-            entry=entry)
-        self._file_name = file_name
-        self._file_uri = None
+            fname_on_disk=temp_file_name,
+            compression='',
+            scheme=scheme,
+            entry=entry,
+            uri_name=uri_name,
+        )
+        self._file_name = temp_file_name
 
     @property
     def file_name(self):
         return self._file_name
-
-    @property
-    def file_uri(self):
-        result = self._file_uri
-        if result is None:
-            result = super(CFHTAdvancedProduct, self).file_uri
-        return result
-
-    @file_uri.setter
-    def file_uri(self, value):
-        self._file_uri = value
 
     @property
     def product_id(self):
@@ -153,9 +171,12 @@ class CFHTAdvancedProduct(mc.StorageName):
 
     @property
     def use_metadata(self):
-        return not ('mask.rd.reg' in self._file_name or
-                    '.flag' in self._file_name or '.gif' in self._file_name or
-                    '.weight' in self._file_name)
+        return not (
+            'mask.rd.reg' in self._file_name
+            or '.flag' in self._file_name
+            or '.gif' in self._file_name
+            or '.weight' in self._file_name
+        )
 
 
 class NGVSName(CFHTAdvancedProduct):
@@ -187,11 +208,10 @@ class NGVSName(CFHTAdvancedProduct):
         self.fname_in_ad = file_name
         obs_id = NGVSName.get_obs_id(file_name)
         super(NGVSName, self).__init__(
-            obs_id, file_name, NGVS_COLLECTION, NGVS_ARCHIVE, scheme,
-            entry=entry)
+            obs_id, file_name, NGVS_COLLECTION, scheme, entry=entry
+        )
         self._product_id = NGVSName.get_product_id(file_name)
         self._logger = logging.getLogger(__name__)
-        self._logger.debug(self)
 
     @property
     def filter_name(self):
@@ -205,8 +225,9 @@ class NGVSName(CFHTAdvancedProduct):
 
     @property
     def use_metadata(self):
-        return not ('mask.rd.reg' in self._file_name or
-                    '.flag' in self._file_name)
+        return not (
+            'mask.rd.reg' in self._file_name or '.flag' in self._file_name
+        )
 
     @property
     def version(self):
@@ -241,10 +262,17 @@ class NGVSName(CFHTAdvancedProduct):
     @staticmethod
     def remove_extensions(name):
         """How to get the file_id from a file_name."""
-        return name.replace('.fits', '').replace('.fz', '').replace(
-            '.header', '').replace('.sig', '').replace('.weight', '').replace(
-            '.cat', '').replace('.mask.rd.reg', '').replace(
-            '.flag', '').replace('.psf', '')
+        return (
+            name.replace('.fits', '')
+            .replace('.fz', '')
+            .replace('.header', '')
+            .replace('.sig', '')
+            .replace('.weight', '')
+            .replace('.cat', '')
+            .replace('.mask.rd.reg', '')
+            .replace('.flag', '')
+            .replace('.psf', '')
+        )
 
     @staticmethod
     def use_later_extensions(name):
@@ -275,8 +303,13 @@ class MEGAPIPEName(CFHTAdvancedProduct):
     def __init__(self, file_name, entry):
         obs_id = MEGAPIPEName.get_obs_id(file_name)
         super(MEGAPIPEName, self).__init__(
-            obs_id, file_name, MP_COLLECTION, MP_ARCHIVE, scheme='ad',
-            entry=entry)
+            obs_id,
+            file_name,
+            MP_COLLECTION,
+            scheme='cadc',
+            entry=entry,
+            uri_name=MP_URI_NAME,
+        )
         self._product_id = MEGAPIPEName.get_product_id(file_name)
         self._logger = logging.getLogger(__name__)
         self._logger.debug(self)
@@ -307,5 +340,9 @@ class MEGAPIPEName(CFHTAdvancedProduct):
 
     @staticmethod
     def remove_extensions(f_name):
-        return f_name.replace('.fits', '').replace('.fz', '').replace(
-            '.header', '').replace('.gif', '')
+        return (
+            f_name.replace('.fits', '')
+            .replace('.fz', '')
+            .replace('.header', '')
+            .replace('.gif', '')
+        )

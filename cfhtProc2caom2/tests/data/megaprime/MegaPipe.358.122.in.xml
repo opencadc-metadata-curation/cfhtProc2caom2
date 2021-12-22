@@ -46,7 +46,7 @@
       </caom2:metrics>
       <caom2:artifacts>
         <caom2:artifact caom2:id="00000000-0000-0000-a850-5f1704c19e4a" caom2:lastModified="2018-10-16T21:21:47.633" caom2:maxLastModified="2020-11-20T00:45:19.784" caom2:metaChecksum="md5:67718162157f74d76635df6c39150818" caom2:accMetaChecksum="md5:7db786637fefa69050599bee518dc614">
-          <caom2:uri>ad:CFHTSG/MegaPipe.358.122.G.MP9401.fits</caom2:uri>
+          <caom2:uri>cadc:CFHTSG/MegaPipe.358.122.G.MP9401.fits</caom2:uri>
           <caom2:productType>science</caom2:productType>
           <caom2:releaseType>data</caom2:releaseType>
           <caom2:contentType>application/fits</caom2:contentType>
@@ -129,7 +129,7 @@
           </caom2:parts>
         </caom2:artifact>
         <caom2:artifact caom2:id="00000000-0000-0000-a15a-ae37d9cb7afc" caom2:lastModified="2018-10-16T21:21:47.633" caom2:maxLastModified="2018-10-16T21:21:47.633" caom2:metaChecksum="md5:d96db1a2fc43afb87ee3559bba5f1b6f" caom2:accMetaChecksum="md5:278e8dec0dae51dad26fe21f2c4ceec1">
-          <caom2:uri>ad:CFHTSG/MegaPipe.358.122.G.MP9401.fits.gif</caom2:uri>
+          <caom2:uri>cadc:CFHTSG/MegaPipe.358.122.G.MP9401.fits.gif</caom2:uri>
           <caom2:productType>preview</caom2:productType>
           <caom2:releaseType>data</caom2:releaseType>
           <caom2:contentType>image/gif</caom2:contentType>
@@ -137,7 +137,7 @@
           <caom2:parts/>
         </caom2:artifact>
         <caom2:artifact caom2:id="6122b101-688b-4cd9-90da-00fd6738b9b2" caom2:lastModified="2020-11-20T00:45:29.755" caom2:maxLastModified="2020-11-20T00:45:29.755" caom2:metaChecksum="md5:ba27e0f5090540467be97bd41bdb2bfc" caom2:accMetaChecksum="md5:3f66a5457539cc8c8e1f57ab446f6f2c">
-          <caom2:uri>ad:CFHTSG/MegaPipe.358.122.G.MP9401.weight.fits</caom2:uri>
+          <caom2:uri>cadc:CFHTSG/MegaPipe.358.122.G.MP9401.weight.fits</caom2:uri>
           <caom2:productType>weight</caom2:productType>
           <caom2:releaseType>data</caom2:releaseType>
           <caom2:contentType>application/fits</caom2:contentType>
@@ -165,7 +165,7 @@
       </caom2:metrics>
       <caom2:artifacts>
         <caom2:artifact caom2:id="00000000-0000-0000-99a2-6050f7d1146b" caom2:lastModified="2018-10-16T21:21:47.633" caom2:maxLastModified="2020-11-20T00:45:34.944" caom2:metaChecksum="md5:9fa758418875de966abb8fb7667766b0" caom2:accMetaChecksum="md5:04d8a6d6f1b1d5edbefcd595cc112ca5">
-          <caom2:uri>ad:CFHTSG/MegaPipe.358.122.GRI.MP9605.fits</caom2:uri>
+          <caom2:uri>cadc:CFHTSG/MegaPipe.358.122.GRI.MP9605.fits</caom2:uri>
           <caom2:productType>science</caom2:productType>
           <caom2:releaseType>data</caom2:releaseType>
           <caom2:contentType>application/fits</caom2:contentType>
@@ -248,7 +248,7 @@
           </caom2:parts>
         </caom2:artifact>
         <caom2:artifact caom2:id="00000000-0000-0000-a11c-bbe0a8eeed3d" caom2:lastModified="2018-10-16T21:21:47.633" caom2:maxLastModified="2018-10-16T21:21:47.633" caom2:metaChecksum="md5:151ce282c1382f63e60a096dee578326" caom2:accMetaChecksum="md5:88c24b12acd68ea0459272622a006af5">
-          <caom2:uri>ad:CFHTSG/MegaPipe.358.122.GRI.MP9605.fits.gif</caom2:uri>
+          <caom2:uri>cadc:CFHTSG/MegaPipe.358.122.GRI.MP9605.fits.gif</caom2:uri>
           <caom2:productType>preview</caom2:productType>
           <caom2:releaseType>data</caom2:releaseType>
           <caom2:contentType>image/gif</caom2:contentType>
@@ -256,7 +256,7 @@
           <caom2:parts/>
         </caom2:artifact>
         <caom2:artifact caom2:id="2a9dff17-1d28-450d-859e-1d2c4e862a44" caom2:lastModified="2020-11-20T00:45:43.567" caom2:maxLastModified="2020-11-20T00:45:43.567" caom2:metaChecksum="md5:9b61f1c089f9535019a4bf37cd7233d9" caom2:accMetaChecksum="md5:d3d5a9a30efd5ad07dd8ce6595981747">
-          <caom2:uri>ad:CFHTSG/MegaPipe.358.122.GRI.MP9605.weight.fits</caom2:uri>
+          <caom2:uri>cadc:CFHTSG/MegaPipe.358.122.GRI.MP9605.weight.fits</caom2:uri>
           <caom2:productType>weight</caom2:productType>
           <caom2:releaseType>data</caom2:releaseType>
           <caom2:contentType>application/fits</caom2:contentType>
@@ -284,7 +284,7 @@
       </caom2:metrics>
       <caom2:artifacts>
         <caom2:artifact caom2:id="00000000-0000-0000-b211-201038418115" caom2:lastModified="2018-10-16T21:21:47.633" caom2:maxLastModified="2020-11-20T00:45:51.955" caom2:metaChecksum="md5:dc533049b5d6d8eb917da9478f33914a" caom2:accMetaChecksum="md5:965551a5ba341b80b6cfab8ee7593e4e">
-          <caom2:uri>ad:CFHTSG/MegaPipe.358.122.I.MP9702.fits</caom2:uri>
+          <caom2:uri>cadc:CFHTSG/MegaPipe.358.122.I.MP9702.fits</caom2:uri>
           <caom2:productType>science</caom2:productType>
           <caom2:releaseType>data</caom2:releaseType>
           <caom2:contentType>application/fits</caom2:contentType>
@@ -367,7 +367,7 @@
           </caom2:parts>
         </caom2:artifact>
         <caom2:artifact caom2:id="00000000-0000-0000-a66f-543b2a854d02" caom2:lastModified="2018-10-16T21:21:47.633" caom2:maxLastModified="2018-10-16T21:21:47.633" caom2:metaChecksum="md5:d8b75ba52fe60b95d8806a2bca1e994f" caom2:accMetaChecksum="md5:0338dfec285a036ab4b9f2820f96a5d0">
-          <caom2:uri>ad:CFHTSG/MegaPipe.358.122.I.MP9702.fits.gif</caom2:uri>
+          <caom2:uri>cadc:CFHTSG/MegaPipe.358.122.I.MP9702.fits.gif</caom2:uri>
           <caom2:productType>preview</caom2:productType>
           <caom2:releaseType>data</caom2:releaseType>
           <caom2:contentType>image/gif</caom2:contentType>
@@ -375,7 +375,7 @@
           <caom2:parts/>
         </caom2:artifact>
         <caom2:artifact caom2:id="06eac1f6-7318-454d-9c6e-1bcca81c2404" caom2:lastModified="2020-11-20T00:46:01.151" caom2:maxLastModified="2020-11-20T00:46:01.151" caom2:metaChecksum="md5:1e9e93c573ec0d99ad1159a10eff3c95" caom2:accMetaChecksum="md5:484bf8be9f582480020f5811924418f4">
-          <caom2:uri>ad:CFHTSG/MegaPipe.358.122.I.MP9702.weight.fits</caom2:uri>
+          <caom2:uri>cadc:CFHTSG/MegaPipe.358.122.I.MP9702.weight.fits</caom2:uri>
           <caom2:productType>weight</caom2:productType>
           <caom2:releaseType>data</caom2:releaseType>
           <caom2:contentType>application/fits</caom2:contentType>
@@ -403,7 +403,7 @@
       </caom2:metrics>
       <caom2:artifacts>
         <caom2:artifact caom2:id="00000000-0000-0000-b62d-4745e64c2b42" caom2:lastModified="2018-10-16T21:21:47.633" caom2:maxLastModified="2020-11-20T00:46:07.246" caom2:metaChecksum="md5:7a0412ba5053b331fc8b408d44f03792" caom2:accMetaChecksum="md5:1e1a0f9677eb56170b1184f074b50152">
-          <caom2:uri>ad:CFHTSG/MegaPipe.358.122.R.MP9601.fits</caom2:uri>
+          <caom2:uri>cadc:CFHTSG/MegaPipe.358.122.R.MP9601.fits</caom2:uri>
           <caom2:productType>science</caom2:productType>
           <caom2:releaseType>data</caom2:releaseType>
           <caom2:contentType>application/fits</caom2:contentType>
@@ -486,7 +486,7 @@
           </caom2:parts>
         </caom2:artifact>
         <caom2:artifact caom2:id="00000000-0000-0000-b1b3-f34354cbdbf2" caom2:lastModified="2018-10-16T21:21:47.633" caom2:maxLastModified="2018-10-16T21:21:47.633" caom2:metaChecksum="md5:978272749c6d11cef386b48128d75f79" caom2:accMetaChecksum="md5:e46dfdf518f8895539876410f8d2186e">
-          <caom2:uri>ad:CFHTSG/MegaPipe.358.122.R.MP9601.fits.gif</caom2:uri>
+          <caom2:uri>cadc:CFHTSG/MegaPipe.358.122.R.MP9601.fits.gif</caom2:uri>
           <caom2:productType>preview</caom2:productType>
           <caom2:releaseType>data</caom2:releaseType>
           <caom2:contentType>image/gif</caom2:contentType>
@@ -494,7 +494,7 @@
           <caom2:parts/>
         </caom2:artifact>
         <caom2:artifact caom2:id="e03cdbca-6861-42ad-adb3-5fcb747da5bc" caom2:lastModified="2020-11-20T00:46:16.369" caom2:maxLastModified="2020-11-20T00:46:16.369" caom2:metaChecksum="md5:b24377d2c76b33035db45e073d5525d2" caom2:accMetaChecksum="md5:7d297194078be021cd59fa7f9e9a0b89">
-          <caom2:uri>ad:CFHTSG/MegaPipe.358.122.R.MP9601.weight.fits</caom2:uri>
+          <caom2:uri>cadc:CFHTSG/MegaPipe.358.122.R.MP9601.weight.fits</caom2:uri>
           <caom2:productType>weight</caom2:productType>
           <caom2:releaseType>data</caom2:releaseType>
           <caom2:contentType>application/fits</caom2:contentType>
