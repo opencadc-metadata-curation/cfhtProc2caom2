@@ -21,7 +21,7 @@ WORKDIR /usr/src/app
 ARG COLLECTION_BRANCH=master
 ARG COLLECTION_REPO=opencadc
 ARG OPENCADC_BRANCH=master
-ARG OPENCADC_REPO=opencadc
+ARG OPENCADC_REPO=opencadc-metadata-curation
 ARG PIPE_BRANCH=master
 ARG PIPE_REPO=opencadc
 
