@@ -1,6 +1,6 @@
 #!/bin/bash
 
-IMAGE="opencadc/cfhtproc2caom2"
+IMAGE="opencadc-metadata-curation/cfhtproc2caom2"
 CMD="cfht_proc"
 
 echo "Get a proxy certificate"
