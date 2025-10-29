@@ -19,11 +19,11 @@ RUN pip install cadcdata \
 WORKDIR /usr/src/app
 
 ARG COLLECTION_BRANCH=master
-ARG COLLECTION_REPO=opencadc
+ARG COLLECTION_REPO=opencadc-metadata-curation
 ARG OPENCADC_BRANCH=master
-ARG OPENCADC_REPO=opencadc
+ARG OPENCADC_REPO=opencadc-metadata-curation
 ARG PIPE_BRANCH=master
-ARG PIPE_REPO=opencadc
+ARG PIPE_REPO=opencadc-metadata-curation
 
 RUN git clone https://github.com/${OPENCADC_REPO}/caom2tools.git --branch ${OPENCADC_BRANCH} && \
     pip install ./caom2tools/caom2utils
